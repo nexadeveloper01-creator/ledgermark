@@ -76,6 +76,7 @@ export default function LandingPage() {
         <Link href="/console">정부 관제 콘솔</Link>
         <Link href="/partner">매장·총판 웹</Link>
         <Link href="/app">소비자 앱</Link>
+        <Link href="/field">단속 현장</Link>
       </header>
 
       <div style={{ padding: "88px 32px 72px", maxWidth: 1200, margin: "0 auto" }}>

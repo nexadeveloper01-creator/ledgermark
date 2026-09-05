@@ -36,6 +36,7 @@ export async function createRetailSaleRequest(args: {
   if (!verdict.eligible && (uid.status === "MINTED" || uid.status === "EXPORTED")) {
     await prisma.smuggleAlert.create({
       data: {
+        uidCode: uid.code,
         uidId: uid.id,
         reason: `매장 판매 시도 차단 — ${verdict.reason}`,
       },

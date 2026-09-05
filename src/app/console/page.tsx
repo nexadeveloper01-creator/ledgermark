@@ -327,7 +327,14 @@ function Alerts() {
         <tbody>
           {alerts.map((a) => (
             <tr key={a.id}>
-              <td>{a.uid?.code}</td>
+              <td>
+                {a.uidCode}
+                {!a.uidId && (
+                  <span style={{ marginLeft: 6, fontSize: 10 }} className="text-muted">
+                    원장 미존재
+                  </span>
+                )}
+              </td>
               <td>{a.reason}</td>
               <td>
                 <Tag variant={a.status === "OPEN" ? "accent" : "neutral"}>{a.status}</Tag>

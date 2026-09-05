@@ -146,6 +146,7 @@ model Uid {
   transactions LedgerTransaction[]
   alerts       SmuggleAlert[]
   requests     TransferRequest[]
+  inspections  FieldInspection[]
 
   @@index([status])
 }
@@ -216,12 +217,44 @@ model TransferRequest {
   @@index([status])
 }
 
+// 원장에 존재하지 않는 UID(위조 의심)도 알림 대상이므로 uidCode를 항상 보관하고
+// 원장 레코드와의 연결(uidId)은 선택적으로 둔다.
 model SmuggleAlert {
   id         String      @id @default(cuid())
-  uidId      String
-  uid        Uid         @relation(fields: [uidId], references: [id])
+  uidCode    String
+  uidId      String?
+  uid        Uid?        @relation(fields: [uidId], references: [id])
   reason     String
   status     AlertStatus @default(OPEN)
   detectedAt DateTime    @default(now())
   resolvedAt DateTime?
+}
+
+enum FieldVerdict {
+  VERIFIED // 정품 · 정상 유통
+  SEIZURE_GROUNDS // 통관 미확인 · 압수 근거 성립
+  COUNTERFEIT_SUSPECTED // 원장 미존재 · 위조 의심
+}
+
+// 현장 단속 조회 기록. 조서를 발행한 건은 reportNumber가 부여된다.
+model FieldInspection {
+  id      String       @id @default(cuid())
+  uidCode String
+  uidId   String?
+  uid     Uid?         @relation(fields: [uidId], references: [id])
+  verdict FieldVerdict
+  rule    String
+  basis   String
+
+  officerName String
+  location    String
+
+  // 조서에 첨부되는 원장 스냅샷 — 앵커링된 Merkle Root이므로 제3자 검증이 가능하다.
+  ledgerSnapshot String?
+
+  reportNumber String?   @unique
+  reportedAt   DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([verdict])
 }

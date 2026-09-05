@@ -19,7 +19,7 @@
 | 소비자 앱 (스캔 / 연령인증 / 등록 상태 / 내 제품·교환·중고거래) | 구현 완료 |
 | 매장·총판 웹 (소유권 이전 대기 큐 / 커밋) | 구현 완료 |
 | 통관 미확인 UID 판매 차단 + 밀수 알림 자동 승격 | 구현 완료 |
-| 단속 현장 앱 | 미착수 (다음 단계) |
+| 단속 현장 단말 (판정 3종 / 조서 자동 생성 / 콘솔 승격) | 구현 완료 |
 
 ## 실행 방법
 
@@ -59,6 +59,15 @@ npm run dev
 - 정부 관제 콘솔: http://localhost:3000/console
 - 소비자 앱: http://localhost:3000/app
 - 매장·총판 웹: http://localhost:3000/partner
+- 단속 현장 단말: http://localhost:3000/field
+
+시드 데이터로 바로 확인할 수 있는 UID:
+
+| UID | 확인 내용 |
+|---|---|
+| `PH-2609-A-000010` | 정상 유통 — 소비자 앱 스캔, 단속 현장 정상 판정 |
+| `GRAY-2609-Z-000002` | 통관 미확인 — 단속 현장 압수 근거 판정 |
+| 아무 미등록 코드 | 원장 미존재 — 단속 현장 위조 의심 판정 |
 
 ### 테스트
 
@@ -77,12 +86,28 @@ src/lib/ledger/merkle.ts         앵커링용 Merkle 루트
 src/lib/ledger/ledgerService.ts  상태머신 + Prisma 트랜잭션 결합 (원장 쓰기)
 src/lib/avp/                     국가별 연령인증 Provider 계층
 src/lib/requests/                소유권 이전 요청 큐 + 소매 판매 적격성 판정
+src/lib/field/                   현장 단속 판정 엔진 + 조서 발행
 src/app/api/                     REST API 라우트
 src/app/page.tsx                 랜딩 페이지
 src/app/console/page.tsx         정부 관제 콘솔
 src/app/app/page.tsx             소비자 앱
 src/app/partner/page.tsx         매장·총판 웹
+src/app/field/page.tsx           단속 현장 단말
 ```
+
+### 현장 단속 판정
+
+현장 단말은 관제 콘솔과 달리 단일 제품의 "압수 근거 성립 여부"만 판정합니다.
+
+| 판정 | 조건 | 규칙 | 조서 |
+|---|---|---|---|
+| 정품 · 정상 유통 | 원장에 존재하고 `EXPORT_TRANSFER`(통관) 기록 있음 | — | 조회 로그만 남김 |
+| 압수 근거 성립 | 원장에 존재하나 통관 기록 없음 | CU-02 | 압수 조서 발행 |
+| 위조 의심 | 원장에 UID 자체가 없음 | UN-01 | 위조 신고 조서 발행 |
+
+조서에는 마지막 앵커의 **Merkle Root가 원장 스냅샷으로 첨부**되므로, 조서 작성 이후
+데이터가 변경되지 않았음을 제3자가 검증할 수 있습니다. 적용 법조는 국가별 검토
+사항이므로 플랫폼이 확정하지 않고 "확인 필요"로 표기합니다.
 
 ### 소비자 앱 ↔ 매장 웹 2단 구조
 
@@ -142,6 +167,9 @@ UID(`MINTED`/`EXPORTED`)로 판매를 시도하면 요청이 `BLOCKED` 처리되
 | `GET` | `/api/uid/[code]` | UID 현재 상태 + 전체 유통 이력 |
 | `POST` | `/api/uid/[code]/transfer` | 소유권 이전 트랜잭션 실행 |
 | `GET` | `/api/console/kpis` | 콘솔 대시보드 집계 |
+| `POST` | `/api/field/inspect` | 현장 UID 조회 + 판정 |
+| `POST` | `/api/field/inspections/[id]/report` | 조서 발행 (조서번호 부여) |
+| `POST` | `/api/field/inspections/[id]/escalate` | 관제 콘솔로 알림 승격 |
 | `GET/POST` | `/api/console/alerts` | 밀수 의심 알림 목록 / 등록 |
 | `POST` | `/api/console/alerts/[id]/resolve` | 알림 해결 처리 |
 | `GET` | `/api/ledger/verify` | 원장 해시체인 무결성 검증 |
@@ -169,9 +197,10 @@ curl -X POST http://localhost:3000/api/uid/PH-2609-A-000001/transfer \
 
 ## 남은 과제
 
-- 단속 현장 화면 (디자인 프로토타입에 정의됨)
 - **인증·권한 (현재 API에 인증 계층 없음 — 파일럿 전 필수)**. 소비자 앱의 계정
-  선택 드롭다운은 실제 로그인 대신 둔 데모용 자리표시자입니다.
+  선택 드롭다운과 현장 단말의 담당관 정보는 실제 로그인 대신 둔 데모용
+  자리표시자입니다. 특히 조서 발행은 담당관 신원이 실제로 인증되어야 법적 효력을
+  논할 수 있습니다.
 - 퍼블릭 체인 앵커링 실연동
 - 밀수 의심 탐지 규칙 확장 (현재는 통관 미확인 판매 차단 1종 + 수동 등록)
 - UID 스캔의 카메라/QR 연동 (현재는 코드 직접 입력)
