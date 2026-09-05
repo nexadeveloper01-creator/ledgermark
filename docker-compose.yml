@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ledgermark
+      POSTGRES_PASSWORD: ledgermark
+      POSTGRES_DB: ledgermark
+    ports:
+      - "5432:5432"
+    volumes:
+      - ledgermark_db:/var/lib/postgresql/data
+
+volumes:
+  ledgermark_db:

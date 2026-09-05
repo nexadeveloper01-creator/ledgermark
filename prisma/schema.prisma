@@ -1,0 +1,184 @@
+// LEDGERMARK — 전자담배 유통 공정관리 플랫폼
+// UID 소유권 상태머신 + 허가형 원장(해시체인 시뮬레이션) 데이터 모델
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrgType {
+  PRODUCER // 생산법인
+  IMPORTER // 수입사
+  DISTRIBUTOR // 지역총판
+  RETAILER // 소매 매장
+  GOVERNMENT // 정부기관 (관세청/DTI 등)
+  LEDGER_OPERATOR // 블록체인 신뢰 레이어 운영 주체
+  MARKETING // 브랜드·마케팅 계열사
+}
+
+enum UidStatus {
+  MINTED
+  EXPORTED
+  WHOLESALE
+  RETAIL_SOLD
+  EXCHANGED
+  RESOLD
+}
+
+enum OwnerType {
+  ORG
+  CONSUMER
+}
+
+enum VoucherState {
+  NONE
+  AVAILABLE
+  USED
+  VOID
+}
+
+enum TxType {
+  MINT
+  EXPORT_TRANSFER
+  WHOLESALE_TRANSFER
+  RETAIL_SALE
+  EXCHANGE_TRANSFER
+  RESALE_TRANSFER
+}
+
+enum AlertStatus {
+  OPEN
+  RESOLVED
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  type      OrgType
+  country   String
+  createdAt DateTime @default(now())
+
+  lotsProduced   Lot[]               @relation("Producer")
+  uidsOwned      Uid[]               @relation("OrgOwner")
+  ledgerTxAsFrom LedgerTransaction[] @relation("FromOrg")
+  ledgerTxAsTo   LedgerTransaction[] @relation("ToOrg")
+}
+
+model Consumer {
+  id          String   @id @default(cuid())
+  displayName String
+  country     String
+  createdAt   DateTime @default(now())
+
+  ageVerifications AgeVerification[]
+  uidsOwned        Uid[]               @relation("ConsumerOwner")
+  ledgerTxAsFrom   LedgerTransaction[] @relation("FromConsumer")
+  ledgerTxAsTo     LedgerTransaction[] @relation("ToConsumer")
+}
+
+// 연령인증 — 원본 신분정보는 저장하지 않고 "검증 결과 크리덴셜"만 기록한다 (기획서 3.3)
+model AgeVerification {
+  id             String   @id @default(cuid())
+  consumerId     String
+  consumer       Consumer @relation(fields: [consumerId], references: [id])
+  country        String
+  method         String
+  verified       Boolean
+  credentialHash String
+  verifiedAt     DateTime @default(now())
+}
+
+model Lot {
+  id            String       @id @default(cuid())
+  code          String       @unique
+  productName   String
+  quantity      Int
+  producerOrgId String
+  producer      Organization @relation("Producer", fields: [producerOrgId], references: [id])
+  producedAt    DateTime     @default(now())
+
+  uids Uid[]
+}
+
+model Uid {
+  id     String @id @default(cuid())
+  code   String @unique
+  lotId  String
+  lot    Lot    @relation(fields: [lotId], references: [id])
+
+  status       UidStatus
+  ownerType    OwnerType
+  ownerOrgId   String?
+  ownerOrg     Organization? @relation("OrgOwner", fields: [ownerOrgId], references: [id])
+  ownerConsumerId String?
+  ownerConsumer   Consumer?  @relation("ConsumerOwner", fields: [ownerConsumerId], references: [id])
+
+  voucherState VoucherState @default(NONE)
+
+  // EXCHANGE_TRANSFER 발급 시 구UID -> 신UID 연결 (교환 이력 추적용)
+  replacesUidId String? @unique
+  replacesUid   Uid?    @relation("UidExchange", fields: [replacesUidId], references: [id])
+  replacedBy    Uid?    @relation("UidExchange")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions LedgerTransaction[]
+  alerts       SmuggleAlert[]
+
+  @@index([status])
+}
+
+// 그룹 허가형 원장 — append-only, 해시체인으로 무결성 보장(퍼블릭 앵커링은 Anchor 모델로 시뮬레이션)
+model LedgerTransaction {
+  id       String @id @default(cuid())
+  sequence Int    @unique @default(autoincrement())
+
+  uidId String
+  uid   Uid    @relation(fields: [uidId], references: [id])
+  txType TxType
+
+  fromOwnerType  OwnerType?
+  fromOrgId      String?
+  fromOrg        Organization? @relation("FromOrg", fields: [fromOrgId], references: [id])
+  fromConsumerId String?
+  fromConsumer   Consumer?     @relation("FromConsumer", fields: [fromConsumerId], references: [id])
+
+  toOwnerType  OwnerType
+  toOrgId      String?
+  toOrg        Organization? @relation("ToOrg", fields: [toOrgId], references: [id])
+  toConsumerId String?
+  toConsumer   Consumer?     @relation("ToConsumer", fields: [toConsumerId], references: [id])
+
+  metadata  Json?
+  prevHash  String
+  hash      String
+  createdAt DateTime @default(now())
+
+  @@index([uidId])
+}
+
+// 주기적 Merkle 앵커링 — publicAnchorRef는 향후 퍼블릭 L2 연동 단계에서 채워질 자리(스텁)
+model Anchor {
+  id              String   @id @default(cuid())
+  fromSequence    Int
+  toSequence      Int
+  txCount         Int
+  merkleRoot      String
+  publicAnchorRef String?
+  createdAt       DateTime @default(now())
+}
+
+model SmuggleAlert {
+  id         String      @id @default(cuid())
+  uidId      String
+  uid        Uid         @relation(fields: [uidId], references: [id])
+  reason     String
+  status     AlertStatus @default(OPEN)
+  detectedAt DateTime    @default(now())
+  resolvedAt DateTime?
+}
