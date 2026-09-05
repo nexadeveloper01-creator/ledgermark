@@ -55,6 +55,19 @@ enum AlertStatus {
   RESOLVED
 }
 
+enum RequestType {
+  RETAIL_SALE
+  EXCHANGE_TRANSFER
+  WHOLESALE_TRANSFER
+}
+
+enum RequestStatus {
+  PENDING
+  COMMITTED
+  BLOCKED
+  REJECTED
+}
+
 model Organization {
   id        String   @id @default(cuid())
   name      String
@@ -62,10 +75,12 @@ model Organization {
   country   String
   createdAt DateTime @default(now())
 
-  lotsProduced   Lot[]               @relation("Producer")
-  uidsOwned      Uid[]               @relation("OrgOwner")
-  ledgerTxAsFrom LedgerTransaction[] @relation("FromOrg")
-  ledgerTxAsTo   LedgerTransaction[] @relation("ToOrg")
+  lotsProduced     Lot[]               @relation("Producer")
+  uidsOwned        Uid[]               @relation("OrgOwner")
+  ledgerTxAsFrom   LedgerTransaction[] @relation("FromOrg")
+  ledgerTxAsTo     LedgerTransaction[] @relation("ToOrg")
+  requestsAsFrom   TransferRequest[]   @relation("RequestFromOrg")
+  requestsAsTo     TransferRequest[]   @relation("RequestToOrg")
 }
 
 model Consumer {
@@ -78,6 +93,7 @@ model Consumer {
   uidsOwned        Uid[]               @relation("ConsumerOwner")
   ledgerTxAsFrom   LedgerTransaction[] @relation("FromConsumer")
   ledgerTxAsTo     LedgerTransaction[] @relation("ToConsumer")
+  transferRequests TransferRequest[]
 }
 
 // 연령인증 — 원본 신분정보는 저장하지 않고 "검증 결과 크리덴셜"만 기록한다 (기획서 3.3)
@@ -129,6 +145,7 @@ model Uid {
 
   transactions LedgerTransaction[]
   alerts       SmuggleAlert[]
+  requests     TransferRequest[]
 
   @@index([status])
 }
@@ -171,6 +188,32 @@ model Anchor {
   merkleRoot      String
   publicAnchorRef String?
   createdAt       DateTime @default(now())
+}
+
+// 소유권 이전 대기 큐 — 소비자 앱이 스캔·연령인증으로 요청을 올리면,
+// UID를 실제로 보유한 매장/총판이 매장 웹에서 커밋해 원장 트랜잭션이 기록된다.
+model TransferRequest {
+  id     String        @id @default(cuid())
+  uidId  String
+  uid    Uid           @relation(fields: [uidId], references: [id])
+  type   RequestType
+  status RequestStatus @default(PENDING)
+
+  requestedConsumerId String?
+  requestedConsumer   Consumer? @relation(fields: [requestedConsumerId], references: [id])
+
+  fromOrgId String?
+  fromOrg   Organization? @relation("RequestFromOrg", fields: [fromOrgId], references: [id])
+  toOrgId   String?
+  toOrg     Organization? @relation("RequestToOrg", fields: [toOrgId], references: [id])
+
+  ageVerified   Boolean @default(false)
+  blockedReason String?
+
+  createdAt   DateTime  @default(now())
+  committedAt DateTime?
+
+  @@index([status])
 }
 
 model SmuggleAlert {

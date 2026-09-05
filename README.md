@@ -16,7 +16,10 @@
 | 연령인증 AVP 라우터 + 필리핀(RA 11900) 모듈 | 구현 완료 |
 | 랜딩 페이지 | 구현 완료 |
 | 정부 관제 콘솔 (대시보드 / UID 조회 / 밀수 알림 / 원장 상태) | 구현 완료 |
-| 소비자 앱 · 매장/총판 웹 · 단속 현장 앱 | 미착수 (다음 단계) |
+| 소비자 앱 (스캔 / 연령인증 / 등록 상태 / 내 제품·교환·중고거래) | 구현 완료 |
+| 매장·총판 웹 (소유권 이전 대기 큐 / 커밋) | 구현 완료 |
+| 통관 미확인 UID 판매 차단 + 밀수 알림 자동 승격 | 구현 완료 |
+| 단속 현장 앱 | 미착수 (다음 단계) |
 
 ## 실행 방법
 
@@ -54,6 +57,8 @@ npm run dev
 
 - 랜딩 페이지: http://localhost:3000
 - 정부 관제 콘솔: http://localhost:3000/console
+- 소비자 앱: http://localhost:3000/app
+- 매장·총판 웹: http://localhost:3000/partner
 
 ### 테스트
 
@@ -71,10 +76,35 @@ src/lib/ledger/hashChain.ts      원장 해시체인 계산·검증
 src/lib/ledger/merkle.ts         앵커링용 Merkle 루트
 src/lib/ledger/ledgerService.ts  상태머신 + Prisma 트랜잭션 결합 (원장 쓰기)
 src/lib/avp/                     국가별 연령인증 Provider 계층
+src/lib/requests/                소유권 이전 요청 큐 + 소매 판매 적격성 판정
 src/app/api/                     REST API 라우트
 src/app/page.tsx                 랜딩 페이지
 src/app/console/page.tsx         정부 관제 콘솔
+src/app/app/page.tsx             소비자 앱
+src/app/partner/page.tsx         매장·총판 웹
 ```
+
+### 소비자 앱 ↔ 매장 웹 2단 구조
+
+UID는 판매 시점까지 매장/총판이 보유하므로, 소비자가 직접 소유권을 이전할 수 없습니다.
+따라서 소비자 앱은 **스캔 + 연령인증까지 수행해 이전 요청을 큐에 올리고**, 실제 원장
+트랜잭션은 **매장 웹에서 커밋**할 때 기록됩니다.
+
+```
+[소비자 앱] UID 스캔 → 연령인증(AVP) → 등록 신청
+     → TransferRequest(PENDING)          ← 원장에는 아직 아무것도 기록되지 않음
+[매장 웹]  대기 큐에서 확인 → COMMIT
+     → RETAIL_SALE 트랜잭션 원장 기록 + 교환권 발급
+```
+
+교환(EXCHANGE_TRANSFER)도 같은 경로를 따릅니다. 반면 중고거래(RESALE_TRANSFER)는
+소비자가 UID를 직접 보유한 상태이므로 앱에서 바로 원장에 기록됩니다.
+
+### 통관 미확인 UID 판매 차단
+
+정상 유통 제품은 매장 도달 시점에 `WHOLESALE` 상태여야 합니다. 통관·배분 이력이 없는
+UID(`MINTED`/`EXPORTED`)로 판매를 시도하면 요청이 `BLOCKED` 처리되고, 관제 콘솔에
+밀수 의심 알림이 자동 등록됩니다.
 
 ### UID 소유권 상태머신
 
@@ -102,6 +132,12 @@ src/app/console/page.tsx         정부 관제 콘솔
 | 메서드 | 경로 | 설명 |
 |---|---|---|
 | `GET/POST` | `/api/organizations` | 조직 목록 / 생성 |
+| `GET/POST` | `/api/consumers` | 소비자 목록 / 생성 |
+| `POST` | `/api/consumers/[id]/verify-age` | 국가별 AVP 연령인증 (결과 크리덴셜만 저장) |
+| `GET` | `/api/consumers/[id]/uids` | 소비자 보유 제품 목록 |
+| `GET/POST` | `/api/requests` | 소유권 이전 대기 큐 조회 / 요청 생성 |
+| `POST` | `/api/requests/[id]/commit` | 매장이 요청을 커밋 → 원장 기록 |
+| `POST` | `/api/requests/[id]/reject` | 요청 반려 |
 | `GET/POST` | `/api/lots` | LOT 목록 / LOT 생성 + UID 일괄 MINT |
 | `GET` | `/api/uid/[code]` | UID 현재 상태 + 전체 유통 이력 |
 | `POST` | `/api/uid/[code]/transfer` | 소유권 이전 트랜잭션 실행 |
@@ -133,7 +169,9 @@ curl -X POST http://localhost:3000/api/uid/PH-2609-A-000001/transfer \
 
 ## 남은 과제
 
-- 소비자 앱 / 매장·총판 웹 / 단속 현장 화면 (디자인 프로토타입에 정의됨)
-- 인증·권한 (현재 API에 인증 계층 없음 — 파일럿 전 필수)
+- 단속 현장 화면 (디자인 프로토타입에 정의됨)
+- **인증·권한 (현재 API에 인증 계층 없음 — 파일럿 전 필수)**. 소비자 앱의 계정
+  선택 드롭다운은 실제 로그인 대신 둔 데모용 자리표시자입니다.
 - 퍼블릭 체인 앵커링 실연동
-- 밀수 의심 UID 자동 탐지 규칙 엔진 (현재는 수동 등록)
+- 밀수 의심 탐지 규칙 확장 (현재는 통관 미확인 판매 차단 1종 + 수동 등록)
+- UID 스캔의 카메라/QR 연동 (현재는 코드 직접 입력)

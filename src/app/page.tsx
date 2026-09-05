@@ -74,6 +74,8 @@ export default function LandingPage() {
           LEDGERMARK
         </span>
         <Link href="/console">정부 관제 콘솔</Link>
+        <Link href="/partner">매장·총판 웹</Link>
+        <Link href="/app">소비자 앱</Link>
       </header>
 
       <div style={{ padding: "88px 32px 72px", maxWidth: 1200, margin: "0 auto" }}>
@@ -113,6 +115,9 @@ export default function LandingPage() {
             >
               <Corners />
               관제 콘솔 보기 / CONSOLE
+            </LinkButton>
+            <LinkButton href="/app" variant="secondary" style={{ height: 46, padding: "0 20px" }}>
+              소비자 앱 / APP
             </LinkButton>
           </div>
         </div>

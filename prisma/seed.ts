@@ -1,5 +1,6 @@
 import { prisma } from "../src/lib/prisma";
 import { mintLot, transferUid } from "../src/lib/ledger/ledgerService";
+import { createRetailSaleRequest } from "../src/lib/requests/transferRequestService";
 
 async function main() {
   console.log("Seeding LEDGERMARK demo data...");
@@ -82,16 +83,25 @@ async function main() {
     ageVerified: true,
   });
 
-  // 데모용 밀수 의심 알림 하나 등록 (통관 이력 없이 소매 판매 시도된 것으로 가정)
-  const uidForAlert = await prisma.uid.findUnique({ where: { code: uidCodes[uidCodes.length - 1] } });
-  if (uidForAlert) {
-    await prisma.smuggleAlert.create({
-      data: {
-        uidId: uidForAlert.id,
-        reason: "통관 이력 없는 UID 소매 판매 시도 (판정 규칙 CU-02)",
-      },
-    });
-  }
+  // 매장 큐에 처리 대기 중인 소매 판매 요청 (소비자 앱에서 연령인증까지 마친 상태)
+  await createRetailSaleRequest({
+    uidCode: uidCodes[3]!,
+    consumerId: consumerB.id,
+    ageVerified: true,
+  });
+
+  // 통관을 거치지 않은 회색 유통 LOT — 매장 판매 시도가 차단되고 관제 콘솔로 승격된다.
+  const gray = await mintLot({
+    code: "GRAY-2609-Z",
+    productName: "Series V · Graphite",
+    quantity: 2,
+    producerOrgId: producer.id,
+  });
+  await createRetailSaleRequest({
+    uidCode: gray.uidCodes[0]!,
+    consumerId: consumerB.id,
+    ageVerified: true,
+  });
 
   console.log("Seed complete.");
 }
