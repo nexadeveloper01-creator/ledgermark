@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/industry-c396e63c-370c-4111-9612-2ba11f5f7a14/styles.css">
+  <script src="_ds/industry-c396e63c-370c-4111-9612-2ba11f5f7a14/_ds_bundle.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: var(--color-bg); color: var(--color-text); font-family: var(--font-body); }
+    a { color: var(--color-accent-700); text-decoration: none; }
+    a:hover { color: var(--color-accent-800); text-decoration: underline; }
+    @keyframes lm-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+  </style>
+</helmet>
+
+<div style="min-height: 100vh; background: var(--color-bg);">
+
+  <div style="background: var(--color-accent-900); color: var(--color-bg); padding: 12px 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 24px; position: sticky; top: 0; z-index: 40;">
+    <div style="display: flex; align-items: baseline; gap: 8px;">
+      <span style="font-family: var(--font-heading); font-weight: 700; font-size: 19px; letter-spacing: 0.14em;">LEDGERMARK</span>
+      <span style="font-size: 10px; letter-spacing: 0.18em; opacity: 0.6;">PROTOTYPE v0.1</span>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 18px; margin-left: auto;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 10px; letter-spacing: 0.16em; opacity: 0.55;">화면 / SURFACE</span>
+        <div class="seg" style="color: var(--color-bg); border-color: color-mix(in srgb, #f2f2f3 35%, transparent);">
+          <sc-for list="{{ segSurface }}" as="surf" hint-placeholder-count="4">
+            <label class="seg-opt" style="border-color: color-mix(in srgb, #f2f2f3 35%, transparent);">
+              <input type="radio" name="lm-surface" checked="{{ surf.checked }}" onChange="{{ surf.pick }}" />
+              {{ surf.label }}
+            </label>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 10px; letter-spacing: 0.16em; opacity: 0.55;">네비 / NAV</span>
+        <div class="seg" style="color: var(--color-bg); border-color: color-mix(in srgb, #f2f2f3 35%, transparent);">
+          <sc-for list="{{ segNav }}" as="nv" hint-placeholder-count="2">
+            <label class="seg-opt" style="border-color: color-mix(in srgb, #f2f2f3 35%, transparent);">
+              <input type="radio" name="lm-nav" checked="{{ nv.checked }}" onChange="{{ nv.pick }}" />
+              {{ nv.label }}
+            </label>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 10px; letter-spacing: 0.16em; opacity: 0.55;">레이아웃 / LAYOUT</span>
+        <div class="seg" style="color: var(--color-bg); border-color: color-mix(in srgb, #f2f2f3 35%, transparent);">
+          <sc-for list="{{ segLayout }}" as="lay" hint-placeholder-count="2">
+            <label class="seg-opt" style="border-color: color-mix(in srgb, #f2f2f3 35%, transparent);">
+              <input type="radio" name="lm-layout" checked="{{ lay.checked }}" onChange="{{ lay.pick }}" />
+              {{ lay.label }}
+            </label>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 10px; letter-spacing: 0.16em; opacity: 0.55;">대시보드 톤 / TONE</span>
+        <div class="seg" style="color: var(--color-bg); border-color: color-mix(in srgb, #f2f2f3 35%, transparent);">
+          <sc-for list="{{ segTone }}" as="tn" hint-placeholder-count="2">
+            <label class="seg-opt" style="border-color: color-mix(in srgb, #f2f2f3 35%, transparent); white-space: nowrap;">
+              <input type="radio" name="lm-tone" checked="{{ tn.checked }}" onChange="{{ tn.pick }}" />
+              {{ tn.label }}
+            </label>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 10px; letter-spacing: 0.16em; opacity: 0.55;">이력 / TRACE</span>
+        <div class="seg" style="color: var(--color-bg); border-color: color-mix(in srgb, #f2f2f3 35%, transparent);">
+          <sc-for list="{{ segTrace }}" as="tr" hint-placeholder-count="2">
+            <label class="seg-opt" style="border-color: color-mix(in srgb, #f2f2f3 35%, transparent);">
+              <input type="radio" name="lm-trace" checked="{{ tr.checked }}" onChange="{{ tr.pick }}" />
+              {{ tr.label }}
+            </label>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <sc-if value="{{ isConsole }}" hint-placeholder-val="{{ true }}">
+  <div data-screen-label="정부 관제 콘솔" style="overflow-x: auto;">
+    <div style="min-width: 944px; max-width: 1920px; margin: 0 auto;">
+
+      <sc-if value="{{ navTop }}" hint-placeholder-val="{{ true }}">
+      <div class="nav" style="display: flex; align-items: center; gap: 20px; padding: 0 32px; height: 64px; border-bottom: 1px solid var(--color-divider); background: var(--color-bg);">
+        <span class="nav-brand" style="font-family: var(--font-heading); font-size: 17px; letter-spacing: 0.12em;">LEDGERMARK</span>
+        <span style="font-size: 11px; letter-spacing: 0.14em; color: var(--color-accent-700); border: 1px solid var(--color-divider); padding: 2px 8px;">BOC · DTI CONSOLE</span>
+        <div class="seg" style="margin-left: 12px; flex: none;">
+          <sc-for list="{{ segModule }}" as="mod" hint-placeholder-count="5">
+            <label class="seg-opt" style="white-space: nowrap;">
+              <input type="radio" name="lm-mod-top" checked="{{ mod.checked }}" onChange="{{ mod.pick }}" />
+              {{ mod.label }}
+            </label>
+          </sc-for>
+        </div>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 12px;">
+          <span style="display: inline-flex; align-items: center; gap: 6px;">
+            <span style="width: 6px; height: 6px; background: var(--color-accent); animation: lm-pulse 2s ease-in-out infinite;"></span>
+            앵커 동기화 / ANCHORED
+          </span>
+          <span class="text-muted">심사관 R. Delgado</span>
+        </div>
+      </div>
+      </sc-if>
+
+      <div style="display: flex; align-items: stretch; min-height: 760px;">
+
+        <sc-if value="{{ navRail }}" hint-placeholder-val="{{ false }}">
+        <div style="width: 200px; flex: none; border-right: 1px solid var(--color-divider); padding: 26px 18px; display: flex; flex-direction: column; gap: 22px;">
+          <div>
+            <div style="font-family: var(--font-heading); font-size: 16px; letter-spacing: 0.12em;">LEDGERMARK</div>
+            <div style="font-size: 10px; letter-spacing: 0.14em; color: var(--color-accent-700); margin-top: 3px;">BOC · DTI CONSOLE</div>
+          </div>
+          <div class="seg" style="flex-direction: column; align-items: stretch;">
+            <sc-for list="{{ segModule }}" as="mod2" hint-placeholder-count="5">
+              <label class="seg-opt" style="border-left: 0; border-top: 1px solid var(--color-divider); padding: 10px 12px;">
+                <input type="radio" name="lm-mod-rail" checked="{{ mod2.checked }}" onChange="{{ mod2.pick }}" />
+                {{ mod2.label }}
+              </label>
+            </sc-for>
+          </div>
+          <div style="margin-top: auto; font-size: 11px; line-height: 1.5;" class="text-muted">심사관 R. Delgado · 앵커 동기화 03:00 UTC</div>
+        </div>
+        </sc-if>
+
+        <div style="flex: 1; min-width: 0; padding: 28px 32px 40px;">
+
+          <sc-if value="{{ modDashLight }}" hint-placeholder-val="{{ false }}">
+          <div style="margin: -28px -32px -40px; padding: 28px 32px 44px; background: #f4f6f3; font-family: var(--font-body); color: #16181a;">
+            <div style="display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 20px;">
+              <h3 style="margin: 0; font-size: 22px; color: #16181a;">유통 현황</h3>
+              <span style="font-size: 12px; color: #7e857c;">2026년 9월 6일 기준 · 원장 실시간 집계</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; margin-bottom: 24px;">
+              <sc-for list="{{ kpisLight }}" as="lk2" hint-placeholder-count="4">
+                <div style="background: #ffffff; border-radius: 18px; padding: 20px 22px; box-shadow: 0 1px 2px rgba(20,24,20,0.05), 0 8px 24px rgba(20,24,20,0.04);">
+                  <div style="font-size: 12px; color: #7e857c;">{{ lk2.ko }}</div>
+                  <div style="font-size: 34px; line-height: 1.1; margin-top: 8px; font-weight: 600; letter-spacing: -0.02em;">{{ lk2.value }}</div>
+                  <div style="display: flex; align-items: center; gap: 6px; margin-top: 8px;">
+                    <span style="{{ lk2.deltaStyle }}">{{ lk2.delta }}</span>
+                    <span style="font-size: 11px; color: #9aa098;">{{ lk2.deltaNote }}</span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(300px, 1fr); gap: 20px; align-items: start;">
+              <div style="background: #ffffff; border-radius: 18px; padding: 24px; box-shadow: 0 1px 2px rgba(20,24,20,0.05), 0 8px 24px rgba(20,24,20,0.04);">
+                <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 4px;">
+                  <div style="font-size: 17px; font-weight: 600;">유통 단계별 재고</div>
+                  <span style="font-size: 12px; color: #7e857c;">PIPELINE BY STAGE</span>
+                </div>
+                <div style="font-size: 12px; color: #7e857c; margin-bottom: 18px;">각 단계를 마지막 소유권으로 보유한 UID 수</div>
+                <sc-for list="{{ pipelineLight }}" as="pg" hint-placeholder-count="6">
+                  <div style="padding: 13px 0; border-top: 1px solid #edf0ec;">
+                    <div style="display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;">
+                      <span style="font-size: 14px;">{{ pg.stage }}</span>
+                      <span style="font-size: 11px; letter-spacing: 0.04em; color: #9aa098;">{{ pg.tx }}</span>
+                      <span style="font-size: 14px; margin-left: auto; font-variant-numeric: tabular-nums;">{{ pg.volume }}</span>
+                      <span style="font-size: 12px; color: #7e857c; width: 46px; text-align: right;">{{ pg.share }}</span>
+                    </div>
+                    <div style="height: 8px; border-radius: 99px; background: #eef1ec; margin-top: 9px; overflow: hidden;">
+                      <div style="{{ pg.barStyle }}"></div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div style="background: #d7ef6a; border-radius: 18px; padding: 22px; box-shadow: 0 1px 2px rgba(20,24,20,0.05), 0 8px 24px rgba(20,24,20,0.04);">
+                  <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    <span style="font-size: 12px; color: #3f4a2c;">무결성 앵커</span>
+                    <span style="font-size: 11px; color: #3f4a2c;">PUBLIC L2</span>
+                  </div>
+                  <div style="font-family: ui-monospace, Menlo, monospace; font-size: 20px; margin-top: 14px; color: #16181a;">0x9f3c…a41d</div>
+                  <div style="font-size: 12px; color: #3f4a2c; margin-top: 6px;">최근 앵커 09-05 03:00 · 18,204건</div>
+                  <div style="display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap;">
+                    <button type="button" style="border: 0; border-radius: 99px; background: #16181a; color: #ffffff; font: inherit; font-size: 13px; padding: 9px 16px; cursor: pointer;">검증 링크</button>
+                    <button type="button" style="border: 1px solid rgba(22,24,26,0.2); border-radius: 99px; background: transparent; color: #16181a; font: inherit; font-size: 13px; padding: 9px 16px; cursor: pointer;">이력 전체</button>
+                  </div>
+                </div>
+
+                <div style="background: #ffffff; border-radius: 18px; padding: 22px; box-shadow: 0 1px 2px rgba(20,24,20,0.05), 0 8px 24px rgba(20,24,20,0.04);">
+                  <div style="font-size: 16px; font-weight: 600; margin-bottom: 4px;">국가별 규제 상태</div>
+                  <div style="font-size: 12px; color: #7e857c; margin-bottom: 14px;">진출국 요건 확인 현황</div>
+                  <sc-for list="{{ countriesLight }}" as="cl" hint-placeholder-count="4">
+                    <div style="padding: 11px 0; border-top: 1px solid #edf0ec;">
+                      <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 14px;">{{ cl.country }}</span>
+                        <span style="{{ cl.pillStyle }}">{{ cl.state }}</span>
+                      </div>
+                      <div style="font-size: 11px; line-height: 1.5; color: #9aa098; margin-top: 4px;">{{ cl.basis }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ modDash }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin-bottom: 34px;">
+              <sc-for list="{{ kpis }}" as="kpi" hint-placeholder-count="4">
+                <div class="blueprint" style="padding: 14px 16px; background: transparent;">
+                  <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                  <div style="font-size: 10px; letter-spacing: 0.14em; color: var(--color-accent-700);">{{ kpi.en }}</div>
+                  <div style="font-family: var(--font-heading); font-size: 30px; line-height: 1.1; margin-top: 6px;">{{ kpi.value }}</div>
+                  <div style="font-size: 12px; margin-top: 2px;" class="text-muted">{{ kpi.ko }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(300px, 1fr); gap: 40px; align-items: start;">
+              <div>
+                <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px;">
+                  <h3 style="margin: 0; font-size: 17px;">유통 단계별 재고</h3>
+                  <span style="font-size: 10px; letter-spacing: 0.14em;" class="text-muted">PIPELINE BY STAGE</span>
+                </div>
+                <table class="table" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                  <thead>
+                    <tr>
+                      <th style="text-align: left; padding: 8px 10px;">단계 / STAGE</th>
+                      <th style="text-align: left; padding: 8px 10px;">최근 트랜잭션</th>
+                      <th style="text-align: right; padding: 8px 10px;">보유 UID</th>
+                      <th style="text-align: right; padding: 8px 10px;">비중</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ pipeline }}" as="pl" hint-placeholder-count="6">
+                      <tr>
+                        <td style="padding: 10px;">{{ pl.stage }}</td>
+                        <td style="padding: 10px; font-size: 11px; letter-spacing: 0.06em; color: var(--color-accent-700);">{{ pl.tx }}</td>
+                        <td style="padding: 10px; text-align: right; font-family: ui-monospace, Menlo, monospace; font-size: 12px;">{{ pl.volume }}</td>
+                        <td style="padding: 10px; text-align: right;" class="text-muted">{{ pl.share }}</td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+                <div style="margin-top: 14px; font-size: 12px; line-height: 1.6;" class="text-muted">각 행은 해당 단계를 마지막 소유권으로 보유한 UID 수입니다. 합계는 누적 발급 UID와 일치합니다.</div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 24px;">
+                <div class="blueprint" style="padding: 16px; background: transparent;">
+                  <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                  <div class="card-kicker">RECENT ANCHORS</div>
+                  <div style="font-family: var(--font-heading); font-size: 16px; margin: 4px 0 10px;">최근 앵커링</div>
+                  <sc-for list="{{ anchorLog }}" as="an" hint-placeholder-count="3">
+                    <div style="display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-top: 1px solid var(--color-divider); font-size: 12px;">
+                      <span class="text-muted">{{ an.time }}</span>
+                      <span style="font-family: ui-monospace, Menlo, monospace; font-size: 11px;">{{ an.root }}</span>
+                      <span style="text-align: right;">{{ an.records }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <div class="blueprint" style="padding: 16px; background: transparent;">
+                  <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                  <div class="card-kicker">REGULATORY STATUS</div>
+                  <div style="font-family: var(--font-heading); font-size: 16px; margin: 4px 0 10px;">국가별 규제 상태</div>
+                  <sc-for list="{{ countries }}" as="cn" hint-placeholder-count="4">
+                    <div style="padding: 8px 0; border-top: 1px solid var(--color-divider);">
+                      <div style="display: flex; justify-content: space-between; gap: 10px; font-size: 13px;">
+                        <span>{{ cn.country }}</span>
+                        <span style="font-size: 11px;" class="text-muted">{{ cn.state }}</span>
+                      </div>
+                      <div style="font-size: 11px; line-height: 1.45; margin-top: 3px;" class="text-muted">{{ cn.basis }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ modAlerts }}" hint-placeholder-val="{{ false }}">
+          <div style="display: grid; grid-template-columns: minmax(260px, 380px) minmax(0, 1fr); gap: 40px; align-items: start;">
+            <div>
+              <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px;">
+                <h3 style="margin: 0; font-size: 17px;">전체 알림</h3>
+                <span style="font-size: 10px; letter-spacing: 0.14em;" class="text-muted">14 OPEN</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 1px; border-top: 1px solid var(--color-divider);">
+                <sc-for list="{{ alerts }}" as="al2" hint-placeholder-count="4">
+                  <button type="button" onClick="{{ al2.pick }}" style="{{ al2.style }}">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span class="tag tag-outline" style="font-size: 10px;">{{ al2.severity }}</span>
+                      <span style="font-size: 11px; margin-left: auto;" class="text-muted">{{ al2.time }}</span>
+                    </div>
+                    <div style="font-size: 13px; line-height: 1.4; margin-top: 6px;">{{ al2.title }}</div>
+                    <div style="font-family: ui-monospace, Menlo, monospace; font-size: 11px; margin-top: 4px; color: var(--color-accent-700);">{{ al2.uid }}</div>
+                  </button>
+                </sc-for>
+              </div>
+            </div>
+
+            <div>
+              <div style="display: flex; align-items: flex-start; gap: 14px; flex-wrap: wrap; padding-bottom: 16px; border-bottom: 1px solid var(--color-divider); margin-bottom: 22px;">
+                <div style="min-width: 0;">
+                  <div style="font-size: 10px; letter-spacing: 0.16em; color: var(--color-accent-700);">ALERT DETAIL</div>
+                  <h3 style="font-size: 24px; margin: 6px 0 4px;">{{ detail.title }}</h3>
+                  <div style="font-family: ui-monospace, Menlo, monospace; font-size: 13px;" class="text-muted">{{ detail.uid }}</div>
+                </div>
+                <span class="tag tag-accent" style="margin-left: auto;">{{ detail.severity }}</span>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 28px;">
+                <div class="blueprint" style="padding: 16px; background: transparent;">
+                  <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                  <div class="card-kicker">JUDGEMENT</div>
+                  <div style="font-family: var(--font-heading); font-size: 16px; margin: 4px 0 8px;">판정 근거</div>
+                  <div style="font-size: 13px; line-height: 1.6;">{{ detail.judgement }}</div>
+                  <div style="font-size: 11px; line-height: 1.5; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--color-divider);" class="text-muted">{{ detail.rule }}</div>
+                </div>
+                <div class="blueprint" style="padding: 16px; background: transparent;">
+                  <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                  <div class="card-kicker">RECOMMENDED ACTION</div>
+                  <div style="font-family: var(--font-heading); font-size: 16px; margin: 4px 0 8px;">권고 조치</div>
+                  <div style="font-size: 13px; line-height: 1.6;">{{ detail.recommend }}</div>
+                  <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
+                    <button type="button" class="btn btn-primary blueprint" style="height: 38px; padding: 0 14px;">
+                      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                      단속 지시 전송
+                    </button>
+                    <button type="button" class="btn btn-secondary" style="height: 38px; padding: 0 14px;">정상 처리</button>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px;">
+                <h4 style="margin: 0; font-size: 15px;">관련 UID</h4>
+                <span style="font-size: 10px; letter-spacing: 0.14em;" class="text-muted">LINKED RECORDS</span>
+              </div>
+              <table class="table" style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 28px;">
+                <thead>
+                  <tr>
+                    <th style="text-align: left; padding: 8px 10px;">UID</th>
+                    <th style="text-align: left; padding: 8px 10px;">마지막 트랜잭션</th>
+                    <th style="text-align: left; padding: 8px 10px;">판정</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ detailLinked }}" as="lk" hint-placeholder-count="3">
+                    <tr>
+                      <td style="padding: 10px; font-family: ui-monospace, Menlo, monospace; font-size: 11px;">{{ lk.uid }}</td>
+                      <td style="padding: 10px; font-size: 11px; letter-spacing: 0.06em; color: var(--color-accent-700);">{{ lk.tx }}</td>
+                      <td style="padding: 10px;">{{ lk.verdict }}</td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+
+              <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px;">
+                <h4 style="margin: 0; font-size: 15px;">조치 이력</h4>
+                <span style="font-size: 10px; letter-spacing: 0.14em;" class="text-muted">ACTION LOG</span>
+              </div>
+              <div style="display: flex; flex-direction: column;">
+                <sc-for list="{{ detailLog }}" as="lg" hint-placeholder-count="3">
+                  <div style="display: grid; grid-template-columns: 1px minmax(0, 1fr); gap: 18px;">
+                    <div style="background: var(--color-divider); position: relative;">
+                      <span style="position: absolute; top: 5px; left: -4px; width: 9px; height: 9px; background: var(--color-bg); border: 1px solid var(--color-accent-600);"></span>
+                    </div>
+                    <div style="padding: 0 0 18px; display: flex; gap: 12px; flex-wrap: wrap;">
+                      <span style="font-size: 11px; letter-spacing: 0.04em;" class="text-muted">{{ lg.time }}</span>
+                      <span style="font-size: 13px;">{{ lg.text }}</span>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ modCustoms }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px;">
+              <h3 style="margin: 0; font-size: 17px;">수입 신고 배치 대조</h3>
+              <span style="font-size: 10px; letter-spacing: 0.14em;" class="text-muted">IMPORT DECLARATION RECONCILIATION</span>
+            </div>
+            <p style="font-size: 13px; line-height: 1.65; max-width: 70ch; margin: 0 0 20px;">수출 시점에 사전 연동된 UID 목록과 통관 현장 스캔 결과를 배치 단위로 대조합니다. 미일치 건은 즉시 알림으로 승격됩니다.</p>
+            <table class="table" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+              <thead>
+                <tr>
+                  <th style="text-align: left; padding: 8px 10px;">신고번호 / DECL</th>
+                  <th style="text-align: left; padding: 8px 10px;">LOT</th>
+                  <th style="text-align: right; padding: 8px 10px;">사전연동</th>
+                  <th style="text-align: right; padding: 8px 10px;">통관 스캔</th>
+                  <th style="text-align: right; padding: 8px 10px;">미일치</th>
+                  <th style="text-align: left; padding: 8px 10px;">상태</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ batches }}" as="bt" hint-placeholder-count="4">
+                  <tr onClick="{{ bt.pick }}" style="{{ bt.style }}">
+                    <td style="padding: 11px 10px; font-family: ui-monospace, Menlo, monospace; font-size: 11px;">{{ bt.decl }}</td>
+                    <td style="padding: 11px 10px;">{{ bt.lot }}</td>
+                    <td style="padding: 11px 10px; text-align: right; font-family: ui-monospace, Menlo, monospace; font-size: 12px;">{{ bt.pre }}</td>
+                    <td style="padding: 11px 10px; text-align: right; font-family: ui-monospace, Menlo, monospace; font-size: 12px;">{{ bt.scanned }}</td>
+                    <td style="padding: 11px 10px; text-align: right; font-family: ui-monospace, Menlo, monospace; font-size: 12px;">{{ bt.gap }}</td>
+                    <td style="padding: 11px 10px;"><span class="tag tag-outline" style="font-size: 10px;">{{ bt.state }}</span></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 28px; margin-top: 32px; align-items: start;">
+              <div class="blueprint" style="padding: 18px; background: transparent;">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <div class="card-kicker">RECONCILIATION</div>
+                <div style="font-family: var(--font-heading); font-size: 18px; margin: 4px 0 12px;">대조 결과 · {{ batch.decl }}</div>
+                <sc-for list="{{ batchRows }}" as="br2" hint-placeholder-count="5">
+                  <div style="display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--color-divider); font-size: 13px;">
+                    <span class="text-muted">{{ br2.k }}</span>
+                    <span style="text-align: right;">{{ br2.v }}</span>
+                  </div>
+                </sc-for>
+                <div style="display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap;">
+                  <button type="button" class="btn btn-primary blueprint" style="height: 38px; padding: 0 14px;">
+                    <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                    통관 승인
+                  </button>
+                  <button type="button" class="btn btn-secondary" style="height: 38px; padding: 0 14px;">보류 · 현장 검사</button>
+                </div>
+              </div>
+              <div class="blueprint" style="padding: 18px; background: transparent;">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <div class="card-kicker">EXCEPTIONS</div>
+                <div style="font-family: var(--font-heading); font-size: 18px; margin: 4px 0 12px;">미일치 UID</div>
+                <sc-for list="{{ batchGaps }}" as="gp" hint-placeholder-count="3">
+                  <div style="padding: 9px 0; border-top: 1px solid var(--color-divider);">
+                    <div style="font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: var(--color-accent-700);">{{ gp.uid }}</div>
+                    <div style="font-size: 12px; line-height: 1.45; margin-top: 3px;">{{ gp.reason }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ modReports }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px;">
+              <h3 style="margin: 0; font-size: 17px;">정책 데이터 리포트</h3>
+              <span style="font-size: 10px; letter-spacing: 0.14em;" class="text-muted">POLICY DATA · 2026 Q3</span>
+            </div>
+            <p style="font-size: 13px; line-height: 1.65; max-width: 70ch; margin: 0 0 24px;">유통 원장에서 직접 집계된 지표입니다. 정책 수립에 필요한 유통 실데이터를 기관에 제공합니다.</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 24px;">
+              <sc-for list="{{ reportCards }}" as="rc" hint-placeholder-count="4">
+                <div class="blueprint" style="padding: 18px; background: transparent;">
+                  <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                  <div style="font-size: 10px; letter-spacing: 0.14em; color: var(--color-accent-700);">{{ rc.en }}</div>
+                  <div style="font-family: var(--font-heading); font-size: 32px; line-height: 1.05; margin-top: 8px;">{{ rc.value }}</div>
+                  <div style="font-size: 13px; margin-top: 4px;">{{ rc.ko }}</div>
+                  <div style="font-size: 11px; line-height: 1.5; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--color-divider);" class="text-muted">{{ rc.note }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--color-divider);">
+              <div style="font-size: 13px;">데이터 내보내기 / EXPORT</div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto;">
+                <button type="button" class="btn btn-secondary" style="height: 38px; padding: 0 14px;">CSV</button>
+                <button type="button" class="btn btn-secondary" style="height: 38px; padding: 0 14px;">기관 API 키</button>
+                <button type="button" class="btn btn-primary blueprint" style="height: 38px; padding: 0 14px;">
+                  <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                  월간 리포트 발행
+                </button>
+              </div>
+            </div>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ modLookup }}" hint-placeholder-val="{{ true }}">
+          <div style="display: grid; grid-template-columns: {{ consoleCols }}; gap: 24px; align-items: start;">
+
+            <div style="min-width: 0;">
+              <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px;">
+                <h3 style="margin: 0; font-size: 15px; letter-spacing: 0.06em;">밀수 의심 알림</h3>
+                <span style="font-size: 10px; letter-spacing: 0.14em;" class="text-muted">SUSPECT QUEUE</span>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 1px; border-top: 1px solid var(--color-divider);">
+                <sc-for list="{{ alerts }}" as="al" hint-placeholder-count="4">
+                  <button type="button" onClick="{{ al.pick }}" style="{{ al.style }}">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span class="tag tag-outline" style="font-size: 10px;">{{ al.severity }}</span>
+                      <span style="font-size: 11px; margin-left: auto;" class="text-muted">{{ al.time }}</span>
+                    </div>
+                    <div style="font-size: 13px; line-height: 1.4; margin-top: 6px;">{{ al.title }}</div>
+                    <div style="font-family: ui-monospace, Menlo, monospace; font-size: 11px; margin-top: 4px; color: var(--color-accent-700);">{{ al.uid }}</div>
+                  </button>
+                </sc-for>
+              </div>
+              <div style="margin-top: 16px; font-size: 12px; line-height: 1.6;" class="text-muted">RA 11900 위반 지점은 지오펜스 규칙(학교 반경 100m)으로 자동 분류됩니다.</div>
+            </div>
+
+            <div style="min-width: 0;">
+              <div class="field" style="margin-bottom: 20px;">
+                <label>UID 조회 / PROVENANCE LOOKUP</label>
+                <div style="display: flex; gap: 8px;">
+                  <input class="input" defaultValue="LM-PH-2609-A00417-3F8C" style="font-family: ui-monospace, Menlo, monospace; letter-spacing: 0.04em;" />
+                  <button type="button" class="btn btn-primary blueprint" style="flex: none; padding: 0 18px;">
+                    <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                    조회 / TRACE
+                  </button>
+                </div>
+              </div>
+
+              <div style="display: flex; align-items: flex-start; gap: 16px; flex-wrap: wrap; padding-bottom: 18px; border-bottom: 1px solid var(--color-divider); margin-bottom: 22px;">
+                <div style="min-width: 0;">
+                  <div style="font-family: ui-monospace, Menlo, monospace; font-size: 22px; letter-spacing: 0.02em;">{{ uid.code }}</div>
+                  <div style="font-size: 13px; margin-top: 4px;">{{ uid.product }} · LOT {{ uid.lot }}</div>
+                </div>
+                <div style="margin-left: auto; display: flex; gap: 8px; align-items: center;">
+                  <span class="tag tag-accent">{{ uid.status }}</span>
+                  <span class="tag tag-neutral">{{ uid.holder }}</span>
+                </div>
+              </div>
+
+              <sc-if value="{{ traceRail }}" hint-placeholder-val="{{ true }}">
+              <div>
+                <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 20px;">
+                  <h3 style="margin: 0; font-size: 15px; letter-spacing: 0.06em;">소유권 이전 레일</h3>
+                  <span style="font-size: 10px; letter-spacing: 0.14em;" class="text-muted">OWNERSHIP RAIL — A안</span>
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                  <sc-for list="{{ txRail }}" as="node" hint-placeholder-count="5">
+                    <div style="display: grid; grid-template-columns: 1px minmax(0, 1fr); gap: 20px;">
+                      <div style="background: var(--color-divider); position: relative;">
+                        <span style="{{ node.nodeStyle }}"></span>
+                      </div>
+                      <div style="padding: 0 0 26px;">
+                        <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;">
+                          <span style="font-size: 11px; letter-spacing: 0.09em; color: var(--color-accent-700); overflow-wrap: anywhere;">{{ node.type }}</span>
+                          <span style="font-size: 11px; letter-spacing: 0.04em; margin-left: auto;" class="text-muted">{{ node.date }}</span>
+                        </div>
+                        <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-top: 5px;">
+                          <span style="font-size: 15px; line-height: 1.3;">{{ node.to }}</span>
+                          <span style="font-size: 11px;" class="text-muted">{{ node.place }}</span>
+                        </div>
+                        <div style="display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-top: 6px;">
+                          <span style="font-size: 11px; line-height: 1.45; overflow-wrap: anywhere;" class="text-muted">{{ node.note }}</span>
+                          <span style="font-family: ui-monospace, Menlo, monospace; font-size: 10px; margin-left: auto; color: var(--color-accent-700);">{{ node.block }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              </sc-if>
+
+              <sc-if value="{{ traceLedger }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 16px;">
+                  <h3 style="margin: 0; font-size: 15px; letter-spacing: 0.06em;">소유권 원장</h3>
+                  <span style="font-size: 10px; letter-spacing: 0.14em;" class="text-muted">LEDGER TABLE — B안</span>
+                </div>
+                <table class="table" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                  <thead>
+                    <tr>
+                      <th style="text-align: left; padding: 8px 10px;">TX</th>
+                      <th style="text-align: left; padding: 8px 10px;">시각 / TIME</th>
+                      <th style="text-align: left; padding: 8px 10px;">이전 → 신규 소유자</th>
+                      <th style="text-align: left; padding: 8px 10px;">교환권</th>
+                      <th style="text-align: left; padding: 8px 10px;">앵커 / ANCHOR</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ txRail }}" as="row" hint-placeholder-count="5">
+                      <tr>
+                        <td style="padding: 10px; font-size: 11px; letter-spacing: 0.08em; color: var(--color-accent-700); white-space: nowrap;">{{ row.type }}</td>
+                        <td style="padding: 10px; white-space: nowrap;">{{ row.date }}</td>
+                        <td style="padding: 10px;">{{ row.flow }}</td>
+                        <td style="padding: 10px;">{{ row.voucher }}</td>
+                        <td style="padding: 10px; font-family: ui-monospace, Menlo, monospace; font-size: 11px; white-space: nowrap;">{{ row.block }}</td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+                <div style="margin-top: 14px; font-size: 12px; line-height: 1.6;" class="text-muted">모든 행은 정의된 트랜잭션 유형으로만 생성됩니다. 임의 수정(silent update) 경로는 존재하지 않습니다.</div>
+              </div>
+              </sc-if>
+
+              <sc-if value="{{ layoutTwo }}" hint-placeholder-val="{{ false }}">
+              <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-top: 32px;">
+                <sc-for list="{{ sidePanels }}" as="pnl" hint-placeholder-count="3">
+                  <div class="blueprint" style="padding: 16px; background: transparent;">
+                    <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                    <div class="card-kicker">{{ pnl.en }}</div>
+                    <div style="font-family: var(--font-heading); font-size: 16px; margin: 4px 0 10px;">{{ pnl.ko }}</div>
+                    <sc-for list="{{ pnl.rows }}" as="pr" hint-placeholder-count="3">
+                      <div style="display: flex; gap: 10px; justify-content: space-between; padding: 5px 0; border-top: 1px solid var(--color-divider); font-size: 12px;">
+                        <span class="text-muted">{{ pr.k }}</span>
+                        <span style="text-align: right;">{{ pr.v }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-for>
+              </div>
+              </sc-if>
+            </div>
+
+            <sc-if value="{{ layoutThree }}" hint-placeholder-val="{{ true }}">
+            <div style="min-width: 0; display: flex; flex-direction: column; gap: 24px;">
+              <sc-for list="{{ sidePanels }}" as="pnl2" hint-placeholder-count="3">
+                <div class="blueprint" style="padding: 16px; background: transparent;">
+                  <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                  <div class="card-kicker">{{ pnl2.en }}</div>
+                  <div style="font-family: var(--font-heading); font-size: 16px; margin: 4px 0 10px;">{{ pnl2.ko }}</div>
+                  <sc-for list="{{ pnl2.rows }}" as="pr2" hint-placeholder-count="3">
+                    <div style="display: flex; gap: 10px; justify-content: space-between; padding: 5px 0; border-top: 1px solid var(--color-divider); font-size: 12px;">
+                      <span class="text-muted">{{ pr2.k }}</span>
+                      <span style="text-align: right;">{{ pr2.v }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-for>
+            </div>
+            </sc-if>
+
+          </div>
+          </sc-if>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="소비자 앱" style="padding: 56px 32px 72px; display: flex; gap: 72px; flex-wrap: wrap; justify-content: center; align-items: flex-start;">
+
+    <div style="max-width: 380px; min-width: 260px;">
+      <div style="font-size: 10px; letter-spacing: 0.16em; color: var(--color-accent-700);">CONSUMER APP</div>
+      <h2 style="font-size: 34px; margin: 6px 0 14px; letter-spacing: -0.01em;">정품 등록 &amp; 교환권</h2>
+      <p style="font-size: 14px; line-height: 1.65; margin: 0 0 20px;">매장 전용 단말기 없이 앱만으로 UID 등록, 연령인증, 교환권 발급이 끝납니다. 원장에는 신분정보 원본이 아니라 검증 결과 크리덴셜만 남습니다.</p>
+      <div style="display: flex; flex-direction: column; gap: 1px;">
+        <sc-for list="{{ appSteps }}" as="stp" hint-placeholder-count="4">
+          <button type="button" onClick="{{ stp.pick }}" style="{{ stp.style }}">
+            <span style="font-family: ui-monospace, Menlo, monospace; font-size: 11px; opacity: 0.6;">{{ stp.num }}</span>
+            <span style="font-size: 13px;">{{ stp.label }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div class="blueprint" style="width: 372px; flex: none; background: var(--color-bg); padding: 0;">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--color-divider); font-size: 11px; letter-spacing: 0.08em;">
+        <span>09:41</span>
+        <span style="font-family: var(--font-heading); letter-spacing: 0.16em;">LEDGERMARK</span>
+        <span class="text-muted">PH</span>
+      </div>
+      <div style="padding: 24px 20px 28px; min-height: 620px; display: flex; flex-direction: column;">
+        <div style="font-size: 10px; letter-spacing: 0.16em; color: var(--color-accent-700);">{{ appScreen.en }}</div>
+        <h3 style="font-size: 25px; margin: 6px 0 8px;">{{ appScreen.ko }}</h3>
+        <p style="font-size: 13px; line-height: 1.6; margin: 0 0 20px;" class="text-muted">{{ appScreen.desc }}</p>
+
+        <div class="blueprint" style="background: transparent; padding: 18px; margin-bottom: 20px;">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="font-size: 10px; letter-spacing: 0.14em;" class="text-muted">{{ appScreen.figureLabel }}</div>
+          <div style="font-family: ui-monospace, Menlo, monospace; font-size: 17px; margin-top: 8px; word-break: break-all;">{{ appScreen.figureValue }}</div>
+          <div style="font-size: 12px; line-height: 1.5; margin-top: 10px;">{{ appScreen.figureNote }}</div>
+        </div>
+
+        <sc-for list="{{ appRows }}" as="ar" hint-placeholder-count="3">
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid var(--color-divider); font-size: 13px;">
+            <span class="text-muted">{{ ar.k }}</span>
+            <span style="text-align: right;">{{ ar.v }}</span>
+          </div>
+        </sc-for>
+
+        <div style="margin-top: auto; padding-top: 24px;">
+          <sc-if value="{{ appWarn }}" hint-placeholder-val="{{ false }}">
+          <div style="border: 1px solid var(--color-accent-400); background: var(--color-accent-100); padding: 12px 14px; font-size: 12px; line-height: 1.55; color: var(--color-accent-900); margin-bottom: 16px;">{{ appScreen.warnText }}</div>
+          </sc-if>
+          <button type="button" class="btn btn-primary btn-block blueprint" onClick="{{ appNext }}" style="height: 48px;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            {{ appScreen.cta }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isPartner }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="매장·총판 웹" style="overflow-x: auto;">
+    <div style="min-width: 880px; padding: 0 0 64px;">
+      <div class="nav" style="display: flex; align-items: center; gap: 18px; padding: 0 32px; height: 64px; border-bottom: 1px solid var(--color-divider);">
+        <span class="nav-brand" style="font-family: var(--font-heading); font-size: 17px; letter-spacing: 0.12em;">LEDGERMARK</span>
+        <span style="font-size: 11px; letter-spacing: 0.14em; color: var(--color-accent-700); border: 1px solid var(--color-divider); padding: 2px 8px;">DISTRIBUTOR · RETAIL</span>
+        <span style="margin-left: auto; font-size: 12px;" class="text-muted">메트로마닐라 총판 · 지점 MM-014</span>
+      </div>
+
+      <div style="padding: 32px; max-width: 1920px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(340px, 1fr); gap: 44px; align-items: start;">
+        <div>
+          <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px;">
+            <h3 style="margin: 0; font-size: 17px;">소유권 이전 대기 큐</h3>
+            <span style="font-size: 10px; letter-spacing: 0.14em;" class="text-muted">TRANSFER QUEUE</span>
+          </div>
+          <table class="table" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+            <thead>
+              <tr>
+                <th style="text-align: left; padding: 8px 10px;">UID</th>
+                <th style="text-align: left; padding: 8px 10px;">요청 / REQUEST</th>
+                <th style="text-align: left; padding: 8px 10px;">수량</th>
+                <th style="text-align: left; padding: 8px 10px;">상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ queueRows }}" as="qr" hint-placeholder-count="4">
+                <tr onClick="{{ qr.pick }}" style="{{ qr.style }}">
+                  <td style="padding: 11px 10px; font-family: ui-monospace, Menlo, monospace; font-size: 11px; white-space: nowrap;">{{ qr.uid }}</td>
+                  <td style="padding: 11px 10px; font-size: 11px; letter-spacing: 0.06em; color: var(--color-accent-700);">{{ qr.type }}</td>
+                  <td style="padding: 11px 10px;">{{ qr.qty }}</td>
+                  <td style="padding: 11px 10px;"><span class="tag tag-outline" style="font-size: 10px; white-space: nowrap;">{{ qr.state }}</span></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="blueprint" style="padding: 22px; background: transparent;">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div class="card-kicker">{{ job.en }}</div>
+          <h3 style="font-size: 21px; margin: 5px 0 4px;">{{ job.ko }}</h3>
+          <div style="font-family: ui-monospace, Menlo, monospace; font-size: 14px; margin-bottom: 16px; color: var(--color-accent-700);">{{ job.uid }}</div>
+          <sc-for list="{{ jobRows }}" as="jr" hint-placeholder-count="4">
+            <div style="display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--color-divider); font-size: 13px;">
+              <span class="text-muted">{{ jr.k }}</span>
+              <span style="text-align: right;">{{ jr.v }}</span>
+            </div>
+          </sc-for>
+          <div style="display: flex; gap: 10px; margin-top: 22px;">
+            <button type="button" class="btn btn-primary blueprint" onClick="{{ jobCommit }}" style="flex: 1; height: 44px;">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              {{ job.cta }}
+            </button>
+            <button type="button" class="btn btn-secondary" style="height: 44px; padding: 0 16px;">보류</button>
+          </div>
+          <div style="font-size: 12px; line-height: 1.55; margin-top: 14px;" class="text-muted">{{ job.note }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isField }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="단속 현장" style="padding: 56px 32px 72px; display: flex; gap: 56px; flex-wrap: wrap; justify-content: center; align-items: flex-start;">
+
+    <div style="max-width: 360px; min-width: 260px;">
+      <div style="font-size: 10px; letter-spacing: 0.16em; color: var(--color-accent-700);">FIELD ENFORCEMENT</div>
+      <h2 style="font-size: 34px; margin: 6px 0 14px; letter-spacing: -0.01em;">현장 단속 단말</h2>
+      <p style="font-size: 14px; line-height: 1.65; margin: 0 0 18px;">경찰·단속기관이 현장에서 UID를 스캔하면 원장 판정과 압수 근거가 즉시 산출됩니다. 관제 콘솔(관세청·DTI 심사관 데스크)과 달리 단일 제품 판정과 조서 작성에만 집중합니다.</p>
+      <div style="font-size: 10px; letter-spacing: 0.14em; color: var(--color-accent-700); margin-bottom: 10px;">판정 시나리오 / VERDICT CASES</div>
+      <div style="display: flex; flex-direction: column; gap: 1px;">
+        <sc-for list="{{ fieldCases }}" as="fc" hint-placeholder-count="3">
+          <button type="button" onClick="{{ fc.pick }}" style="{{ fc.style }}">
+            <span style="font-family: ui-monospace, Menlo, monospace; font-size: 11px; opacity: 0.6;">{{ fc.num }}</span>
+            <span style="font-size: 13px;">{{ fc.label }}</span>
+          </button>
+        </sc-for>
+      </div>
+      <div style="font-size: 11px; line-height: 1.6; margin-top: 18px;" class="text-muted">조서에 첨부되는 원장 스냅샷은 앵커링된 Merkle Root를 포함하므로, 사후에 데이터가 변경되지 않았음을 제3자가 검증할 수 있습니다.</div>
+    </div>
+
+    <div class="blueprint" style="width: 372px; flex: none; background: var(--color-bg); padding: 0;">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 1px solid var(--color-divider); font-size: 11px; letter-spacing: 0.08em;">
+        <span>14:26</span>
+        <span style="font-family: var(--font-heading); letter-spacing: 0.16em;">LEDGERMARK FIELD</span>
+        <span class="text-muted">PNP</span>
+      </div>
+      <div style="padding: 22px 20px 26px; min-height: 560px; display: flex; flex-direction: column;">
+        <div style="font-size: 10px; letter-spacing: 0.14em;" class="text-muted">SCANNED UID</div>
+        <div style="font-family: ui-monospace, Menlo, monospace; font-size: 16px; margin-top: 6px; word-break: break-all;">{{ field.uid }}</div>
+
+        <div class="blueprint" style="background: {{ field.verdictBg }}; padding: 16px; margin: 18px 0 20px;">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="font-size: 10px; letter-spacing: 0.14em; opacity: 0.7;">{{ field.verdictEn }}</div>
+          <div style="font-family: var(--font-heading); font-size: 24px; line-height: 1.15; margin-top: 6px;">{{ field.verdict }}</div>
+          <div style="font-size: 12px; line-height: 1.55; margin-top: 8px;">{{ field.basis }}</div>
+        </div>
+
+        <sc-for list="{{ fieldRows }}" as="fr2" hint-placeholder-count="4">
+          <div style="display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid var(--color-divider); font-size: 13px;">
+            <span class="text-muted">{{ fr2.k }}</span>
+            <span style="text-align: right;">{{ fr2.v }}</span>
+          </div>
+        </sc-for>
+
+        <div style="margin-top: auto; padding-top: 22px; display: flex; gap: 8px;">
+          <button type="button" class="btn btn-primary blueprint" style="flex: 1; height: 46px;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            {{ field.cta }}
+          </button>
+          <button type="button" class="btn btn-secondary" style="height: 46px; padding: 0 14px;">재스캔</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="blueprint" style="width: 380px; flex: none; padding: 22px; background: transparent;">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div class="card-kicker">{{ field.reportEn }}</div>
+      <h3 style="font-size: 21px; margin: 5px 0 14px;">{{ field.reportTitle }}</h3>
+      <sc-for list="{{ reportRows }}" as="rr" hint-placeholder-count="7">
+        <div style="display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid var(--color-divider); font-size: 12px;">
+          <span class="text-muted">{{ rr.k }}</span>
+          <span style="text-align: right; overflow-wrap: anywhere;">{{ rr.v }}</span>
+        </div>
+      </sc-for>
+      <div style="display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap;">
+        <sc-if value="{{ field.hasReport }}" hint-placeholder-val="{{ true }}">
+        <button type="button" class="btn btn-primary blueprint" style="height: 40px; padding: 0 14px;">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          조서 발행
+        </button>
+        </sc-if>
+        <button type="button" class="btn btn-secondary" style="height: 40px; padding: 0 14px;">관제 콘솔 전송</button>
+      </div>
+      <div style="font-size: 11px; line-height: 1.6; margin-top: 14px;" class="text-muted">{{ field.legalNote }}</div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isLanding }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="랜딩 페이지">
+
+    <div style="padding: 88px 32px 72px; max-width: 1520px; margin: 0 auto;">
+      <div style="font-size: 11px; letter-spacing: 0.2em; color: var(--color-accent-700);">NATIONAL DISTRIBUTION LEDGER · 국가 연동형 유통 원장</div>
+      <h1 style="font-size: clamp(44px, 5.4vw, 96px); line-height: 1.02; margin: 18px 0 0; max-width: 18ch;">생산부터 소유권 이전까지, 하나의 원장</h1>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 40px; margin-top: 34px; align-items: start;">
+        <p style="font-size: 16px; line-height: 1.7; margin: 0; max-width: 46ch;">LEDGERMARK는 규제품목의 개별 UID를 생산 시점에 발급하고, 수출·통관·총판·소매·소비자·교환까지 모든 단계를 소유권 이전 트랜잭션으로만 기록합니다. 정부는 밀수 단속 근거를 얻고, 소비자는 정품 인증과 교환 서비스를 얻습니다.</p>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-primary blueprint" onClick="{{ goConsole }}" style="height: 46px; padding: 0 22px;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            관제 콘솔 보기 / CONSOLE
+          </button>
+          <button type="button" class="btn btn-secondary" onClick="{{ goApp }}" style="height: 46px; padding: 0 20px;">소비자 앱 / APP</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="background: var(--color-accent-900); color: var(--color-bg); padding: 56px 32px;">
+      <div style="max-width: 1520px; margin: 0 auto;">
+        <div style="font-size: 11px; letter-spacing: 0.2em; opacity: 0.7;">PHILIPPINES · MARKET &amp; LEAKAGE</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 44px; margin-top: 32px;">
+          <sc-for list="{{ marketStats }}" as="stat" hint-placeholder-count="4">
+            <div>
+              <div style="font-family: var(--font-heading); font-size: 44px; line-height: 1;">{{ stat.value }}</div>
+              <div style="font-size: 13px; margin-top: 8px; opacity: 0.85; line-height: 1.45;">{{ stat.ko }}</div>
+              <div style="font-size: 10px; letter-spacing: 0.14em; margin-top: 6px; opacity: 0.55;">{{ stat.en }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="font-size: 12px; margin-top: 30px; opacity: 0.6;">출처: 필리핀 전자담배 제안서 자료 (2024 기준) — [Fact]</div>
+      </div>
+    </div>
+
+    <div style="padding: 72px 32px; max-width: 1520px; margin: 0 auto;">
+      <div style="display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px;">
+        <h2 style="font-size: 34px; margin: 0;">UID 소유권 상태머신</h2>
+        <span style="font-size: 11px; letter-spacing: 0.16em;" class="text-muted">OWNERSHIP STATE MACHINE</span>
+      </div>
+      <p style="font-size: 15px; line-height: 1.7; max-width: 60ch; margin: 0 0 34px;">UID 레코드의 모든 변경은 정의된 6종 트랜잭션을 통해서만 발생합니다. 임의 수정 경로가 설계상 존재하지 않습니다.</p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 28px;">
+        <sc-for list="{{ txTypes }}" as="txt" hint-placeholder-count="6">
+          <div class="blueprint" style="padding: 18px; background: transparent;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px;">
+              <span style="font-size: 11px; letter-spacing: 0.1em; color: var(--color-accent-700);">{{ txt.code }}</span>
+              <span style="font-family: ui-monospace, Menlo, monospace; font-size: 11px;" class="text-muted">{{ txt.num }}</span>
+            </div>
+            <div style="font-family: var(--font-heading); font-size: 19px; margin: 8px 0 6px;">{{ txt.ko }}</div>
+            <div style="font-size: 13px; line-height: 1.55;" class="text-muted">{{ txt.detail }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="padding: 0 32px 88px; max-width: 1520px; margin: 0 auto;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 32px; border-top: 1px solid var(--color-divider); padding-top: 40px;">
+        <div>
+          <div style="font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--color-accent-700);">01</div>
+          <h4 style="font-size: 19px; margin: 8px 0 8px;">소유권 상태머신</h4>
+          <div style="font-size: 10px; letter-spacing: 0.14em; margin-bottom: 10px;" class="text-muted">STATE MACHINE</div>
+          <div style="font-size: 13px; line-height: 1.65;">UID 변경은 정의된 트랜잭션만 통과합니다. 임의 조작 경로가 없습니다.</div>
+        </div>
+        <div>
+          <div style="font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--color-accent-700);">02</div>
+          <h4 style="font-size: 19px; margin: 8px 0 8px;">하이브리드 신뢰 구조</h4>
+          <div style="font-size: 10px; letter-spacing: 0.14em; margin-bottom: 10px;" class="text-muted">PERMISSIONED + ANCHORED</div>
+          <div style="font-size: 13px; line-height: 1.65;">허가형 원장에 기록하고 주기적으로 퍼블릭 체인에 앵커링해 제3자 검증을 남깁니다.</div>
+        </div>
+        <div>
+          <div style="font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--color-accent-700);">03</div>
+          <h4 style="font-size: 19px; margin: 8px 0 8px;">규제 대응 모듈화</h4>
+          <div style="font-size: 10px; letter-spacing: 0.14em; margin-bottom: 10px;" class="text-muted">AVP ROUTER</div>
+          <div style="font-size: 13px; line-height: 1.65;">연령인증 등 국가별 요건을 Provider 계층으로 분리해 다국가로 확장합니다.</div>
+        </div>
+        <div>
+          <div style="font-family: ui-monospace, Menlo, monospace; font-size: 12px; color: var(--color-accent-700);">04</div>
+          <h4 style="font-size: 19px; margin: 8px 0 8px;">하드웨어 비의존</h4>
+          <div style="font-size: 10px; letter-spacing: 0.14em; margin-bottom: 10px;" class="text-muted">APP-FIRST</div>
+          <div style="font-size: 13px; line-height: 1.65;">매장 단말기 스펙 불일치를 앱 중심 설계로 우회해 초기 투자를 최소화합니다.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = {
+    surface: 'console',
+    nav: 'top',
+    layout: 'three',
+    trace: 'rail',
+    tone: 'blueprint',
+    module: 'lookup',
+    alert: 0,
+    appStep: 0,
+    queue: 0,
+    batch: 1,
+    field: 1,
+    committed: false
+  };
+
+  seg(key, opts) {
+    return opts.map(o => ({
+      label: o.label,
+      checked: this.state[key] === o.value,
+      pick: () => this.setState({ [key]: o.value })
+    }));
+  }
+
+  rowStyle(active, extra) {
+    return 'width:100%;text-align:left;cursor:pointer;font:inherit;border:0;border-bottom:1px solid var(--color-divider);'
+      + 'border-left:3px solid ' + (active ? 'var(--color-accent)' : 'transparent') + ';'
+      + 'background:' + (active ? 'var(--color-accent-100)' : 'transparent') + ';'
+      + 'padding:11px 12px;color:var(--color-text);' + (extra || '');
+  }
+
+  renderVals() {
+    const s = this.state;
+
+    const alertData = [
+      { severity: 'HIGH', time: '09:12', title: '통관 이력 없는 UID 소매 판매 시도', uid: 'LM-PH-2609-A00982-77B1',
+        judgement: 'MINT 기록은 존재하나 EXPORT_TRANSFER 이후 통관 대조 배치에 포함되지 않았습니다. 정식 수입 경로를 거치지 않은 것으로 판정됩니다.',
+        rule: '판정 규칙 CU-02 · 통관 배치 미포함 UID의 소매 판매 차단',
+        recommend: '해당 지점 재고 전량 스캔 및 동일 LOT UID 유통 경로 역추적을 권고합니다.',
+        linked: [
+          { uid: 'LM-PH-2609-A00982-77B1', tx: 'RETAIL_SALE 시도', verdict: '차단' },
+          { uid: 'LM-PH-2609-A00983-77B2', tx: 'WHOLESALE_TRANSFER', verdict: '동일 LOT · 감시' },
+          { uid: 'LM-PH-2609-A00991-8C04', tx: 'MINT', verdict: '통관 미확인' }
+        ],
+        log: [
+          { time: '09:12', text: '지점 MM-207 앱 스캔에서 자동 감지' },
+          { time: '09:12', text: '소매 판매 트랜잭션 시스템 차단' },
+          { time: '09:14', text: 'BOC 관제 콘솔로 알림 승격' }
+        ] },
+      { severity: 'HIGH', time: '08:47', title: '동일 시각 대량 UID 스캔 — 복제 의심', uid: 'LOT PH-2608-C · 412건',
+        judgement: '단일 지점에서 4분 내 412건의 UID 조회가 발생했습니다. 물리적 판매 속도를 초과하여 코드 복제 스캔으로 판정됩니다.',
+        rule: '판정 규칙 CL-01 · 지점당 분당 조회 임계값 초과',
+        recommend: '해당 UID군의 소유권 이전을 일시 정지하고 지점 현장 확인을 권고합니다.',
+        linked: [
+          { uid: 'LM-PH-2608-C00114-2A31', tx: 'RETAIL_SALE', verdict: '중복 스캔' },
+          { uid: 'LM-PH-2608-C00114-2A31', tx: 'RETAIL_SALE', verdict: '중복 스캔' },
+          { uid: 'LM-PH-2608-C00287-6F9D', tx: 'WHOLESALE_TRANSFER', verdict: '감시' }
+        ],
+        log: [
+          { time: '08:47', text: '조회 임계값 초과 감지' },
+          { time: '08:51', text: '해당 LOT 소유권 이전 일시 정지' }
+        ] },
+      { severity: 'MED', time: '어제', title: '학교 반경 100m 내 판매 지점 감지 (RA 11900)', uid: 'STORE CEB-207',
+        judgement: '지점 등록 좌표가 초등학교 경계로부터 82m로 측정되었습니다. RA 11900의 판매금지 구역 요건에 저촉됩니다.',
+        rule: '판정 규칙 GEO-01 · 학교 반경 100m 지오펜스',
+        recommend: 'DTI 지점 등록 재심사 및 판매 권한 정지를 권고합니다.',
+        linked: [
+          { uid: 'STORE CEB-207', tx: 'RETAIL_SALE 12건', verdict: '구역 위반' },
+          { uid: 'LM-PH-2609-A02210-4B77', tx: 'RETAIL_SALE', verdict: '위반 지점 판매' }
+        ],
+        log: [
+          { time: '어제 16:20', text: '지오펜스 규칙 위반 자동 분류' },
+          { time: '어제 17:02', text: 'DTI 담당자 배정' }
+        ] },
+      { severity: 'LOW', time: '어제', title: '미등록 UID 스캔 3건 — 세부 소매', uid: 'LM-PH-2607-B00311-9A20',
+        judgement: '원장에 존재하지 않는 UID 형식이 스캔되었습니다. 위조 코드 또는 타사 제품으로 추정됩니다.',
+        rule: '판정 규칙 UN-01 · 원장 미존재 UID 스캔',
+        recommend: '패턴 축적 후 위조 코드 생성 규칙 분석을 권고합니다.',
+        linked: [
+          { uid: 'LM-PH-2607-B00311-9A20', tx: '조회 실패', verdict: '원장 미존재' }
+        ],
+        log: [
+          { time: '어제 11:30', text: '소비자 앱 조회 실패 3건 집계' }
+        ] }
+    ];
+
+    const tx = [
+      { type: 'MINT', date: '2026-06-14 09:12', to: '제조 법인', flow: '— → 제조 법인', place: '선전 제3라인', block: '#418,220', note: 'LOT PH-2609-A · 100,000개 일괄 발급', voucher: '—' },
+      { type: 'EXPORT_TRANSFER', date: '2026-06-28 17:40', to: '수입사 PH', flow: '제조 법인 → 수입사 PH', place: '인천항 → 마닐라', block: '#421,884', note: '관세청 사전 연동 데이터 송신 완료', voucher: '—' },
+      { type: 'WHOLESALE_TRANSFER', date: '2026-07-05 11:03', to: '메트로마닐라 총판', flow: '수입사 PH → 총판 MM', place: '케손시티 물류센터', block: '#425,517', note: '배분 수량 2,400개 중 1개', voucher: '—' },
+      { type: 'RETAIL_SALE', date: '2026-07-19 14:02', to: '소비자 A', flow: '지점 MM-014 → 소비자 A', place: '마카티 지점 MM-014', block: '#431,006', note: '연령인증 완료 · ID + Liveness', voucher: '신규 발급' },
+      { type: 'RESALE_TRANSFER', date: '2026-08-30 20:15', to: '소비자 B', flow: '소비자 A → 소비자 B', place: '앱 내 중고거래', block: '#448,772', note: '교환권 재발급 없음 — 남용 방지 규칙', voucher: '재발급 안 함' }
+    ];
+    const last = tx.length - 1;
+
+    const appScreens = [
+      {
+        en: 'STEP 01 — SCAN', ko: 'UID 스캔', desc: '제품 하단 코드를 촬영하면 원장에서 즉시 조회됩니다.',
+        figureLabel: 'SCANNED UID', figureValue: 'LM-PH-2609-A00417-3F8C', figureNote: '원장 일치 · 정품 확인',
+        rows: [{ k: '제품', v: 'Series V · Graphite' }, { k: 'LOT', v: 'PH-2609-A' }, { k: '현재 소유자', v: '지점 MM-014' }],
+        cta: '연령인증으로 / CONTINUE', warn: false, warnText: ''
+      },
+      {
+        en: 'STEP 02 — AGE VERIFICATION', ko: '연령인증', desc: 'RA 11900 요건에 따라 정부발급 ID 스캔과 Liveness 검사를 수행합니다.',
+        figureLabel: 'AVP MODULE', figureValue: 'PH · GOV-ID + LIVENESS', figureNote: '등록국가 판별 → 필리핀 모듈 호출',
+        rows: [{ k: '검증 방식', v: 'ID 스캔 + Liveness' }, { k: '원장 기록', v: '검증완료 여부·시각·방식' }, { k: '신분정보 원본', v: '저장하지 않음' }],
+        cta: '인증 완료 / VERIFY', warn: false, warnText: ''
+      },
+      {
+        en: 'STEP 03 — REGISTERED', ko: '정품 등록 완료', desc: '소유권이 회원님에게 이전되었고 교환권이 1회 발급되었습니다.',
+        figureLabel: 'EXCHANGE VOUCHER', figureValue: 'EV-2607-19-0417', figureNote: '불량·색상 교환 1회 · 양도 가능',
+        rows: [{ k: '트랜잭션', v: 'RETAIL_SALE' }, { k: '앵커 블록', v: '#431,006' }, { k: '교환권', v: '유효' }],
+        cta: '중고거래 등록 / RESELL', warn: false, warnText: ''
+      },
+      {
+        en: 'STEP 04 — RESALE', ko: '중고거래 등록', desc: '소유권은 계속 추적되지만, 새 소유자에게 교환권은 재발급되지 않습니다.',
+        figureLabel: 'RESALE_TRANSFER', figureValue: '소비자 A → 소비자 B', figureNote: '이력 연속성 유지 · 원장 기록',
+        rows: [{ k: '기존 교환권', v: '소진 처리' }, { k: '신규 교환권', v: '발급 안 함' }, { k: '이력 조회', v: '계속 가능' }],
+        cta: '거래 등록 / LIST', warn: true,
+        warnText: '중고 취득 제품은 무상교환 대상이 아닙니다. 교환권 남용 방지를 위한 설계입니다.'
+      }
+    ];
+
+    const queueData = [
+      { uid: 'LM-PH-2609-A00417-3F8C', type: 'RETAIL_SALE', qty: '1', state: '연령인증 대기',
+        en: 'RETAIL SALE', ko: '소매 판매 처리', cta: '소유권 이전 / COMMIT',
+        rows: [{ k: '이전 소유자', v: '지점 MM-014' }, { k: '신규 소유자', v: '소비자 A' }, { k: '연령인증', v: '앱 인증 완료' }, { k: '교환권', v: '신규 발급 예정' }],
+        note: '커밋 시 RETAIL_SALE 트랜잭션이 원장에 기록되고 다음 앵커링에 포함됩니다.' },
+      { uid: 'LM-PH-2609-A01102-B4E2', type: 'EXCHANGE_TRANSFER', qty: '1', state: 'AS 검수 중',
+        en: 'EXCHANGE', ko: '불량 교환 처리', cta: '교환 승인 / COMMIT',
+        rows: [{ k: '구 UID', v: '…A01102-B4E2' }, { k: '신 UID', v: '…A03310-D71F' }, { k: '교환권', v: '유효 · 소진 예정' }, { k: '소유자', v: '동일 소유자 귀속' }],
+        note: '기존 교환권은 소진되고 신규 UID는 동일 소유자에게 귀속됩니다.' },
+      { uid: 'LOT PH-2609-B · 2,400', type: 'WHOLESALE_TRANSFER', qty: '2,400', state: '배분 대기',
+        en: 'WHOLESALE', ko: '총판 배분', cta: '일괄 이전 / COMMIT',
+        rows: [{ k: '이전 소유자', v: '수입사 PH' }, { k: '신규 소유자', v: '총판 MM' }, { k: '대상 수량', v: '2,400개' }, { k: '통관 데이터', v: '연동 확인됨' }],
+        note: 'LOT 단위 일괄 이전은 단일 트랜잭션으로 원장에 기록됩니다.' },
+      { uid: 'LM-PH-2609-A00982-77B1', type: 'RETAIL_SALE', qty: '1', state: '판매 차단',
+        en: 'BLOCKED', ko: '판매 차단', cta: '관제 콘솔로 신고',
+        rows: [{ k: '통관 이력', v: '없음' }, { k: '판정', v: '밀수 의심' }, { k: '조치', v: '판매 불가 · 신고 필요' }, { k: '알림', v: 'BOC 콘솔 전송됨' }],
+        note: '수입통관 트랜잭션이 없는 UID는 소매 판매를 시스템적으로 차단합니다.' }
+    ];
+
+    const batchData = [
+      { decl: 'PH-IMP-26-40118', lot: 'PH-2609-A', pre: '100,000', scanned: '100,000', gap: '0', state: '일치 · 승인 대기',
+        rows: [
+          { k: '수출 법인', v: '제조 법인 (선전)' },
+          { k: '수입사', v: '수입사 PH' },
+          { k: '사전 연동 시각', v: '06-28 17:40' },
+          { k: '통관 스캔 완료', v: '06-30 09:12' },
+          { k: '대조 결과', v: '전량 일치' }
+        ], gaps: [] },
+      { decl: 'PH-IMP-26-40122', lot: 'PH-2609-B', pre: '80,000', scanned: '79,988', gap: '12', state: '미일치 · 검사 필요',
+        rows: [
+          { k: '수출 법인', v: '제조 법인 (선전)' },
+          { k: '수입사', v: '수입사 PH' },
+          { k: '사전 연동 시각', v: '07-02 14:05' },
+          { k: '통관 스캔 완료', v: '07-04 10:41' },
+          { k: '대조 결과', v: '12건 미스캔' }
+        ],
+        gaps: [
+          { uid: 'LM-PH-2609-B01204-C4D9', reason: '사전 연동 목록에 있으나 통관 스캔 누락' },
+          { uid: 'LM-PH-2609-B01205-C4E0', reason: '사전 연동 목록에 있으나 통관 스캔 누락' },
+          { uid: 'LM-PH-2609-B01288-D110', reason: '스캔 코드 손상 — 재스캔 필요' }
+        ] },
+      { decl: 'PH-IMP-26-40095', lot: 'PH-2608-C', pre: '120,000', scanned: '120,412', gap: '412', state: '초과 · 복제 의심',
+        rows: [
+          { k: '수출 법인', v: '제조 법인 (선전)' },
+          { k: '수입사', v: '수입사 PH' },
+          { k: '사전 연동 시각', v: '06-14 08:30' },
+          { k: '통관 스캔 완료', v: '06-18 15:22' },
+          { k: '대조 결과', v: '412건 초과 스캔' }
+        ],
+        gaps: [
+          { uid: 'LM-PH-2608-C00114-2A31', reason: '동일 UID 중복 스캔 — 복제 코드 의심' },
+          { uid: 'LM-PH-2608-C00287-6F9D', reason: '동일 UID 중복 스캔 — 복제 코드 의심' }
+        ] },
+      { decl: 'KZ-IMP-26-00871', lot: 'KZ-2608-B', pre: '40,000', scanned: '—', gap: '—', state: '스캔 대기',
+        rows: [
+          { k: '수출 법인', v: '제조 법인 (선전)' },
+          { k: '수입사', v: '수입사 KZ' },
+          { k: '사전 연동 시각', v: '09-01 11:15' },
+          { k: '통관 스캔 완료', v: '미완' },
+          { k: '대조 결과', v: '대기' }
+        ], gaps: [] }
+    ];
+
+    const fieldData = [
+      {
+        label: '정품 · 정상 유통', uid: 'LM-PH-2609-A00417-3F8C',
+        verdict: '정품 · 정상 유통', verdictEn: 'VERIFIED · CLEARED',
+        verdictBg: 'transparent',
+        basis: '통관 배치 PH-IMP-26-40118과 일치하며 소유권 이력이 연속됩니다.',
+        rows: [
+          { k: '통관 배치', v: 'PH-IMP-26-40118 · 일치' },
+          { k: '최종 트랜잭션', v: 'RESALE_TRANSFER' },
+          { k: '현재 소유자', v: '소비자 B' },
+          { k: '연령인증', v: '완료 (RA 11900)' }
+        ],
+        cta: '정상 종결',
+        reportEn: 'LOOKUP LOG', reportTitle: '조회 로그', hasReport: false,
+        report: [
+          { k: '조서', v: '작성 불필요' },
+          { k: '판정', v: '정품 · 정상 유통' },
+          { k: '대상 UID', v: '1건' },
+          { k: '조회 일시', v: '2026-09-06 14:26' },
+          { k: '담당관', v: 'PNP 단속관 J. Reyes' },
+          { k: '장소', v: '마카티 지점 MM-014' },
+          { k: '원장 스냅샷', v: '0x9f3c…a41d' }
+        ],
+        legalNote: '정상 판정 건은 조회 로그만 원장에 남고 조서는 생성되지 않습니다.'
+      },
+      {
+        label: '통관 미확인 — 압수 근거', uid: 'LM-PH-2609-A00982-77B1',
+        verdict: '압수 근거 성립', verdictEn: 'SEIZURE GROUNDS ESTABLISHED',
+        verdictBg: 'var(--color-accent-100)',
+        basis: 'MINT 기록은 있으나 통관 대조 배치에 미포함 — 정식 수입 경로 미경유로 판정됩니다.',
+        rows: [
+          { k: '통관 배치', v: '미포함' },
+          { k: '최종 트랜잭션', v: 'WHOLESALE_TRANSFER' },
+          { k: '판정 규칙', v: 'CU-02' },
+          { k: '동일 LOT 감시', v: '2건' }
+        ],
+        cta: '압수 조서 작성',
+        reportEn: 'SEIZURE REPORT', reportTitle: '압수 조서 (자동 생성)', hasReport: true,
+        report: [
+          { k: '조서번호', v: 'SZ-PH-26-00412' },
+          { k: '판정', v: '통관 미확인 · 압수 근거 성립' },
+          { k: '판정 규칙', v: 'CU-02 (플랫폼 규칙)' },
+          { k: '적용 법조', v: '진출국 관세법 — 확인 필요' },
+          { k: '대상 UID', v: '1건 + 동일 LOT 2건' },
+          { k: '일시 · 장소', v: '09-06 14:26 · 지점 MM-207' },
+          { k: '담당관', v: 'PNP 단속관 J. Reyes' },
+          { k: '원장 스냅샷', v: '0x9f3c…a41d' }
+        ],
+        legalNote: '적용 법조는 국가별 검토 후 확정됩니다. 플랫폼은 판정 근거와 원장 스냅샷만 제공합니다.'
+      },
+      {
+        label: '원장 미존재 — 위조 의심', uid: 'LM-PH-2607-B00311-9A20',
+        verdict: '위조 의심', verdictEn: 'NOT IN LEDGER',
+        verdictBg: 'var(--color-accent-100)',
+        basis: '원장에 존재하지 않는 UID입니다. 위조 코드 또는 타사 제품으로 추정됩니다.',
+        rows: [
+          { k: '원장 조회', v: '결과 없음' },
+          { k: 'MINT 기록', v: '없음' },
+          { k: '판정 규칙', v: 'UN-01' },
+          { k: '유사 코드', v: '3건 (형식 불일치)' }
+        ],
+        cta: '위조 신고 접수',
+        reportEn: 'COUNTERFEIT REPORT', reportTitle: '위조 신고 조서 (자동 생성)', hasReport: true,
+        report: [
+          { k: '조서번호', v: 'CF-PH-26-00188' },
+          { k: '판정', v: '원장 미존재 · 위조 의심' },
+          { k: '판정 규칙', v: 'UN-01 (플랫폼 규칙)' },
+          { k: '적용 법조', v: '상표법 · 관세법 — 확인 필요' },
+          { k: '대상 UID', v: '1건' },
+          { k: '일시 · 장소', v: '09-06 11:30 · 세부 소매' },
+          { k: '담당관', v: 'PNP 단속관 J. Reyes' },
+          { k: '원장 스냅샷', v: '0x9f3c…a41d' }
+        ],
+        legalNote: '원장 미존재는 위조 판정의 근거이며, 제품 진위 확인은 제조사 감정과 병행합니다.'
+      }
+    ];
+
+    const job = queueData[s.queue];
+    const appScreen = appScreens[s.appStep];
+    const alert = alertData[s.alert];
+    const fld = fieldData[s.field];
+    const batch = batchData[s.batch];
+
+    return {
+      isConsole: s.surface === 'console',
+      isApp: s.surface === 'app',
+      isPartner: s.surface === 'partner',
+      isField: s.surface === 'field',
+      isLanding: s.surface === 'landing',
+
+      fieldCases: fieldData.map((f, i) => ({
+        num: '0' + (i + 1),
+        label: f.label,
+        style: this.rowStyle(s.field === i, 'display:flex;align-items:center;gap:12px;'),
+        pick: () => this.setState({ field: i })
+      })),
+      field: {
+        uid: fld.uid, verdict: fld.verdict, verdictEn: fld.verdictEn, verdictBg: fld.verdictBg,
+        basis: fld.basis, cta: fld.cta, legalNote: fld.legalNote,
+        reportEn: fld.reportEn, reportTitle: fld.reportTitle, hasReport: fld.hasReport
+      },
+      fieldRows: fld.rows,
+      reportRows: fld.report,
+      navTop: s.nav === 'top',
+      navRail: s.nav === 'rail',
+      layoutThree: s.layout === 'three',
+      layoutTwo: s.layout === 'two',
+      traceRail: s.trace === 'rail',
+      traceLedger: s.trace === 'ledger',
+      consoleCols: s.layout === 'three'
+        ? 'minmax(180px, 0.78fr) minmax(300px, 1.9fr) minmax(180px, 0.8fr)'
+        : 'minmax(200px, 0.7fr) minmax(320px, 2.4fr)',
+
+      segSurface: this.seg('surface', [
+        { label: '관제 콘솔', value: 'console' },
+        { label: '소비자 앱', value: 'app' },
+        { label: '매장·총판', value: 'partner' },
+        { label: '단속 현장', value: 'field' },
+        { label: '랜딩', value: 'landing' }
+      ]),
+      segNav: this.seg('nav', [{ label: '상단 탭', value: 'top' }, { label: '좌측 레일', value: 'rail' }]),
+      segLayout: this.seg('layout', [{ label: '3열', value: 'three' }, { label: '2열', value: 'two' }]),
+      segTrace: this.seg('trace', [{ label: 'A 레일', value: 'rail' }, { label: 'B 원장', value: 'ledger' }]),
+      segTone: this.seg('tone', [{ label: '청사진', value: 'blueprint' }, { label: '라이트 카드', value: 'light' }]),
+      segModule: this.seg('module', [
+        { label: '대시보드', value: 'dash' },
+        { label: 'UID 조회', value: 'lookup' },
+        { label: '알림', value: 'alerts' },
+        { label: '통관', value: 'customs' },
+        { label: '리포트', value: 'reports' }
+      ]),
+
+      kpis: [
+        { en: 'UIDS ISSUED', ko: '누적 발급 UID', value: '4,182,400' },
+        { en: 'IN CIRCULATION', ko: '유통 중', value: '1,927,336' },
+        { en: 'CONSUMER REGISTERED', ko: '소비자 등록', value: '812,904' },
+        { en: 'SUSPECT ALERTS · 7D', ko: '의심 알림 (7일)', value: '14' }
+      ],
+
+      modDash: s.module === 'dash' && s.tone === 'blueprint',
+      modDashLight: s.module === 'dash' && s.tone === 'light',
+      modLookup: s.module === 'lookup',
+      modAlerts: s.module === 'alerts',
+      modCustoms: s.module === 'customs',
+      modReports: s.module === 'reports',
+
+      alerts: alertData.map((a, i) => ({
+        severity: a.severity, time: a.time, title: a.title, uid: a.uid,
+        style: this.rowStyle(s.alert === i),
+        pick: () => this.setState({ alert: i })
+      })),
+      detail: {
+        severity: alert.severity, title: alert.title, uid: alert.uid,
+        judgement: alert.judgement, rule: alert.rule, recommend: alert.recommend
+      },
+      detailLinked: alert.linked,
+      detailLog: alert.log,
+
+      pipeline: [
+        { stage: '제조 법인 재고', tx: 'MINT', volume: '1,842,110', share: '44.0%' },
+        { stage: '수출 · 이동 중', tx: 'EXPORT_TRANSFER', volume: '212,480', share: '5.1%' },
+        { stage: '수입사 보유', tx: 'EXPORT_TRANSFER', volume: '486,220', share: '11.6%' },
+        { stage: '지역 총판', tx: 'WHOLESALE_TRANSFER', volume: '628,940', share: '15.0%' },
+        { stage: '소매 매장', tx: 'WHOLESALE_TRANSFER', volume: '199,746', share: '4.8%' },
+        { stage: '소비자 보유', tx: 'RETAIL_SALE', volume: '812,904', share: '19.5%' }
+      ],
+      kpisLight: [
+        { ko: '누적 발급 UID', value: '4,182,400', delta: '+3.4%', deltaNote: '전월 대비', up: true },
+        { ko: '유통 중', value: '1,927,336', delta: '+1.8%', deltaNote: '전월 대비', up: true },
+        { ko: '소비자 등록', value: '812,904', delta: '+6.2%', deltaNote: '전월 대비', up: true },
+        { ko: '의심 알림 (7일)', value: '14', delta: '-21%', deltaNote: '전주 대비', up: false }
+      ].map(k => ({
+        ko: k.ko, value: k.value, delta: k.delta, deltaNote: k.deltaNote,
+        deltaStyle: 'font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px;'
+          + (k.up ? 'background:#e6f6c4;color:#41631a;' : 'background:#eef1ec;color:#5f665d;')
+      })),
+      pipelineLight: [
+        { stage: '제조 법인 재고', tx: 'MINT', volume: '1,842,110', share: '44.0%', pct: 44 },
+        { stage: '수출 · 이동 중', tx: 'EXPORT_TRANSFER', volume: '212,480', share: '5.1%', pct: 5.1 },
+        { stage: '수입사 보유', tx: 'EXPORT_TRANSFER', volume: '486,220', share: '11.6%', pct: 11.6 },
+        { stage: '지역 총판', tx: 'WHOLESALE_TRANSFER', volume: '628,940', share: '15.0%', pct: 15 },
+        { stage: '소매 매장', tx: 'WHOLESALE_TRANSFER', volume: '199,746', share: '4.8%', pct: 4.8 },
+        { stage: '소비자 보유', tx: 'RETAIL_SALE', volume: '812,904', share: '19.5%', pct: 19.5 }
+      ].map((p, i) => ({
+        stage: p.stage, tx: p.tx, volume: p.volume, share: p.share,
+        barStyle: 'height:100%;border-radius:99px;width:' + (p.pct / 44 * 100).toFixed(1) + '%;'
+          + 'background:' + (i === 5 ? '#a8d94a' : i === 0 ? '#d7ef6a' : '#c3e463') + ';'
+      })),
+      countriesLight: [
+        { country: '필리핀', state: '시행중', basis: '공화국법 11900 · DTI 관할 · 만 18세 연령확인', live: true },
+        { country: '카자흐스탄', state: '확인 필요', basis: '유통·연령인증 요건 미조사 — 진출 전 법률 검토', live: false },
+        { country: '파라과이', state: '확인 필요', basis: '유통·연령인증 요건 미조사 — 진출 전 법률 검토', live: false },
+        { country: '한국', state: '확인 필요', basis: '담배사업법 및 시행령상 요건 재확인 필요', live: false }
+      ].map(c => ({
+        country: c.country, state: c.state, basis: c.basis,
+        pillStyle: 'font-size:11px;padding:2px 9px;border-radius:99px;margin-left:auto;'
+          + (c.live ? 'background:#e6f6c4;color:#41631a;' : 'background:#eef1ec;color:#5f665d;')
+      })),
+      anchorLog: [
+        { time: '09-05 03:00', root: '0x9f3c…a41d', records: '18,204건' },
+        { time: '09-04 03:00', root: '0x71ab…0c62', records: '22,881건' },
+        { time: '09-03 03:00', root: '0x4d20…ff17', records: '19,455건' }
+      ],
+      countries: [
+        { country: '필리핀', state: '시행중', basis: '공화국법 11900 · DTI 관할 · 만 18세 연령확인' },
+        { country: '카자흐스탄', state: '확인 필요', basis: '유통·연령인증 요건 미조사 — 진출 전 법률 검토' },
+        { country: '파라과이', state: '확인 필요', basis: '유통·연령인증 요건 미조사 — 진출 전 법률 검토' },
+        { country: '한국', state: '확인 필요', basis: '담배사업법 및 시행령상 요건 재확인 필요' }
+      ],
+
+      batches: batchData.map((b, i) => ({
+        decl: b.decl, lot: b.lot, pre: b.pre, scanned: b.scanned, gap: b.gap, state: b.state,
+        style: 'cursor:pointer;background:' + (s.batch === i ? 'var(--color-accent-100)' : 'transparent') + ';',
+        pick: () => this.setState({ batch: i })
+      })),
+      batch: { decl: batch.decl },
+      batchRows: batch.rows,
+      batchGaps: batch.gaps.length ? batch.gaps : [{ uid: '—', reason: '미일치 건이 없습니다.' }],
+
+      reportCards: [
+        { en: 'TAX BASE CAPTURED', ko: '원장 기반 과세 근거 물량', value: '812,904', note: '소비자 등록이 완료되어 판매가 확정된 UID 수' },
+        { en: 'AGE VERIFICATION PASS', ko: '연령인증 통과율', value: '97.2%', note: 'RA 11900 방식(ID+Liveness) 기준 · 미통과 건은 판매 차단' },
+        { en: 'BLOCKED SALES', ko: '차단된 판매 시도', value: '1,284', note: '통관 미확인 · 미등록 UID로 시스템 차단된 건수' },
+        { en: 'VOUCHER USAGE', ko: '교환권 사용률', value: '11.4%', note: '발급 교환권 중 실제 교환으로 소진된 비율' }
+      ],
+
+      uid: {
+        code: 'LM-PH-2609-A00417-3F8C',
+        product: 'Series V · Graphite',
+        lot: 'PH-2609-A',
+        status: '정품 확인 / VERIFIED',
+        holder: '소비자 B 보유'
+      },
+
+      txRail: tx.map((t, i) => ({
+        type: t.type, date: t.date, to: t.to, flow: t.flow, place: t.place,
+        block: t.block, note: t.note, voucher: t.voucher,
+        nodeStyle: 'position:absolute;top:5px;left:-5px;width:11px;height:11px;'
+          + (i === last
+            ? 'background:var(--color-accent);border:1px solid var(--color-accent-700);'
+            : 'background:var(--color-bg);border:1px solid var(--color-accent-600);')
+      })),
+
+      sidePanels: [
+        { en: 'INTEGRITY', ko: '무결성 앵커', rows: [
+          { k: '원장', v: '그룹 허가형' },
+          { k: '앵커 체인', v: 'Public L2' },
+          { k: '최근 앵커', v: '09-05 03:00' },
+          { k: 'Merkle Root', v: '0x9f3c…a41d' },
+          { k: '검증', v: '제3자 가능' }
+        ] },
+        { en: 'AGE CREDENTIAL', ko: '연령인증 크리덴셜', rows: [
+          { k: '방식', v: 'GOV-ID + Liveness' },
+          { k: '근거', v: 'RA 11900' },
+          { k: '검증 시각', v: '07-19 14:01' },
+          { k: '원본 신분정보', v: '미보관' }
+        ] },
+        { en: 'GOV LOOKUP LOG', ko: '정부 조회 로그', rows: [
+          { k: 'BOC 통관', v: '06-30 조회' },
+          { k: 'BIR 과세', v: '07-20 조회' },
+          { k: 'DTI 단속', v: '09-04 조회' }
+        ] }
+      ],
+
+      appSteps: appScreens.map((a, i) => ({
+        num: '0' + (i + 1),
+        label: a.ko,
+        style: this.rowStyle(s.appStep === i, 'display:flex;align-items:center;gap:12px;'),
+        pick: () => this.setState({ appStep: i })
+      })),
+      appScreen: {
+        en: appScreen.en, ko: appScreen.ko, desc: appScreen.desc,
+        figureLabel: appScreen.figureLabel, figureValue: appScreen.figureValue, figureNote: appScreen.figureNote,
+        cta: appScreen.cta, warnText: appScreen.warnText
+      },
+      appRows: appScreen.rows,
+      appWarn: appScreen.warn,
+      appNext: () => this.setState({ appStep: (s.appStep + 1) % appScreens.length }),
+
+      queueRows: queueData.map((q, i) => ({
+        uid: q.uid, type: q.type, qty: q.qty, state: q.state,
+        style: 'cursor:pointer;background:' + (s.queue === i ? 'var(--color-accent-100)' : 'transparent') + ';',
+        pick: () => this.setState({ queue: i, committed: false })
+      })),
+      job: {
+        en: job.en, ko: job.ko, uid: job.uid,
+        cta: s.committed ? '기록 완료 / RECORDED' : job.cta,
+        note: s.committed ? '원장에 기록되었습니다. 다음 앵커링(03:00 UTC)에 포함됩니다.' : job.note
+      },
+      jobRows: job.rows,
+      jobCommit: () => this.setState({ committed: true }),
+
+      marketStats: [
+        { value: '$112.7M', ko: '2024년 필리핀 시장 규모', en: 'MARKET SIZE 2024' },
+        { value: '17.7%', ko: '연평균 성장률', en: 'CAGR' },
+        { value: '$488.6M', ko: '2033년 예상 규모', en: 'PROJECTED 2033' },
+        { value: '₱541억', ko: '연간 조세수입 손실 추정', en: 'TAX LEAKAGE' }
+      ],
+
+      txTypes: [
+        { code: 'MINT', num: '01', ko: '발급', detail: '생산 완료 시 LOT 단위로 개별 UID를 발급합니다.' },
+        { code: 'EXPORT_TRANSFER', num: '02', ko: '수출 이전', detail: '수출 시점에 소유권이 수입사로 이전되고 통관 데이터가 사전 연동됩니다.' },
+        { code: 'WHOLESALE_TRANSFER', num: '03', ko: '총판 배분', detail: '수입사에서 지역 총판으로의 배분을 기록합니다.' },
+        { code: 'RETAIL_SALE', num: '04', ko: '소매 판매', detail: '연령인증 완료를 조건으로 소비자에게 이전되고 교환권이 발급됩니다.' },
+        { code: 'EXCHANGE_TRANSFER', num: '05', ko: '교환', detail: '기존 교환권을 소진하고 신규 UID를 동일 소유자에게 귀속시킵니다.' },
+        { code: 'RESALE_TRANSFER', num: '06', ko: '중고 이전', detail: '개인 간 거래를 정식 지원하되 교환권은 재발급하지 않습니다.' }
+      ],
+
+      goConsole: () => this.setState({ surface: 'console' }),
+      goApp: () => this.setState({ surface: 'app' })
+    };
+  }
+}
+</script>
+</body>
+</html>
