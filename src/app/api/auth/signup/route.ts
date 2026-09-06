@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     });
 
     // 가입 직후 바로 앱을 쓸 수 있도록 세션을 발급한다.
-    await createSession(user.id);
+    const { token } = await createSession(user.id);
 
     const { raw } = await issueToken(user.id, "EMAIL_VERIFY");
     const link = `${appBaseUrl()}/verify-email?token=${encodeURIComponent(raw)}`;
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
       detail: { self: true },
     });
 
-    return NextResponse.json({ user }, { status: 201 });
+    return NextResponse.json({ user, token }, { status: 201 });
   } catch (err) {
     if (err instanceof AccountPolicyError) {
       return NextResponse.json({ error: err.message }, { status: 422 });

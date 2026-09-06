@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
     return invalid;
   }
 
-  await createSession(user.id);
+  const { token } = await createSession(user.id);
 
   // 정상 로그인으로 확인되었으므로 해당 계정의 실패 카운터를 비운다.
   await clearRateLimit(`login:email:${normalizedEmail}`);
@@ -113,5 +113,8 @@ export async function POST(req: NextRequest) {
       role: user.role,
       isDeveloper: isDeveloperEmail(user.email),
     },
+    // 쿠키를 쓰지 못하는 API 클라이언트(Flutter 등)를 위해 세션 토큰을 함께 반환한다.
+    // 웹은 httpOnly 쿠키로 이미 인증되므로 이 값을 사용하지 않는다.
+    token,
   });
 }
