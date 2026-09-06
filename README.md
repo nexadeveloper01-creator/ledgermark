@@ -29,7 +29,8 @@
 | 소비자 자가 가입 | 구현 완료 |
 | 메일 발송 연동 (이메일 인증 · 비밀번호 재설정) | 구현 완료 |
 | 개발자 모드 대시보드 (`/dev`) | 구현 완료 |
-| 소비자 앱 Flutter 버전 (`mobile/`) | 구현 완료 |
+| 소비자 앱 Flutter 버전 (`mobile/`) | 구현 완료 (QR 카메라 스캔 포함) |
+| 생산 단계 UID QR 라벨 생성·인쇄 | 구현 완료 |
 
 ## 실행 방법
 
@@ -468,6 +469,7 @@ npm run anchor:worker
 | `POST` | `/api/requests/[id]/commit` | 매장이 요청을 커밋 → 원장 기록 |
 | `POST` | `/api/requests/[id]/reject` | 요청 반려 |
 | `GET/POST` | `/api/lots` | LOT 목록 / LOT 생성 + UID 일괄 MINT |
+| `GET` | `/api/lots/[id]/uids` | LOT의 UID 코드 목록 (QR 라벨용) |
 | `GET` | `/api/uid/[code]` | UID 현재 상태 + 전체 유통 이력 |
 | `POST` | `/api/uid/[code]/transfer` | 소유권 이전 트랜잭션 실행 |
 | `GET` | `/api/console/kpis` | 콘솔 대시보드 집계 |

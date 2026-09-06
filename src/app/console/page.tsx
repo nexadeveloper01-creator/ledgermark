@@ -7,8 +7,9 @@ import { Corners } from "@/components/ui/Corners";
 import { Tag } from "@/components/ui/Tag";
 import { SessionBar, useSession } from "@/components/SessionBar";
 import { Accounts } from "@/components/console/Accounts";
+import { Production } from "@/components/console/Production";
 
-type Module = "dashboard" | "lookup" | "alerts" | "ledger" | "audit" | "accounts";
+type Module = "dashboard" | "lookup" | "alerts" | "ledger" | "audit" | "accounts" | "production";
 
 const MODULES: { key: Module; label: string }[] = [
   { key: "dashboard", label: "대시보드" },
@@ -19,6 +20,7 @@ const MODULES: { key: Module; label: string }[] = [
 ];
 
 const ADMIN_MODULES: { key: Module; label: string }[] = [
+  { key: "production", label: "생산·라벨" },
   { key: "accounts", label: "계정 관리" },
 ];
 
@@ -105,6 +107,9 @@ export default function ConsolePage() {
         {module === "audit" && <AuditLog />}
         {module === "accounts" && user.role === "ADMIN" && (
           <Accounts currentUserId={user.id} />
+        )}
+        {module === "production" && (
+          <Production canMint={user.role === "ADMIN"} />
         )}
       </div>
     </div>
