@@ -4,6 +4,8 @@ import { mintLot, transferUid } from "../src/lib/ledger/ledgerService";
 import { createRetailSaleRequest } from "../src/lib/requests/transferRequestService";
 
 const DEMO_PASSWORD = "ledgermark1234";
+// 시드 계정은 메일 인증을 거칠 수 없으므로 인증 완료 상태로 만든다.
+const VERIFIED_AT = new Date();
 
 async function main() {
   console.log("Seeding LEDGERMARK demo data...");
@@ -37,13 +39,24 @@ async function main() {
       {
         email: "admin@ledgermark.test",
         passwordHash,
+        emailVerifiedAt: VERIFIED_AT,
         displayName: "운영자",
+        role: "ADMIN",
+        organizationId: ledgerOperator.id,
+      },
+      {
+        // 개발자 모드 진입 계정. DEVELOPER_EMAILS에 이 이메일이 있어야 /dev로 진입한다.
+        email: "nexadeveloper01@gmail.com",
+        passwordHash,
+        emailVerifiedAt: VERIFIED_AT,
+        displayName: "개발자",
         role: "ADMIN",
         organizationId: ledgerOperator.id,
       },
       {
         email: "inspector@boc.test",
         passwordHash,
+        emailVerifiedAt: VERIFIED_AT,
         displayName: "심사관 R. Delgado",
         role: "GOV_INSPECTOR",
         organizationId: government.id,
@@ -51,6 +64,7 @@ async function main() {
       {
         email: "officer@pnp.test",
         passwordHash,
+        emailVerifiedAt: VERIFIED_AT,
         displayName: "단속관 J. Reyes",
         role: "FIELD_OFFICER",
         organizationId: police.id,
@@ -58,6 +72,7 @@ async function main() {
       {
         email: "staff@mm014.test",
         passwordHash,
+        emailVerifiedAt: VERIFIED_AT,
         displayName: "지점 담당 A. Cruz",
         role: "PARTNER_STAFF",
         organizationId: distributor.id,
@@ -87,6 +102,7 @@ async function main() {
       {
         email: "a@consumer.test",
         passwordHash,
+        emailVerifiedAt: VERIFIED_AT,
         displayName: "소비자 A",
         role: "CONSUMER",
         consumerId: consumerA.id,
@@ -94,6 +110,7 @@ async function main() {
       {
         email: "b@consumer.test",
         passwordHash,
+        emailVerifiedAt: VERIFIED_AT,
         displayName: "소비자 B",
         role: "CONSUMER",
         consumerId: consumerB.id,

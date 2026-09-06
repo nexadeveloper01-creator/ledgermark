@@ -26,6 +26,7 @@ const USER_SELECT = {
   displayName: true,
   role: true,
   isOrgManager: true,
+  emailVerifiedAt: true,
   disabledAt: true,
   createdAt: true,
   organization: { select: { id: true, name: true } },

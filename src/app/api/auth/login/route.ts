@@ -9,6 +9,7 @@ import {
   LOGIN_PER_EMAIL,
   LOGIN_PER_IP,
 } from "@/lib/security/rateLimit";
+import { isDeveloperEmail } from "@/lib/auth/developer";
 import { prisma } from "@/lib/prisma";
 
 function tooManyAttempts(retryAfterSec: number) {
@@ -98,6 +99,8 @@ export async function POST(req: NextRequest) {
       organizationName: null,
       consumerId: user.consumerId,
       isOrgManager: user.isOrgManager,
+      emailVerified: user.emailVerifiedAt !== null,
+      isDeveloper: isDeveloperEmail(user.email),
     },
     req,
   });
@@ -108,6 +111,7 @@ export async function POST(req: NextRequest) {
       email: user.email,
       displayName: user.displayName,
       role: user.role,
+      isDeveloper: isDeveloperEmail(user.email),
     },
   });
 }

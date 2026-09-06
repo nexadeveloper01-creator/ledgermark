@@ -24,6 +24,19 @@ export const SIGNUP_PER_IP: RateLimitConfig = {
   blockMs: 60 * 60 * 1000,
 };
 
+// 메일 발송을 유발하는 요청 — 남의 주소로 메일 폭탄을 보내지 못하게 제한한다.
+export const PASSWORD_RESET_PER_IP: RateLimitConfig = {
+  limit: 10,
+  windowMs: 60 * 60 * 1000,
+  blockMs: 60 * 60 * 1000,
+};
+
+export const VERIFY_RESEND_PER_USER: RateLimitConfig = {
+  limit: 5,
+  windowMs: 60 * 60 * 1000,
+  blockMs: 30 * 60 * 1000,
+};
+
 export const LOOKUP_PER_USER: RateLimitConfig = {
   limit: 20,
   windowMs: 10 * 60 * 1000,

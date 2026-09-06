@@ -42,7 +42,7 @@ function LoginForm() {
       return;
     }
 
-    router.replace(next || HOME_BY_ROLE[body.user.role] || "/");
+    router.replace(next || (body.user.isDeveloper ? "/dev" : HOME_BY_ROLE[body.user.role]) || "/");
     router.refresh();
   };
 
@@ -115,6 +115,9 @@ function LoginForm() {
         </Button>
 
         <div style={{ fontSize: 12, marginTop: 16, textAlign: "center" }}>
+          <Link href="/forgot-password">비밀번호를 잊으셨나요?</Link>
+        </div>
+        <div style={{ fontSize: 12, marginTop: 8, textAlign: "center" }}>
           소비자이신가요? <Link href="/signup">가입하기</Link>
         </div>
       </form>

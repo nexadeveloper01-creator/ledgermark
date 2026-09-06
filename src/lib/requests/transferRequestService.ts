@@ -8,7 +8,16 @@ export async function createRetailSaleRequest(args: {
   uidCode: string;
   consumerId: string;
   ageVerified: boolean;
+  /** 시드·관리자 경로처럼 계정이 없는 호출에서는 생략한다. */
+  requireVerifiedEmail?: boolean;
 }) {
+  if (args.requireVerifiedEmail) {
+    const account = await prisma.user.findUnique({ where: { consumerId: args.consumerId } });
+    if (account && !account.emailVerifiedAt) {
+      throw new LedgerError("이메일 인증을 완료한 뒤 정품 등록을 신청할 수 있습니다.");
+    }
+  }
+
   const uid = await prisma.uid.findUnique({ where: { code: args.uidCode } });
   if (!uid) throw new LedgerError(`UID를 찾을 수 없습니다: ${args.uidCode}`);
 

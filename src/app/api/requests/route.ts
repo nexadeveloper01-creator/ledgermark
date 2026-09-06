@@ -77,6 +77,7 @@ export async function POST(req: NextRequest) {
               uidCode: body.uidCode,
               consumerId: user.consumerId,
               ageVerified: body.ageVerified === true,
+              requireVerifiedEmail: true,
             })
           : await createExchangeRequest({
               uidCode: body.uidCode,

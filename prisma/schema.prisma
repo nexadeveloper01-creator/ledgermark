@@ -83,12 +83,16 @@ model User {
   // 이 플래그 부여는 운영자만 할 수 있다.
   isOrgManager Boolean @default(false)
 
+  // 이메일 소유 확인 시점. 미인증 계정은 정품 등록 신청을 할 수 없다.
+  emailVerifiedAt DateTime?
+
   // 감사 로그가 계정을 참조하므로 삭제하지 않고 비활성화한다.
   disabledAt DateTime?
 
   createdAt DateTime   @default(now())
   sessions  Session[]
   auditLogs AuditLog[]
+  tokens    VerificationToken[]
 }
 
 // 세션 토큰 원문은 저장하지 않고 해시만 보관한다 (DB 유출 시 세션 탈취 방지).
@@ -101,6 +105,26 @@ model Session {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+enum TokenType {
+  EMAIL_VERIFY
+  PASSWORD_RESET
+}
+
+// 메일로 보내는 일회용 토큰. 원문은 저장하지 않고 해시만 보관하며,
+// 사용 시각을 남겨 재사용을 막는다.
+model VerificationToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  type      TokenType
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, type])
 }
 
 enum AuditAction {
@@ -126,6 +150,10 @@ enum AuditAction {
   USER_PASSWORD_RESET
   USER_SESSIONS_REVOKED
   USER_SIGNUP
+  EMAIL_VERIFY_SENT
+  EMAIL_VERIFIED
+  PASSWORD_RESET_REQUESTED
+  PASSWORD_RESET_COMPLETED
 }
 
 // 감사 로그 — append-only. 수정·삭제 경로를 두지 않으며 열람은 감독기관·운영자로 제한한다.

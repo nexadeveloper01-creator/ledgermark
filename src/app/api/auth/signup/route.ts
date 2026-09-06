@@ -3,6 +3,9 @@ import { recordAudit } from "@/lib/audit/log";
 import { signupConsumer } from "@/lib/accounts/accountService";
 import { AccountPolicyError } from "@/lib/accounts/policy";
 import { createSession } from "@/lib/auth/session";
+import { issueToken } from "@/lib/accounts/tokens";
+import { appBaseUrl, getMailer } from "@/lib/mail";
+import { verificationEmail } from "@/lib/mail/templates";
 import { clientIp, consumeRateLimit, SIGNUP_PER_IP } from "@/lib/security/rateLimit";
 
 // 공개 엔드포인트. 요청 본문의 role·organizationId·isOrgManager는 읽지 않으며,
@@ -29,6 +32,20 @@ export async function POST(req: NextRequest) {
 
     // 가입 직후 바로 앱을 쓸 수 있도록 세션을 발급한다.
     await createSession(user.id);
+
+    const { raw } = await issueToken(user.id, "EMAIL_VERIFY");
+    const link = `${appBaseUrl()}/verify-email?token=${encodeURIComponent(raw)}`;
+    await getMailer().send(
+      verificationEmail({ to: user.email, displayName: user.displayName, link })
+    );
+
+    await recordAudit({
+      action: "EMAIL_VERIFY_SENT",
+      actorEmail: user.email,
+      req,
+      targetType: "User",
+      targetId: user.id,
+    });
 
     await recordAudit({
       action: "USER_SIGNUP",

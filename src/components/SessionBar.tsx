@@ -12,6 +12,8 @@ export interface SessionUser {
   organizationName: string | null;
   consumerId: string | null;
   isOrgManager: boolean;
+  emailVerified: boolean;
+  isDeveloper: boolean;
 }
 
 export const HOME_BY_ROLE: Record<SessionUser["role"], string> = {

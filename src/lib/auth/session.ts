@@ -2,6 +2,7 @@ import { createHash, randomBytes } from "crypto";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { SESSION_COOKIE } from "./cookie";
+import { isDeveloperEmail } from "./developer";
 
 export { SESSION_COOKIE };
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 관제 콘솔·단속 단말을 고려해 8시간으로 짧게 둔다
@@ -38,6 +39,8 @@ export interface SessionUser {
   organizationName: string | null;
   consumerId: string | null;
   isOrgManager: boolean;
+  emailVerified: boolean;
+  isDeveloper: boolean;
 }
 
 export async function getSessionUser(): Promise<SessionUser | null> {
@@ -72,6 +75,8 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     organizationName: user.organization?.name ?? null,
     consumerId: user.consumerId,
     isOrgManager: user.isOrgManager,
+    emailVerified: user.emailVerifiedAt !== null,
+    isDeveloper: isDeveloperEmail(user.email),
   };
 }
 

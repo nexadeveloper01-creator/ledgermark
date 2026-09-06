@@ -113,6 +113,8 @@ export default function ConsumerAppPage() {
           </div>
         </div>
 
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        {!user.emailVerified && <VerifyBanner />}
         <PhoneFrame>
           {step === "scan" && (
             <ScanStep
@@ -136,6 +138,7 @@ export default function ConsumerAppPage() {
           {step === "status" && <StatusStep consumerId={consumerId} requestId={requestId} />}
           {step === "my" && <MyProductsStep consumerId={consumerId} />}
         </PhoneFrame>
+        </div>
       </div>
     </div>
   );
@@ -564,5 +567,47 @@ function MyProductsStep({ consumerId }: { consumerId: string }) {
         </Button>
       </div>
     </>
+  );
+}
+
+function VerifyBanner() {
+  const [message, setMessage] = useState<string | null>(null);
+  const [sending, setSending] = useState(false);
+
+  return (
+    <div
+      className="blueprint"
+      style={{
+        width: 372,
+        padding: 14,
+        background: "var(--color-accent-100)",
+        borderColor: "var(--color-accent-400)",
+      }}
+    >
+      <Corners />
+      <div style={{ fontSize: 12, lineHeight: 1.55, color: "var(--color-accent-900)" }}>
+        이메일 인증이 완료되지 않았습니다. 메일의 링크를 열어 인증하면 정품 등록을 신청할 수
+        있습니다.
+      </div>
+      <Button
+        variant="secondary"
+        style={{ marginTop: 10, fontSize: 12 }}
+        disabled={sending}
+        onClick={async () => {
+          setSending(true);
+          const res = await fetch("/api/auth/resend-verification", { method: "POST" });
+          const body = await res.json();
+          setMessage(body.message ?? body.error);
+          setSending(false);
+        }}
+      >
+        인증 메일 다시 보내기
+      </Button>
+      {message && (
+        <div style={{ fontSize: 11, marginTop: 8 }} className="text-muted">
+          {message}
+        </div>
+      )}
+    </div>
   );
 }

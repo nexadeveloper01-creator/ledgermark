@@ -12,6 +12,8 @@ function user(overrides: Partial<SessionUser>): SessionUser {
     organizationName: "매장 1",
     consumerId: null,
     isOrgManager: false,
+    emailVerified: true,
+    isDeveloper: false,
     ...overrides,
   };
 }
