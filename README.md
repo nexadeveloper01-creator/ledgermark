@@ -128,6 +128,11 @@ flutter run -d chrome --web-port 8080          # 웹으로 확인
 # 또는 실기기/에뮬레이터: flutter run
 ```
 
+스캔 탭은 카메라로 QR/UID를 읽거나(mobile_scanner) 코드를 직접 입력할 수 있습니다.
+카메라 권한은 Android(CAMERA)·iOS(NSCameraUsageDescription)에 선언돼 있고, 권한 거부·
+미지원·카메라 없음일 때는 안내 후 수동 입력으로 폴백합니다. 웹에서는 localhost/HTTPS에서만
+카메라가 동작합니다.
+
 API 주소가 다르면 주입합니다(예: 실기기에서 PC를 가리킬 때):
 
 ```bash
@@ -141,7 +146,8 @@ flutter run --dart-define=API_BASE=http://192.168.0.10:3000
 mobile/lib/api.dart              REST 클라이언트 (Bearer 토큰, shared_preferences 저장)
 mobile/lib/theme.dart            Industry 디자인 토큰 + Blueprint 위젯
 mobile/lib/main.dart             AuthGate — 토큰 복원·역할 확인
-mobile/lib/screens/              로그인 / 홈(4탭) / 스캔·상태·제품
+mobile/lib/screens/              로그인 / 홈(4탭) / 스캔·상태·제품 + QR 스캐너
+                                 (qr_scanner.dart — mobile_scanner, 카메라 권한 포함)
 ```
 
 ## 아키텍처

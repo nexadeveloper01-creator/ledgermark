@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../api.dart';
 import '../theme.dart';
 import 'widgets.dart';
+import 'qr_scanner.dart';
 
 // UID 스캔 → 연령인증 → 정품 등록 신청까지 한 탭에서 진행한다.
 class ScanTab extends StatefulWidget {
@@ -42,7 +43,17 @@ class _ScanTabState extends State<ScanTab> {
     super.dispose();
   }
 
+  Future<void> _openCamera() async {
+    final code = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const QrScannerScreen(), fullscreenDialog: true),
+    );
+    if (code == null || code.trim().isEmpty) return;
+    _code.text = code.trim();
+    await _scan();
+  }
+
   Future<void> _scan() async {
+    if (_code.text.trim().isEmpty) return;
     setState(() {
       _busy = true;
       _error = null;
@@ -130,7 +141,13 @@ class _ScanTabState extends State<ScanTab> {
           onSubmitted: (_) => _scan(),
         ),
         const SizedBox(height: 12),
-        OutlinedButton(onPressed: _busy ? null : _scan, child: const Text('조회 / SCAN')),
+        ElevatedButton.icon(
+          onPressed: _busy ? null : _openCamera,
+          icon: const Icon(Icons.qr_code_scanner, size: 18),
+          label: const Text('카메라로 스캔 / SCAN QR'),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton(onPressed: _busy ? null : _scan, child: const Text('코드로 조회 / LOOKUP')),
         if (_error != null) ...[const SizedBox(height: 16), Warn(_error!)],
         if (uid != null) ...[
           const SizedBox(height: 20),
