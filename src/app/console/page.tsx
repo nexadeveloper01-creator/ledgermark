@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Corners } from "@/components/ui/Corners";
 import { Tag } from "@/components/ui/Tag";
+import { SessionBar, useSession } from "@/components/SessionBar";
 
 type Module = "dashboard" | "lookup" | "alerts" | "ledger";
 
@@ -33,7 +34,16 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 export default function ConsolePage() {
+  const { user, loading } = useSession(["GOV_INSPECTOR", "ADMIN"]);
   const [module, setModule] = useState<Module>("dashboard");
+
+  if (loading || !user) {
+    return (
+      <p className="text-muted" style={{ padding: 32 }}>
+        불러오는 중...
+      </p>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh" }}>
@@ -73,22 +83,25 @@ export default function ConsolePage() {
             </label>
           ))}
         </div>
-        <Link href="/" style={{ marginLeft: "auto", fontSize: 13 }}>
-          랜딩 페이지
-        </Link>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+          <SessionBar user={user} />
+          <Link href="/" style={{ fontSize: 13 }}>
+            랜딩 페이지
+          </Link>
+        </div>
       </div>
 
       <div style={{ padding: "28px 32px 40px" }}>
-        {module === "dashboard" && <Dashboard />}
+        {module === "dashboard" && <Dashboard canAnchor={user.role === "ADMIN"} />}
         {module === "lookup" && <UidLookup />}
         {module === "alerts" && <Alerts />}
-        {module === "ledger" && <LedgerStatus />}
+        {module === "ledger" && <LedgerStatus canAnchor={user.role === "ADMIN"} />}
       </div>
     </div>
   );
 }
 
-function Dashboard() {
+function Dashboard({ canAnchor }: { canAnchor: boolean }) {
   const [kpis, setKpis] = useState<Kpis | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -134,17 +147,19 @@ function Dashboard() {
         </div>
       </div>
 
-      <div>
-        <Button
-          variant="primary"
-          onClick={async () => {
-            await fetch("/api/ledger/anchor", { method: "POST" });
-            load();
-          }}
-        >
-          앵커링 실행 / RUN ANCHOR CYCLE
-        </Button>
-      </div>
+      {canAnchor && (
+        <div>
+          <Button
+            variant="primary"
+            onClick={async () => {
+              await fetch("/api/ledger/anchor", { method: "POST" });
+              load();
+            }}
+          >
+            앵커링 실행 / RUN ANCHOR CYCLE
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
@@ -368,7 +383,7 @@ function Alerts() {
   );
 }
 
-function LedgerStatus() {
+function LedgerStatus({ canAnchor }: { canAnchor: boolean }) {
   const [verify, setVerify] = useState<any>(null);
   const [anchors, setAnchors] = useState<any[]>([]);
 
@@ -402,15 +417,17 @@ function LedgerStatus() {
       <div>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
           <h3 style={{ fontSize: 18, margin: 0 }}>퍼블릭 앵커링 이력</h3>
-          <Button
-            variant="secondary"
-            onClick={async () => {
-              await fetch("/api/ledger/anchor", { method: "POST" });
-              load();
-            }}
-          >
-            앵커링 실행
-          </Button>
+          {canAnchor && (
+            <Button
+              variant="secondary"
+              onClick={async () => {
+                await fetch("/api/ledger/anchor", { method: "POST" });
+                load();
+              }}
+            >
+              앵커링 실행
+            </Button>
+          )}
         </div>
         <table className="table">
           <thead>

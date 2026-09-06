@@ -1,6 +1,9 @@
 import { prisma } from "../src/lib/prisma";
+import { hashPassword } from "../src/lib/auth/password";
 import { mintLot, transferUid } from "../src/lib/ledger/ledgerService";
 import { createRetailSaleRequest } from "../src/lib/requests/transferRequestService";
+
+const DEMO_PASSWORD = "ledgermark1234";
 
 async function main() {
   console.log("Seeding LEDGERMARK demo data...");
@@ -17,8 +20,49 @@ async function main() {
   const retailer = await prisma.organization.create({
     data: { name: "마카티 지점 MM-014", type: "RETAILER", country: "PH" },
   });
-  await prisma.organization.create({
+  const government = await prisma.organization.create({
     data: { name: "필리핀 관세청 (BOC)", type: "GOVERNMENT", country: "PH" },
+  });
+  const police = await prisma.organization.create({
+    data: { name: "PNP 단속반", type: "GOVERNMENT", country: "PH" },
+  });
+  const ledgerOperator = await prisma.organization.create({
+    data: { name: "그룹 원장 운영", type: "LEDGER_OPERATOR", country: "KR" },
+  });
+
+  const passwordHash = await hashPassword(DEMO_PASSWORD);
+
+  await prisma.user.createMany({
+    data: [
+      {
+        email: "admin@ledgermark.test",
+        passwordHash,
+        displayName: "운영자",
+        role: "ADMIN",
+        organizationId: ledgerOperator.id,
+      },
+      {
+        email: "inspector@boc.test",
+        passwordHash,
+        displayName: "심사관 R. Delgado",
+        role: "GOV_INSPECTOR",
+        organizationId: government.id,
+      },
+      {
+        email: "officer@pnp.test",
+        passwordHash,
+        displayName: "단속관 J. Reyes",
+        role: "FIELD_OFFICER",
+        organizationId: police.id,
+      },
+      {
+        email: "staff@mm014.test",
+        passwordHash,
+        displayName: "지점 담당 A. Cruz",
+        role: "PARTNER_STAFF",
+        organizationId: distributor.id,
+      },
+    ],
   });
 
   const { lot, uidCodes } = await mintLot({
@@ -34,6 +78,25 @@ async function main() {
   });
   const consumerB = await prisma.consumer.create({
     data: { displayName: "소비자 B", country: "PH" },
+  });
+
+  await prisma.user.createMany({
+    data: [
+      {
+        email: "a@consumer.test",
+        passwordHash,
+        displayName: "소비자 A",
+        role: "CONSUMER",
+        consumerId: consumerA.id,
+      },
+      {
+        email: "b@consumer.test",
+        passwordHash,
+        displayName: "소비자 B",
+        role: "CONSUMER",
+        consumerId: consumerB.id,
+      },
+    ],
   });
 
   // 대부분의 UID: 수출 -> 총판 배분까지만 진행 (파이프라인 중간 단계 시연)

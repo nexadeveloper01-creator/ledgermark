@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Corners } from "@/components/ui/Corners";
 import { PhoneFigure, PhoneFrame, PhoneRow, PhoneWarn } from "@/components/PhoneFrame";
+import { SessionBar, useSession } from "@/components/SessionBar";
 
 type Step = "scan" | "verify" | "status" | "my";
 
@@ -15,28 +16,22 @@ const STEPS: { key: Step; num: string; label: string }[] = [
   { key: "my", num: "04", label: "내 제품 · 교환 · 중고거래" },
 ];
 
-interface Consumer {
-  id: string;
-  displayName: string;
-  country: string;
-}
-
 export default function ConsumerAppPage() {
-  const [consumers, setConsumers] = useState<Consumer[]>([]);
-  const [consumerId, setConsumerId] = useState<string>("");
+  const { user, loading } = useSession(["CONSUMER"]);
   const [step, setStep] = useState<Step>("scan");
   const [scanned, setScanned] = useState<any>(null);
   const [verified, setVerified] = useState<boolean | null>(null);
   const [requestId, setRequestId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetch("/api/consumers")
-      .then((r) => r.json())
-      .then((body) => {
-        setConsumers(body.consumers ?? []);
-        if (body.consumers?.[0]) setConsumerId(body.consumers[0].id);
-      });
-  }, []);
+  const consumerId = user?.consumerId ?? "";
+
+  if (loading || !user) {
+    return (
+      <p className="text-muted" style={{ padding: 32 }}>
+        불러오는 중...
+      </p>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh" }}>
@@ -59,27 +54,7 @@ export default function ConsumerAppPage() {
           CONSUMER APP
         </span>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ fontSize: 11 }} className="text-muted">
-            데모 계정
-          </span>
-          <select
-            className="input"
-            style={{ width: "auto", minWidth: 140 }}
-            value={consumerId}
-            onChange={(e) => {
-              setConsumerId(e.target.value);
-              setScanned(null);
-              setVerified(null);
-              setRequestId(null);
-              setStep("scan");
-            }}
-          >
-            {consumers.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.displayName}
-              </option>
-            ))}
-          </select>
+          <SessionBar user={user} />
           <Link href="/" style={{ fontSize: 13 }}>
             랜딩
           </Link>
@@ -159,7 +134,7 @@ export default function ConsumerAppPage() {
             />
           )}
           {step === "status" && <StatusStep consumerId={consumerId} requestId={requestId} />}
-          {step === "my" && <MyProductsStep consumerId={consumerId} consumers={consumers} />}
+          {step === "my" && <MyProductsStep consumerId={consumerId} />}
         </PhoneFrame>
       </div>
     </div>
@@ -455,11 +430,11 @@ function StatusStep({ consumerId, requestId }: { consumerId: string; requestId: 
   );
 }
 
-function MyProductsStep({ consumerId, consumers }: { consumerId: string; consumers: Consumer[] }) {
+function MyProductsStep({ consumerId }: { consumerId: string }) {
   const [uids, setUids] = useState<any[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [targetConsumer, setTargetConsumer] = useState<string>("");
+  const [targetEmail, setTargetEmail] = useState("");
 
   const load = useCallback(async () => {
     const res = await fetch(`/api/consumers/${consumerId}/uids`);
@@ -469,9 +444,7 @@ function MyProductsStep({ consumerId, consumers }: { consumerId: string; consume
 
   useEffect(() => {
     load();
-    const other = consumers.find((c) => c.id !== consumerId);
-    if (other) setTargetConsumer(other.id);
-  }, [load, consumers, consumerId]);
+  }, [load]);
 
   const requestExchange = async (code: string) => {
     setError(null);
@@ -492,13 +465,31 @@ function MyProductsStep({ consumerId, consumers }: { consumerId: string; consume
   const resell = async (code: string) => {
     setError(null);
     setMessage(null);
+
+    if (!targetEmail.trim()) {
+      setError("양수인 이메일을 입력해주세요.");
+      return;
+    }
+
+    // 명부를 노출하지 않기 위해 이메일 단건 조회로 양수인을 확인한다.
+    const lookup = await fetch("/api/consumers/lookup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: targetEmail.trim() }),
+    });
+    const lookupBody = await lookup.json();
+    if (!lookup.ok) {
+      setError(lookupBody.error);
+      return;
+    }
+
     const res = await fetch(`/api/uid/${encodeURIComponent(code)}/transfer`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         txType: "RESALE_TRANSFER",
         from: { type: "CONSUMER", consumerId },
-        to: { type: "CONSUMER", consumerId: targetConsumer },
+        to: { type: "CONSUMER", consumerId: lookupBody.consumer.id },
       }),
     });
     const body = await res.json();
@@ -506,7 +497,9 @@ function MyProductsStep({ consumerId, consumers }: { consumerId: string; consume
       setError(body.error);
       return;
     }
-    setMessage("중고거래가 원장에 기록되었습니다. 교환권은 재발급되지 않습니다.");
+    setMessage(
+      `${lookupBody.consumer.displayName}님에게 양도되었습니다. 교환권은 재발급되지 않습니다.`
+    );
     load();
   };
 
@@ -542,7 +535,6 @@ function MyProductsStep({ consumerId, consumers }: { consumerId: string; consume
               <Button
                 variant="secondary"
                 style={{ flex: 1, fontSize: 12 }}
-                disabled={!targetConsumer}
                 onClick={() => resell(u.code)}
               >
                 중고거래 등록
@@ -557,20 +549,14 @@ function MyProductsStep({ consumerId, consumers }: { consumerId: string; consume
         {message && <PhoneWarn>{message}</PhoneWarn>}
         {uids.length > 0 && (
           <div className="field" style={{ marginBottom: 12 }}>
-            <label>중고거래 양수인</label>
-            <select
+            <label>중고거래 양수인 이메일</label>
+            <input
               className="input"
-              value={targetConsumer}
-              onChange={(e) => setTargetConsumer(e.target.value)}
-            >
-              {consumers
-                .filter((c) => c.id !== consumerId)
-                .map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.displayName}
-                  </option>
-                ))}
-            </select>
+              type="email"
+              placeholder="buyer@example.com"
+              value={targetEmail}
+              onChange={(e) => setTargetEmail(e.target.value)}
+            />
           </div>
         )}
         <Button variant="secondary" block onClick={load}>

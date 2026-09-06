@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Corners } from "@/components/ui/Corners";
+import { SessionBar, useSession } from "@/components/SessionBar";
 
 const TYPE_LABEL: Record<string, { en: string; ko: string; cta: string; note: string }> = {
   RETAIL_SALE: {
@@ -34,6 +35,7 @@ const STATE_LABEL: Record<string, string> = {
 };
 
 export default function PartnerPage() {
+  const { user, loading } = useSession(["PARTNER_STAFF", "ADMIN"]);
   const [requests, setRequests] = useState<any[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -52,6 +54,14 @@ export default function PartnerPage() {
   }, [load]);
 
   const selected = requests.find((r) => r.id === selectedId) ?? null;
+
+  if (loading || !user) {
+    return (
+      <p className="text-muted" style={{ padding: 32 }}>
+        불러오는 중...
+      </p>
+    );
+  }
 
   const commit = async () => {
     if (!selected) return;
@@ -96,12 +106,12 @@ export default function PartnerPage() {
         >
           DISTRIBUTOR · RETAIL
         </span>
-        <span style={{ marginLeft: "auto", fontSize: 12 }} className="text-muted">
-          메트로마닐라 총판 · 지점 MM-014
-        </span>
-        <Link href="/" style={{ fontSize: 13, marginLeft: 18 }}>
-          랜딩
-        </Link>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+          <SessionBar user={user} />
+          <Link href="/" style={{ fontSize: 13 }}>
+            랜딩
+          </Link>
+        </div>
       </div>
 
       <div

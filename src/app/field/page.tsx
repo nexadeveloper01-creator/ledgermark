@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Corners } from "@/components/ui/Corners";
+import { SessionBar, useSession } from "@/components/SessionBar";
 
 interface Inspection {
   id: string;
@@ -28,10 +29,9 @@ interface Inspection {
   createdAt: string;
 }
 
-const OFFICER = "PNP 단속관 J. Reyes";
-const LOCATION = "마카티 지점 MM-014";
-
 export default function FieldPage() {
+  const { user, loading: sessionLoading } = useSession(["FIELD_OFFICER", "ADMIN"]);
+  const [location, setLocation] = useState("마카티 지점 MM-014");
   const [code, setCode] = useState("");
   const [inspection, setInspection] = useState<Inspection | null>(null);
   const [reportNumber, setReportNumber] = useState<string | null>(null);
@@ -46,10 +46,11 @@ export default function FieldPage() {
     setReportNumber(null);
     setEscalated(false);
 
+    // 담당관 이름은 서버가 세션에서 채운다 — 조서의 법적 근거이므로 클라이언트가 지정하지 않는다.
     const res = await fetch("/api/field/inspect", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ uidCode: code.trim(), officerName: OFFICER, location: LOCATION }),
+      body: JSON.stringify({ uidCode: code.trim(), location }),
     });
     const body = await res.json();
     setLoading(false);
@@ -88,6 +89,14 @@ export default function FieldPage() {
 
   const isAlert = inspection && inspection.verdict.verdict !== "VERIFIED";
 
+  if (sessionLoading || !user) {
+    return (
+      <p className="text-muted" style={{ padding: 32 }}>
+        불러오는 중...
+      </p>
+    );
+  }
+
   return (
     <div style={{ minHeight: "100vh" }}>
       <div
@@ -108,12 +117,12 @@ export default function FieldPage() {
         >
           FIELD ENFORCEMENT
         </span>
-        <span style={{ marginLeft: "auto", fontSize: 12 }} className="text-muted">
-          {OFFICER} · {LOCATION}
-        </span>
-        <Link href="/" style={{ fontSize: 13, marginLeft: 18 }}>
-          랜딩
-        </Link>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+          <SessionBar user={user} />
+          <Link href="/" style={{ fontSize: 13 }}>
+            랜딩
+          </Link>
+        </div>
       </div>
 
       <div
@@ -136,6 +145,10 @@ export default function FieldPage() {
             콘솔과 달리 단일 제품 판정과 조서 작성에만 집중합니다.
           </p>
 
+          <div className="field" style={{ marginBottom: 10 }}>
+            <label>단속 장소</label>
+            <input className="input" value={location} onChange={(e) => setLocation(e.target.value)} />
+          </div>
           <div className="field" style={{ marginBottom: 12 }}>
             <label>UID 코드</label>
             <input

@@ -1,18 +1,23 @@
 import { createHash } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { assertIsSelf, authErrorResponse, requireUser } from "@/lib/auth/guards";
 import { getAgeVerificationProvider } from "@/lib/avp/router";
 import { UnsupportedCountryError } from "@/lib/avp/types";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const body = await req.json();
-  const { country, input } = body ?? {};
-
-  if (!country || !input) {
-    return NextResponse.json({ error: "country, input은 필수입니다." }, { status: 400 });
-  }
-
   try {
+    // 연령인증은 본인만 수행할 수 있다 — 타인 명의 인증을 원천 차단한다.
+    const user = await requireUser();
+    assertIsSelf(user, params.id);
+
+    const body = await req.json();
+    const { country, input } = body ?? {};
+
+    if (!country || !input) {
+      return NextResponse.json({ error: "country, input은 필수입니다." }, { status: 400 });
+    }
+
     const provider = getAgeVerificationProvider(country);
     const result = await provider.verify(input);
 
@@ -32,6 +37,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     return NextResponse.json({ verification: record, reasons: result.reasons });
   } catch (err) {
+    const authResponse = authErrorResponse(err);
+    if (authResponse) return authResponse;
     if (err instanceof UnsupportedCountryError) {
       return NextResponse.json({ error: err.message }, { status: 422 });
     }

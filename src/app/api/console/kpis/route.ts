@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { authErrorResponse, requireRole } from "@/lib/auth/guards";
 import { verifyLedgerIntegrity } from "@/lib/ledger/ledgerService";
 import { prisma } from "@/lib/prisma";
 
@@ -6,19 +7,27 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const [statusCounts, totalUids, openAlerts, lastAnchor, ledgerIntegrity] = await Promise.all([
-    prisma.uid.groupBy({ by: ["status"], _count: { _all: true } }),
-    prisma.uid.count(),
-    prisma.smuggleAlert.count({ where: { status: "OPEN" } }),
-    prisma.anchor.findFirst({ orderBy: { toSequence: "desc" } }),
-    verifyLedgerIntegrity(),
-  ]);
+  try {
+    await requireRole("GOV_INSPECTOR", "ADMIN");
 
-  return NextResponse.json({
-    totalUids,
-    byStatus: Object.fromEntries(statusCounts.map((row) => [row.status, row._count._all])),
-    openAlerts,
-    lastAnchor,
-    ledgerIntegrity,
-  });
+    const [statusCounts, totalUids, openAlerts, lastAnchor, ledgerIntegrity] = await Promise.all([
+      prisma.uid.groupBy({ by: ["status"], _count: { _all: true } }),
+      prisma.uid.count(),
+      prisma.smuggleAlert.count({ where: { status: "OPEN" } }),
+      prisma.anchor.findFirst({ orderBy: { toSequence: "desc" } }),
+      verifyLedgerIntegrity(),
+    ]);
+
+    return NextResponse.json({
+      totalUids,
+      byStatus: Object.fromEntries(statusCounts.map((row) => [row.status, row._count._all])),
+      openAlerts,
+      lastAnchor,
+      ledgerIntegrity,
+    });
+  } catch (err) {
+    const authResponse = authErrorResponse(err);
+    if (authResponse) return authResponse;
+    throw err;
+  }
 }

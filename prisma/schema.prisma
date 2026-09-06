@@ -55,6 +55,45 @@ enum AlertStatus {
   RESOLVED
 }
 
+enum UserRole {
+  ADMIN // 플랫폼 운영자 — LOT 발급, 원장 운영
+  GOV_INSPECTOR // 관세청·DTI 심사관 — 관제 콘솔
+  FIELD_OFFICER // 경찰·단속관 — 현장 단말
+  PARTNER_STAFF // 매장·총판 직원 — 소유권 이전 커밋
+  CONSUMER // 소비자 — 앱
+}
+
+// 기관 직원과 소비자를 하나의 계정 테이블로 다루되, 소속으로 구분한다.
+// 직원 계정은 organizationId를, 소비자 계정은 consumerId를 갖는다.
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  displayName  String
+  role         UserRole
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  consumerId String?   @unique
+  consumer   Consumer? @relation(fields: [consumerId], references: [id])
+
+  createdAt DateTime  @default(now())
+  sessions  Session[]
+}
+
+// 세션 토큰 원문은 저장하지 않고 해시만 보관한다 (DB 유출 시 세션 탈취 방지).
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
 enum RequestType {
   RETAIL_SALE
   EXCHANGE_TRANSFER
@@ -81,6 +120,7 @@ model Organization {
   ledgerTxAsTo     LedgerTransaction[] @relation("ToOrg")
   requestsAsFrom   TransferRequest[]   @relation("RequestFromOrg")
   requestsAsTo     TransferRequest[]   @relation("RequestToOrg")
+  users            User[]
 }
 
 model Consumer {
@@ -94,6 +134,7 @@ model Consumer {
   ledgerTxAsFrom   LedgerTransaction[] @relation("FromConsumer")
   ledgerTxAsTo     LedgerTransaction[] @relation("ToConsumer")
   transferRequests TransferRequest[]
+  user             User?
 }
 
 // 연령인증 — 원본 신분정보는 저장하지 않고 "검증 결과 크리덴셜"만 기록한다 (기획서 3.3)
