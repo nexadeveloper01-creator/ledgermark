@@ -22,7 +22,10 @@ export async function GET() {
       totalUids,
       byStatus: Object.fromEntries(statusCounts.map((row) => [row.status, row._count._all])),
       openAlerts,
-      lastAnchor,
+      // blockNumber는 BigInt라 그대로는 직렬화되지 않는다.
+      lastAnchor: lastAnchor
+        ? { ...lastAnchor, blockNumber: lastAnchor.blockNumber?.toString() ?? null }
+        : null,
       ledgerIntegrity,
     });
   } catch (err) {

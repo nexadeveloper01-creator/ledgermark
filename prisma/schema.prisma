@@ -276,15 +276,31 @@ model LedgerTransaction {
   @@index([uidId])
 }
 
-// 주기적 Merkle 앵커링 — publicAnchorRef는 향후 퍼블릭 L2 연동 단계에서 채워질 자리(스텁)
+enum AnchorStatus {
+  PENDING // 로컬 Merkle 루트 계산 완료, 퍼블릭 체인 미게시
+  PUBLISHED // 퍼블릭 체인 트랜잭션 확정
+  FAILED // 게시 시도 실패 — 재시도 가능
+}
+
+// 주기적 Merkle 앵커링. 퍼블릭 체인 게시 실패가 원장 기록을 막아서는 안 되므로
+// 루트 계산·저장과 체인 게시를 분리하고, 게시 상태를 별도로 추적한다.
 model Anchor {
-  id              String   @id @default(cuid())
-  fromSequence    Int
-  toSequence      Int
-  txCount         Int
-  merkleRoot      String
-  publicAnchorRef String?
-  createdAt       DateTime @default(now())
+  id           String @id @default(cuid())
+  fromSequence Int
+  toSequence   Int
+  txCount      Int
+  merkleRoot   String
+
+  status          AnchorStatus @default(PENDING)
+  publicAnchorRef String? // 퍼블릭 체인 트랜잭션 해시
+  chainId         Int?
+  blockNumber     BigInt?
+  publishedAt     DateTime?
+  lastError       String?
+
+  createdAt DateTime @default(now())
+
+  @@index([status])
 }
 
 // 소유권 이전 대기 큐 — 소비자 앱이 스캔·연령인증으로 요청을 올리면,

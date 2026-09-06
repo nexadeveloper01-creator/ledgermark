@@ -1,5 +1,6 @@
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { publishAnchor } from "@/lib/anchor/publisher";
 import { computeEntryHash, verifyChain, GENESIS_HASH, type ChainLink } from "./hashChain";
 import { buildMerkleRoot } from "./merkle";
 import {
@@ -273,14 +274,38 @@ export async function runAnchorCycle() {
   const merkleRoot = buildMerkleRoot(pending.map((p) => p.hash));
   const toSequence = pending[pending.length - 1]!.sequence;
 
-  return prisma.anchor.create({
-    data: {
-      fromSequence,
-      toSequence,
-      txCount: pending.length,
-      merkleRoot,
-      // publicAnchorRef: 향후 퍼블릭 L2 연동 단계에서 채워질 스텁(기획서 3.2)
-      publicAnchorRef: null,
-    },
+  // 루트 계산·저장을 먼저 확정한다. 체인 게시가 실패해도 원장 앵커 기록 자체는 남아야 한다.
+  const anchor = await prisma.anchor.create({
+    data: { fromSequence, toSequence, txCount: pending.length, merkleRoot },
   });
+
+  return publishAnchorRecord(anchor.id);
+}
+
+// 앵커의 퍼블릭 체인 게시를 시도한다. 실패는 FAILED로 기록되어 나중에 재시도할 수 있다.
+export async function publishAnchorRecord(anchorId: string) {
+  const anchor = await prisma.anchor.findUnique({ where: { id: anchorId } });
+  if (!anchor) throw new LedgerError("앵커를 찾을 수 없습니다.");
+  if (anchor.status === "PUBLISHED") return anchor;
+
+  try {
+    const result = await publishAnchor(anchor.merkleRoot);
+    return await prisma.anchor.update({
+      where: { id: anchor.id },
+      data: {
+        status: "PUBLISHED",
+        publicAnchorRef: result.txHash,
+        chainId: result.chainId,
+        blockNumber: result.blockNumber,
+        publishedAt: new Date(),
+        lastError: null,
+      },
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return prisma.anchor.update({
+      where: { id: anchor.id },
+      data: { status: "FAILED", lastError: message.slice(0, 500) },
+    });
+  }
 }

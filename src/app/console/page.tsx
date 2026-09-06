@@ -385,9 +385,23 @@ function Alerts() {
   );
 }
 
+const ANCHOR_STATUS_LABEL: Record<string, string> = {
+  PENDING: "게시 대기",
+  PUBLISHED: "게시 완료",
+  FAILED: "게시 실패",
+};
+
+const ANCHOR_MODE_NOTE: Record<string, string> = {
+  simulated: "시뮬레이션 모드 — 앵커가 퍼블릭 체인에 실제로 게시되지 않습니다. 데모용입니다.",
+  chain: "체인 모드 — 앵커가 퍼블릭 체인에 실제로 게시됩니다.",
+  disabled: "앵커 게시가 비활성화되어 있습니다. 로컬 Merkle 루트만 계산합니다.",
+};
+
 function LedgerStatus({ canAnchor }: { canAnchor: boolean }) {
   const [verify, setVerify] = useState<any>(null);
   const [anchors, setAnchors] = useState<any[]>([]);
+  const [mode, setMode] = useState<string>("simulated");
+  const [checked, setChecked] = useState<Record<string, any>>({});
 
   const load = useCallback(async () => {
     const [v, a] = await Promise.all([
@@ -396,7 +410,14 @@ function LedgerStatus({ canAnchor }: { canAnchor: boolean }) {
     ]);
     setVerify(v);
     setAnchors(a.anchors ?? []);
+    setMode(a.mode ?? "simulated");
   }, []);
+
+  const verifyAnchor = async (id: string) => {
+    const res = await fetch(`/api/ledger/anchor/${id}/verify`);
+    const body = await res.json();
+    setChecked((prev) => ({ ...prev, [id]: res.ok ? body.verification : { message: body.error } }));
+  };
 
   useEffect(() => {
     load();
@@ -431,31 +452,79 @@ function LedgerStatus({ canAnchor }: { canAnchor: boolean }) {
             </Button>
           )}
         </div>
+        <p style={{ fontSize: 12, marginBottom: 12 }} className="text-muted">
+          {ANCHOR_MODE_NOTE[mode] ?? mode}
+        </p>
+
         <table className="table">
           <thead>
             <tr>
               <th>구간</th>
               <th>건수</th>
               <th>Merkle Root</th>
-              <th>생성 시각</th>
+              <th>게시 상태</th>
+              <th>트랜잭션</th>
+              <th>검증</th>
             </tr>
           </thead>
           <tbody>
             {anchors.map((a) => (
               <tr key={a.id}>
-                <td>
+                <td style={{ whiteSpace: "nowrap" }}>
                   #{a.fromSequence} – #{a.toSequence}
                 </td>
                 <td>{a.txCount}</td>
                 <td style={{ fontFamily: "ui-monospace, Menlo, monospace", fontSize: 11 }}>
-                  {a.merkleRoot.slice(0, 20)}…
+                  {a.merkleRoot.slice(0, 16)}…
                 </td>
-                <td>{new Date(a.createdAt).toLocaleString("ko-KR")}</td>
+                <td style={{ whiteSpace: "nowrap" }}>
+                  <Tag variant={a.status === "PUBLISHED" ? "accent" : "neutral"}>
+                    {ANCHOR_STATUS_LABEL[a.status] ?? a.status}
+                  </Tag>
+                  {a.chainId === 0 && (
+                    <span className="text-muted" style={{ marginLeft: 6, fontSize: 10 }}>
+                      시뮬레이션
+                    </span>
+                  )}
+                </td>
+                <td style={{ fontFamily: "ui-monospace, Menlo, monospace", fontSize: 11 }}>
+                  {a.publicAnchorRef ? (
+                    a.explorerUrl ? (
+                      <a href={a.explorerUrl} target="_blank" rel="noreferrer">
+                        {a.publicAnchorRef.slice(0, 14)}…
+                      </a>
+                    ) : (
+                      `${a.publicAnchorRef.slice(0, 14)}…`
+                    )
+                  ) : (
+                    <span className="text-muted">—</span>
+                  )}
+                  {a.lastError && (
+                    <div style={{ fontSize: 10, color: "var(--color-accent-700)" }}>{a.lastError}</div>
+                  )}
+                </td>
+                <td style={{ fontSize: 11 }}>
+                  {a.publicAnchorRef && (
+                    <Button
+                      variant="ghost"
+                      style={{ fontSize: 11 }}
+                      onClick={() => verifyAnchor(a.id)}
+                    >
+                      검증
+                    </Button>
+                  )}
+                  {checked[a.id] && (
+                    <div style={{ fontSize: 10, marginTop: 4 }} className="text-muted">
+                      {checked[a.id].matches ? "✓ " : ""}
+                      {checked[a.id].message}
+                    </div>
+                  )}
+                </td>
               </tr>
             ))}
             {anchors.length === 0 && (
               <tr>
-                <td colSpan={4} className="text-muted">
+                <td colSpan={6} className="text-muted">
                   아직 앵커링 이력이 없습니다.
                 </td>
               </tr>
