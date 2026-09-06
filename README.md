@@ -29,6 +29,7 @@
 | 소비자 자가 가입 | 구현 완료 |
 | 메일 발송 연동 (이메일 인증 · 비밀번호 재설정) | 구현 완료 |
 | 개발자 모드 대시보드 (`/dev`) | 구현 완료 |
+| 소비자 앱 Flutter 버전 (`mobile/`) | 구현 완료 |
 
 ## 실행 방법
 
@@ -98,6 +99,50 @@ npm test
 ```
 
 상태머신·해시체인·Merkle·연령인증 모듈의 순수 로직 단위 테스트가 실행됩니다(DB 불필요).
+
+## 소비자 앱 (Flutter · `mobile/`)
+
+웹 소비자 앱(`/app`)과 동일한 4단계 흐름(UID 스캔 → 연령인증 → 등록 상태 → 내 제품)을
+Flutter로 구현한 네이티브/웹 클라이언트입니다. 기존 Next.js REST API를 그대로 호출합니다.
+
+**인증 방식이 웹과 다릅니다.** 웹은 httpOnly 세션 쿠키를 쓰지만, 모바일 클라이언트는
+쿠키를 다루기 번거로우므로 **Bearer 토큰**을 씁니다. 이를 위해 백엔드를 최소 확장했습니다:
+
+- 로그인·가입 응답에 세션 토큰(`token`)을 함께 반환합니다(웹은 쿠키로 인증하므로 무시).
+- `getSessionUser`가 쿠키뿐 아니라 `Authorization: Bearer <token>` 헤더도 받습니다.
+  세션은 어느 쪽이든 동일하게 해시로 대조하므로 두 경로가 공존합니다.
+- 미들웨어가 `/api/*`에 대해 로컬 오리진 CORS를 허용합니다(쿠키 아닌 Bearer라 안전).
+  **운영에서는 허용 오리진을 좁혀야 합니다.**
+
+Flutter 앱은 로그인·가입 응답의 최소 user 대신 토큰 저장 후 `/api/auth/me`로 전체
+프로필(consumerId·emailVerified 포함)을 받아 단일 소스로 삼습니다.
+
+### 실행
+
+Next.js 서버가 떠 있는 상태에서:
+
+```bash
+cd mobile
+flutter pub get
+flutter run -d chrome --web-port 8080          # 웹으로 확인
+# 또는 실기기/에뮬레이터: flutter run
+```
+
+API 주소가 다르면 주입합니다(예: 실기기에서 PC를 가리킬 때):
+
+```bash
+flutter run --dart-define=API_BASE=http://192.168.0.10:3000
+```
+
+디자인은 Industry 토큰(스틸 블루 · 청사진 프레임)을 `mobile/lib/theme.dart`로 옮겨
+웹과 같은 룩을 유지합니다.
+
+```
+mobile/lib/api.dart              REST 클라이언트 (Bearer 토큰, shared_preferences 저장)
+mobile/lib/theme.dart            Industry 디자인 토큰 + Blueprint 위젯
+mobile/lib/main.dart             AuthGate — 토큰 복원·역할 확인
+mobile/lib/screens/              로그인 / 홈(4탭) / 스캔·상태·제품
+```
 
 ## 아키텍처
 
