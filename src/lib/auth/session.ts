@@ -55,6 +55,13 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   }
 
   const { user } = session;
+
+  // 비활성화된 계정의 세션은 즉시 무효로 취급한다.
+  if (user.disabledAt) {
+    await prisma.session.deleteMany({ where: { userId: user.id } }).catch(() => {});
+    return null;
+  }
+
   return {
     id: user.id,
     email: user.email,

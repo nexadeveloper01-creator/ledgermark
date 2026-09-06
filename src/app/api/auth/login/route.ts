@@ -58,6 +58,18 @@ export async function POST(req: NextRequest) {
     return invalid;
   }
 
+  if (user.disabledAt) {
+    // 계정 존재 여부가 드러나지 않도록 자격증명 오류와 동일한 응답을 준다.
+    await verifyPassword(password, user.passwordHash);
+    await recordAudit({
+      action: "LOGIN_FAILED",
+      actorEmail: normalizedEmail,
+      req,
+      detail: { userId: user.id, reason: "disabled" },
+    });
+    return invalid;
+  }
+
   const ok = await verifyPassword(password, user.passwordHash);
   if (!ok) {
     await recordAudit({

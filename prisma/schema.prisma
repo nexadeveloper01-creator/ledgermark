@@ -78,6 +78,9 @@ model User {
   consumerId String?   @unique
   consumer   Consumer? @relation(fields: [consumerId], references: [id])
 
+  // 감사 로그가 계정을 참조하므로 삭제하지 않고 비활성화한다.
+  disabledAt DateTime?
+
   createdAt DateTime   @default(now())
   sessions  Session[]
   auditLogs AuditLog[]
@@ -112,6 +115,11 @@ enum AuditAction {
   ALERT_CREATED
   ALERT_RESOLVED
   ANCHOR_RUN
+  USER_CREATED
+  USER_DISABLED
+  USER_ENABLED
+  USER_PASSWORD_RESET
+  USER_SESSIONS_REVOKED
 }
 
 // 감사 로그 — append-only. 수정·삭제 경로를 두지 않으며 열람은 감독기관·운영자로 제한한다.

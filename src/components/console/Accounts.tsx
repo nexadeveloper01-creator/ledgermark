@@ -1,0 +1,232 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { Corners } from "@/components/ui/Corners";
+import { Tag } from "@/components/ui/Tag";
+
+const ROLE_LABEL: Record<string, string> = {
+  ADMIN: "운영자",
+  GOV_INSPECTOR: "심사관",
+  FIELD_OFFICER: "단속관",
+  PARTNER_STAFF: "매장·총판",
+  CONSUMER: "소비자",
+};
+
+export function Accounts({ currentUserId }: { currentUserId: string }) {
+  const [users, setUsers] = useState<any[]>([]);
+  const [orgs, setOrgs] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [issued, setIssued] = useState<{ email: string; password: string } | null>(null);
+
+  const [email, setEmail] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [role, setRole] = useState("PARTNER_STAFF");
+  const [organizationId, setOrganizationId] = useState("");
+
+  const load = useCallback(async () => {
+    const [u, o] = await Promise.all([
+      fetch("/api/admin/users").then((r) => r.json()),
+      fetch("/api/organizations").then((r) => r.json()),
+    ]);
+    setUsers(u.users ?? []);
+    setOrgs(o.organizations ?? []);
+    setOrganizationId((current) => current || o.organizations?.[0]?.id || "");
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const act = async (url: string, body?: unknown) => {
+    setError(null);
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error ?? "요청에 실패했습니다.");
+      return null;
+    }
+    await load();
+    return data;
+  };
+
+  const isConsumer = role === "CONSUMER";
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+      <div className="blueprint" style={{ padding: 18, background: "transparent" }}>
+        <Corners />
+        <div className="card-kicker">계정 생성</div>
+        <div
+          style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "flex-end", marginTop: 10 }}
+        >
+          <div className="field" style={{ minWidth: 200 }}>
+            <label>이메일</label>
+            <input
+              className="input"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="field" style={{ minWidth: 150 }}>
+            <label>표시 이름</label>
+            <input
+              className="input"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+            />
+          </div>
+          <div className="field" style={{ minWidth: 140 }}>
+            <label>역할</label>
+            <select className="input" value={role} onChange={(e) => setRole(e.target.value)}>
+              {Object.entries(ROLE_LABEL).map(([k, v]) => (
+                <option key={k} value={k}>
+                  {v}
+                </option>
+              ))}
+            </select>
+          </div>
+          {!isConsumer && (
+            <div className="field" style={{ minWidth: 200 }}>
+              <label>소속 기관</label>
+              <select
+                className="input"
+                value={organizationId}
+                onChange={(e) => setOrganizationId(e.target.value)}
+              >
+                {orgs.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <Button
+            variant="primary"
+            onClick={async () => {
+              const data = await act("/api/admin/users", {
+                email,
+                displayName,
+                role,
+                organizationId: isConsumer ? null : organizationId,
+              });
+              if (data) {
+                setIssued({ email: data.user.email, password: data.tempPassword });
+                setEmail("");
+                setDisplayName("");
+              }
+            }}
+          >
+            계정 생성
+          </Button>
+        </div>
+        <div style={{ fontSize: 11, marginTop: 10 }} className="text-muted">
+          비밀번호는 시스템이 생성하며 생성 직후 한 번만 표시됩니다. 저장되지 않으므로 즉시
+          전달하세요.
+        </div>
+      </div>
+
+      {issued && (
+        <div
+          className="blueprint"
+          style={{
+            padding: 16,
+            background: "var(--color-accent-100)",
+            borderColor: "var(--color-accent-400)",
+          }}
+        >
+          <Corners />
+          <div className="card-kicker">임시 비밀번호 — 이 화면을 벗어나면 다시 볼 수 없습니다</div>
+          <div style={{ marginTop: 8, fontSize: 14 }}>
+            <strong>{issued.email}</strong>
+          </div>
+          <div
+            style={{
+              fontFamily: "ui-monospace, Menlo, monospace",
+              fontSize: 18,
+              marginTop: 6,
+              wordBreak: "break-all",
+            }}
+          >
+            {issued.password}
+          </div>
+          <Button variant="secondary" style={{ marginTop: 12 }} onClick={() => setIssued(null)}>
+            확인했습니다
+          </Button>
+        </div>
+      )}
+
+      {error && <p style={{ color: "var(--color-accent-700)", fontSize: 13 }}>{error}</p>}
+
+      <table className="table">
+        <thead>
+          <tr>
+            <th>이메일</th>
+            <th>이름</th>
+            <th>역할</th>
+            <th>소속</th>
+            <th>세션</th>
+            <th>상태</th>
+            <th>관리</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map((u) => (
+            <tr key={u.id}>
+              <td style={{ fontSize: 12 }}>{u.email}</td>
+              <td style={{ fontSize: 12 }}>{u.displayName}</td>
+              <td style={{ fontSize: 12 }}>{ROLE_LABEL[u.role] ?? u.role}</td>
+              <td style={{ fontSize: 12 }}>{u.organization?.name ?? "—"}</td>
+              <td style={{ fontSize: 12 }}>{u._count.sessions}</td>
+              <td>
+                <Tag variant={u.disabledAt ? "neutral" : "accent"}>
+                  {u.disabledAt ? "비활성" : "활성"}
+                </Tag>
+              </td>
+              <td>
+                <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                  <Button
+                    variant="ghost"
+                    style={{ fontSize: 11 }}
+                    onClick={async () => {
+                      const data = await act(`/api/admin/users/${u.id}/password`);
+                      if (data) setIssued({ email: u.email, password: data.tempPassword });
+                    }}
+                  >
+                    비밀번호 재발급
+                  </Button>
+                  {u._count.sessions > 0 && (
+                    <Button
+                      variant="ghost"
+                      style={{ fontSize: 11 }}
+                      onClick={() => act(`/api/admin/users/${u.id}/revoke-sessions`)}
+                    >
+                      세션 종료
+                    </Button>
+                  )}
+                  {u.id !== currentUserId && (
+                    <Button
+                      variant="ghost"
+                      style={{ fontSize: 11 }}
+                      onClick={() =>
+                        act(`/api/admin/users/${u.id}/status`, { disabled: !u.disabledAt })
+                      }
+                    >
+                      {u.disabledAt ? "활성화" : "비활성화"}
+                    </Button>
+                  )}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}

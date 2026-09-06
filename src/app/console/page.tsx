@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/Button";
 import { Corners } from "@/components/ui/Corners";
 import { Tag } from "@/components/ui/Tag";
 import { SessionBar, useSession } from "@/components/SessionBar";
+import { Accounts } from "@/components/console/Accounts";
 
-type Module = "dashboard" | "lookup" | "alerts" | "ledger" | "audit";
+type Module = "dashboard" | "lookup" | "alerts" | "ledger" | "audit" | "accounts";
 
 const MODULES: { key: Module; label: string }[] = [
   { key: "dashboard", label: "대시보드" },
@@ -15,6 +16,10 @@ const MODULES: { key: Module; label: string }[] = [
   { key: "alerts", label: "밀수 알림" },
   { key: "ledger", label: "원장 상태" },
   { key: "audit", label: "감사 로그" },
+];
+
+const ADMIN_MODULES: { key: Module; label: string }[] = [
+  { key: "accounts", label: "계정 관리" },
 ];
 
 interface Kpis {
@@ -72,7 +77,7 @@ export default function ConsolePage() {
           BOC · DTI CONSOLE
         </span>
         <div className="seg" style={{ marginLeft: 12 }}>
-          {MODULES.map((m) => (
+          {[...MODULES, ...(user.role === "ADMIN" ? ADMIN_MODULES : [])].map((m) => (
             <label key={m.key} className="seg-opt">
               <input
                 type="radio"
@@ -98,6 +103,9 @@ export default function ConsolePage() {
         {module === "alerts" && <Alerts />}
         {module === "ledger" && <LedgerStatus canAnchor={user.role === "ADMIN"} />}
         {module === "audit" && <AuditLog />}
+        {module === "accounts" && user.role === "ADMIN" && (
+          <Accounts currentUserId={user.id} />
+        )}
       </div>
     </div>
   );
