@@ -391,6 +391,13 @@ const ANCHOR_STATUS_LABEL: Record<string, string> = {
   FAILED: "게시 실패",
 };
 
+const SCHEDULE_REASON: Record<string, string> = {
+  NO_PENDING: "앵커링할 신규 트랜잭션 없음",
+  BATCH_REACHED: "건수 임계치 도달 — 다음 실행에서 앵커링",
+  MAX_DELAY_EXCEEDED: "최대 지연 초과 — 다음 실행에서 앵커링",
+  WAITING: "임계치 대기 중",
+};
+
 const ANCHOR_MODE_NOTE: Record<string, string> = {
   simulated: "시뮬레이션 모드 — 앵커가 퍼블릭 체인에 실제로 게시되지 않습니다. 데모용입니다.",
   chain: "체인 모드 — 앵커가 퍼블릭 체인에 실제로 게시됩니다.",
@@ -401,6 +408,7 @@ function LedgerStatus({ canAnchor }: { canAnchor: boolean }) {
   const [verify, setVerify] = useState<any>(null);
   const [anchors, setAnchors] = useState<any[]>([]);
   const [mode, setMode] = useState<string>("simulated");
+  const [schedule, setSchedule] = useState<any>(null);
   const [checked, setChecked] = useState<Record<string, any>>({});
 
   const load = useCallback(async () => {
@@ -411,6 +419,7 @@ function LedgerStatus({ canAnchor }: { canAnchor: boolean }) {
     setVerify(v);
     setAnchors(a.anchors ?? []);
     setMode(a.mode ?? "simulated");
+    setSchedule(a.schedule ?? null);
   }, []);
 
   const verifyAnchor = async (id: string) => {
@@ -455,6 +464,40 @@ function LedgerStatus({ canAnchor }: { canAnchor: boolean }) {
         <p style={{ fontSize: 12, marginBottom: 12 }} className="text-muted">
           {ANCHOR_MODE_NOTE[mode] ?? mode}
         </p>
+
+        {schedule && (
+          <div className="blueprint" style={{ padding: 16, background: "transparent", marginBottom: 18 }}>
+            <Corners />
+            <div className="card-kicker">앵커링 스케줄</div>
+            <div style={{ display: "flex", gap: 28, flexWrap: "wrap", marginTop: 8, fontSize: 13 }}>
+              <span>
+                <span className="text-muted">자동 실행 </span>
+                <Tag variant={schedule.automated ? "accent" : "neutral"}>
+                  {schedule.automated ? "설정됨" : "미설정"}
+                </Tag>
+              </span>
+              <span>
+                <span className="text-muted">미앵커 </span>
+                {schedule.pendingCount.toLocaleString()}건
+              </span>
+              <span>
+                <span className="text-muted">정책 </span>
+                {schedule.minBatch}건 이상 또는 {schedule.maxDelayMinutes}분 경과 시
+              </span>
+              <span>
+                <span className="text-muted">현재 판정 </span>
+                {SCHEDULE_REASON[schedule.reason] ?? schedule.reason}
+              </span>
+            </div>
+            {!schedule.automated && (
+              <div style={{ fontSize: 11, marginTop: 10 }} className="text-muted">
+                ANCHOR_CRON_SECRET을 설정하고 외부 스케줄러가
+                <code style={{ margin: "0 4px" }}>POST /api/ledger/anchor/cron</code>
+                을 호출하도록 하거나, <code>npm run anchor:worker</code>를 실행하면 자동화됩니다.
+              </div>
+            )}
+          </div>
+        )}
 
         <table className="table">
           <thead>

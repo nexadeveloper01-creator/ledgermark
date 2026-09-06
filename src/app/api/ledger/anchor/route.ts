@@ -3,6 +3,8 @@ import type { Anchor } from "@prisma/client";
 import { recordAudit } from "@/lib/audit/log";
 import { authErrorResponse, requireRole } from "@/lib/auth/guards";
 import { explorerTxUrl, loadAnchorConfig } from "@/lib/anchor/config";
+import { evaluateSchedule, loadScheduleConfig } from "@/lib/anchor/schedule";
+import { getPendingStats } from "@/lib/anchor/scheduler";
 import { runAnchorCycle } from "@/lib/ledger/ledgerService";
 import { prisma } from "@/lib/prisma";
 
@@ -21,9 +23,26 @@ export async function GET() {
   try {
     await requireRole("GOV_INSPECTOR", "ADMIN");
     const anchors = await prisma.anchor.findMany({ orderBy: { toSequence: "desc" }, take: 20 });
+
+    const stats = await getPendingStats();
+    const policy = loadScheduleConfig();
+    const decision = evaluateSchedule(
+      { pendingCount: stats.pendingCount, oldestPendingAt: stats.oldestPendingAt, now: new Date() },
+      policy
+    );
+
     return NextResponse.json({
       anchors: anchors.map(serialize),
       mode: loadAnchorConfig().mode,
+      schedule: {
+        automated: Boolean(process.env.ANCHOR_CRON_SECRET),
+        minBatch: policy.minBatch,
+        maxDelayMinutes: policy.maxDelayMs / 60000,
+        pendingCount: stats.pendingCount,
+        oldestPendingAt: stats.oldestPendingAt,
+        reason: decision.reason,
+        shouldAnchor: decision.shouldAnchor,
+      },
     });
   } catch (err) {
     const authResponse = authErrorResponse(err);
