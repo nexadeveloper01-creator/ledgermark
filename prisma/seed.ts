@@ -61,6 +61,8 @@ async function main() {
         displayName: "지점 담당 A. Cruz",
         role: "PARTNER_STAFF",
         organizationId: distributor.id,
+        // 매장이 자기 직원을 직접 관리하는 위임 구조 시연용
+        isOrgManager: true,
       },
     ],
   });

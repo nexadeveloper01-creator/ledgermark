@@ -2,7 +2,11 @@
 
 export type Role = "ADMIN" | "GOV_INSPECTOR" | "FIELD_OFFICER" | "PARTNER_STAFF" | "CONSUMER";
 
+/** 입력값이 규칙에 맞지 않을 때 (422) */
 export class AccountPolicyError extends Error {}
+
+/** 권한 밖의 계정을 다루려 할 때 (403) — 호출자가 두 경우를 구분할 수 있어야 한다. */
+export class AccountAccessError extends AccountPolicyError {}
 
 const STAFF_ROLES: Role[] = ["ADMIN", "GOV_INSPECTOR", "FIELD_OFFICER", "PARTNER_STAFF"];
 
@@ -53,6 +57,66 @@ export function validateCreateUser(input: CreateUserInput): {
     organizationId: isStaffRole(input.role) ? input.organizationId! : null,
     country: (input.country ?? "PH").trim() || "PH",
   };
+}
+
+// ── 위임 관리 (매장·기관 관리자) ─────────────────────────────────────────
+//
+// 운영자는 모든 계정을 관리한다. 기관 관리자는 "자기 기관 안에서, 자기와 같은 역할만"
+// 관리할 수 있다. 이 두 제약이 권한 상승 경로를 막는다 — 매장 관리자가 심사관이나
+// 운영자 계정을 만들거나, 다른 매장의 계정을 건드릴 수 없다.
+
+export interface AccountActor {
+  id: string;
+  role: Role;
+  organizationId: string | null;
+  isOrgManager: boolean;
+}
+
+export interface AccountTarget {
+  id: string;
+  role: Role;
+  organizationId: string | null;
+  isOrgManager: boolean;
+}
+
+export function assertCanManageAccounts(actor: AccountActor): void {
+  if (actor.role === "ADMIN") return;
+  if (actor.isOrgManager && isStaffRole(actor.role) && actor.organizationId) return;
+  throw new AccountAccessError("계정을 관리할 권한이 없습니다.");
+}
+
+export function assertCanCreateAccount(
+  actor: AccountActor,
+  input: { role: Role; organizationId: string | null; isOrgManager?: boolean }
+): void {
+  assertCanManageAccounts(actor);
+  if (actor.role === "ADMIN") return;
+
+  if (input.role !== actor.role) {
+    throw new AccountAccessError("소속 기관의 동일 역할 계정만 생성할 수 있습니다.");
+  }
+  if (input.organizationId !== actor.organizationId) {
+    throw new AccountAccessError("소속 기관의 계정만 생성할 수 있습니다.");
+  }
+  // 관리자 권한 부여는 운영자만 할 수 있다 — 위임이 무한히 번지지 않게 한다.
+  if (input.isOrgManager) {
+    throw new AccountAccessError("관리자 권한 부여는 운영자만 할 수 있습니다.");
+  }
+}
+
+export function assertCanManageTarget(actor: AccountActor, target: AccountTarget): void {
+  assertCanManageAccounts(actor);
+  if (actor.role === "ADMIN") return;
+
+  if (!target.organizationId || target.organizationId !== actor.organizationId) {
+    throw new AccountAccessError("소속 기관의 계정만 관리할 수 있습니다.");
+  }
+  if (target.role !== actor.role) {
+    throw new AccountAccessError("동일 역할 계정만 관리할 수 있습니다.");
+  }
+  if (target.isOrgManager) {
+    throw new AccountAccessError("다른 관리자 계정은 운영자만 관리할 수 있습니다.");
+  }
 }
 
 export interface DisableCheck {

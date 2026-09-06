@@ -11,6 +11,7 @@ export interface SessionUser {
   organizationId: string | null;
   organizationName: string | null;
   consumerId: string | null;
+  isOrgManager: boolean;
 }
 
 export const HOME_BY_ROLE: Record<SessionUser["role"], string> = {

@@ -3,9 +3,13 @@ import { hashPassword } from "@/lib/auth/password";
 import { prisma } from "@/lib/prisma";
 import {
   AccountPolicyError,
+  assertCanCreateAccount,
+  assertCanManageAccounts,
+  assertCanManageTarget,
   assertCanDisable,
   isStaffRole,
   validateCreateUser,
+  type AccountActor,
   type CreateUserInput,
 } from "./policy";
 
@@ -15,25 +19,56 @@ export function generateTempPassword(): string {
   return randomBytes(12).toString("base64url");
 }
 
-export async function listUsers() {
+const USER_SELECT = {
+  id: true,
+  email: true,
+  displayName: true,
+  role: true,
+  isOrgManager: true,
+  disabledAt: true,
+  createdAt: true,
+  organization: { select: { id: true, name: true } },
+  organizationId: true,
+  consumerId: true,
+  _count: { select: { sessions: true } },
+} as const;
+
+export async function listUsers(actor: AccountActor) {
+  assertCanManageAccounts(actor);
+
+  // 기관 관리자에게는 자기 기관의 동일 역할 계정만 보인다.
+  const where =
+    actor.role === "ADMIN"
+      ? {}
+      : { organizationId: actor.organizationId, role: actor.role };
+
   return prisma.user.findMany({
+    where,
     orderBy: [{ role: "asc" }, { createdAt: "asc" }],
-    select: {
-      id: true,
-      email: true,
-      displayName: true,
-      role: true,
-      disabledAt: true,
-      createdAt: true,
-      organization: { select: { id: true, name: true } },
-      consumerId: true,
-      _count: { select: { sessions: true } },
-    },
+    select: USER_SELECT,
   });
 }
 
-export async function createUser(input: CreateUserInput) {
+async function loadTarget(userId: string) {
+  const target = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, role: true, organizationId: true, isOrgManager: true, disabledAt: true },
+  });
+  if (!target) throw new AccountPolicyError("계정을 찾을 수 없습니다.");
+  return target;
+}
+
+export async function createUser(
+  actor: AccountActor,
+  input: CreateUserInput & { isOrgManager?: boolean }
+) {
   const valid = validateCreateUser(input);
+
+  assertCanCreateAccount(actor, {
+    role: valid.role,
+    organizationId: valid.organizationId,
+    isOrgManager: input.isOrgManager === true,
+  });
 
   const existing = await prisma.user.findUnique({ where: { email: valid.email } });
   if (existing) {
@@ -52,9 +87,11 @@ export async function createUser(input: CreateUserInput) {
     // 소비자 계정은 원장 소유권 주체인 Consumer 레코드와 함께 만들어져야 한다.
     const consumerId = isStaffRole(valid.role)
       ? null
-      : (await tx.consumer.create({
-          data: { displayName: valid.displayName, country: valid.country },
-        })).id;
+      : (
+          await tx.consumer.create({
+            data: { displayName: valid.displayName, country: valid.country },
+          })
+        ).id;
 
     return tx.user.create({
       data: {
@@ -64,17 +101,18 @@ export async function createUser(input: CreateUserInput) {
         organizationId: valid.organizationId,
         consumerId,
         passwordHash,
+        isOrgManager: actor.role === "ADMIN" ? input.isOrgManager === true : false,
       },
-      select: { id: true, email: true, displayName: true, role: true },
+      select: { id: true, email: true, displayName: true, role: true, isOrgManager: true },
     });
   });
 
   return { user, tempPassword };
 }
 
-export async function resetPassword(userId: string) {
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) throw new AccountPolicyError("계정을 찾을 수 없습니다.");
+export async function resetPassword(actor: AccountActor, userId: string) {
+  const target = await loadTarget(userId);
+  assertCanManageTarget(actor, target);
 
   const tempPassword = generateTempPassword();
   await prisma.$transaction([
@@ -90,12 +128,12 @@ export async function resetPassword(userId: string) {
 }
 
 export async function setDisabled(args: {
+  actor: AccountActor;
   targetUserId: string;
-  actorUserId: string;
   disabled: boolean;
 }) {
-  const target = await prisma.user.findUnique({ where: { id: args.targetUserId } });
-  if (!target) throw new AccountPolicyError("계정을 찾을 수 없습니다.");
+  const target = await loadTarget(args.targetUserId);
+  assertCanManageTarget(args.actor, target);
 
   if (args.disabled) {
     const otherActiveAdminCount = await prisma.user.count({
@@ -106,7 +144,7 @@ export async function setDisabled(args: {
       targetUserId: target.id,
       targetRole: target.role,
       targetAlreadyDisabled: target.disabledAt !== null,
-      actorUserId: args.actorUserId,
+      actorUserId: args.actor.id,
       otherActiveAdminCount,
     });
 
@@ -122,7 +160,10 @@ export async function setDisabled(args: {
   return { disabled: false };
 }
 
-export async function revokeSessions(userId: string) {
+export async function revokeSessions(actor: AccountActor, userId: string) {
+  const target = await loadTarget(userId);
+  assertCanManageTarget(actor, target);
+
   const result = await prisma.session.deleteMany({ where: { userId } });
   return { revoked: result.count };
 }

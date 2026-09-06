@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Corners } from "@/components/ui/Corners";
 import { SessionBar, useSession } from "@/components/SessionBar";
+import { Accounts } from "@/components/console/Accounts";
 
 const TYPE_LABEL: Record<string, { en: string; ko: string; cta: string; note: string }> = {
   RETAIL_SALE: {
@@ -36,6 +37,7 @@ const STATE_LABEL: Record<string, string> = {
 
 export default function PartnerPage() {
   const { user, loading } = useSession(["PARTNER_STAFF", "ADMIN"]);
+  const [tab, setTab] = useState<"queue" | "staff">("queue");
   const [requests, setRequests] = useState<any[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -106,6 +108,28 @@ export default function PartnerPage() {
         >
           DISTRIBUTOR · RETAIL
         </span>
+        {user.isOrgManager && (
+          <div className="seg" style={{ marginLeft: 12 }}>
+            <label className="seg-opt">
+              <input
+                type="radio"
+                name="partner-tab"
+                checked={tab === "queue"}
+                onChange={() => setTab("queue")}
+              />
+              소유권 이전 큐
+            </label>
+            <label className="seg-opt">
+              <input
+                type="radio"
+                name="partner-tab"
+                checked={tab === "staff"}
+                onChange={() => setTab("staff")}
+              />
+              직원 관리
+            </label>
+          </div>
+        )}
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
           <SessionBar user={user} />
           <Link href="/" style={{ fontSize: 13 }}>
@@ -114,12 +138,25 @@ export default function PartnerPage() {
         </div>
       </div>
 
+      {tab === "staff" && user.isOrgManager && user.organizationId && (
+        <div style={{ padding: 32, maxWidth: 1200, margin: "0 auto" }}>
+          <Accounts
+            currentUserId={user.id}
+            scoped={{
+              role: user.role,
+              organizationId: user.organizationId,
+              organizationName: user.organizationName ?? "소속 기관",
+            }}
+          />
+        </div>
+      )}
+
       <div
         style={{
+          display: tab === "queue" ? "grid" : "none",
           padding: 32,
           maxWidth: 1400,
           margin: "0 auto",
-          display: "grid",
           gridTemplateColumns: "minmax(0, 1.45fr) minmax(340px, 1fr)",
           gap: 44,
           alignItems: "start",

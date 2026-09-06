@@ -78,6 +78,11 @@ model User {
   consumerId String?   @unique
   consumer   Consumer? @relation(fields: [consumerId], references: [id])
 
+  // 소속 기관의 직원 계정을 관리할 수 있는 권한. 역할과 직교하는 속성이라
+  // 별도 역할을 만들지 않고 플래그로 둔다(관리자도 평소 업무는 동일하게 수행한다).
+  // 이 플래그 부여는 운영자만 할 수 있다.
+  isOrgManager Boolean @default(false)
+
   // 감사 로그가 계정을 참조하므로 삭제하지 않고 비활성화한다.
   disabledAt DateTime?
 

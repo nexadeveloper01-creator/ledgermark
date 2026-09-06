@@ -37,6 +37,7 @@ export interface SessionUser {
   organizationId: string | null;
   organizationName: string | null;
   consumerId: string | null;
+  isOrgManager: boolean;
 }
 
 export async function getSessionUser(): Promise<SessionUser | null> {
@@ -70,6 +71,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     organizationId: user.organizationId,
     organizationName: user.organization?.name ?? null,
     consumerId: user.consumerId,
+    isOrgManager: user.isOrgManager,
   };
 }
 

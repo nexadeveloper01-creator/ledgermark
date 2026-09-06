@@ -97,6 +97,7 @@ export async function POST(req: NextRequest) {
       organizationId: user.organizationId,
       organizationName: null,
       consumerId: user.consumerId,
+      isOrgManager: user.isOrgManager,
     },
     req,
   });

@@ -13,7 +13,14 @@ const ROLE_LABEL: Record<string, string> = {
   CONSUMER: "소비자",
 };
 
-export function Accounts({ currentUserId }: { currentUserId: string }) {
+export function Accounts({
+  currentUserId,
+  scoped,
+}: {
+  currentUserId: string;
+  /** 기관 관리자 화면 — 역할·소속이 본인과 동일하게 고정된다. */
+  scoped?: { role: string; organizationId: string; organizationName: string };
+}) {
   const [users, setUsers] = useState<any[]>([]);
   const [orgs, setOrgs] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -21,18 +28,19 @@ export function Accounts({ currentUserId }: { currentUserId: string }) {
 
   const [email, setEmail] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [role, setRole] = useState("PARTNER_STAFF");
-  const [organizationId, setOrganizationId] = useState("");
+  const [role, setRole] = useState(scoped?.role ?? "PARTNER_STAFF");
+  const [organizationId, setOrganizationId] = useState(scoped?.organizationId ?? "");
+  const [grantManager, setGrantManager] = useState(false);
 
   const load = useCallback(async () => {
-    const [u, o] = await Promise.all([
-      fetch("/api/admin/users").then((r) => r.json()),
-      fetch("/api/organizations").then((r) => r.json()),
-    ]);
+    const u = await fetch("/api/admin/users").then((r) => r.json());
     setUsers(u.users ?? []);
+
+    if (scoped) return;
+    const o = await fetch("/api/organizations").then((r) => r.json());
     setOrgs(o.organizations ?? []);
     setOrganizationId((current) => current || o.organizations?.[0]?.id || "");
-  }, []);
+  }, [scoped]);
 
   useEffect(() => {
     load();
@@ -60,7 +68,7 @@ export function Accounts({ currentUserId }: { currentUserId: string }) {
     <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
       <div className="blueprint" style={{ padding: 18, background: "transparent" }}>
         <Corners />
-        <div className="card-kicker">계정 생성</div>
+        <div className="card-kicker">{scoped ? "직원 계정 생성" : "계정 생성"}</div>
         <div
           style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "flex-end", marginTop: 10 }}
         >
@@ -81,17 +89,26 @@ export function Accounts({ currentUserId }: { currentUserId: string }) {
               onChange={(e) => setDisplayName(e.target.value)}
             />
           </div>
-          <div className="field" style={{ minWidth: 140 }}>
-            <label>역할</label>
-            <select className="input" value={role} onChange={(e) => setRole(e.target.value)}>
-              {Object.entries(ROLE_LABEL).map(([k, v]) => (
-                <option key={k} value={k}>
-                  {v}
-                </option>
-              ))}
-            </select>
-          </div>
-          {!isConsumer && (
+          {scoped ? (
+            <div className="field" style={{ minWidth: 180 }}>
+              <label>역할 · 소속</label>
+              <div className="input" style={{ display: "flex", alignItems: "center" }}>
+                {ROLE_LABEL[role] ?? role} · {scoped.organizationName}
+              </div>
+            </div>
+          ) : (
+            <div className="field" style={{ minWidth: 140 }}>
+              <label>역할</label>
+              <select className="input" value={role} onChange={(e) => setRole(e.target.value)}>
+                {Object.entries(ROLE_LABEL).map(([k, v]) => (
+                  <option key={k} value={k}>
+                    {v}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          {!scoped && !isConsumer && (
             <div className="field" style={{ minWidth: 200 }}>
               <label>소속 기관</label>
               <select
@@ -107,6 +124,24 @@ export function Accounts({ currentUserId }: { currentUserId: string }) {
               </select>
             </div>
           )}
+          {!scoped && !isConsumer && (
+            <label className="radio" style={{ marginBottom: 8 }}>
+              <input
+                type="checkbox"
+                checked={grantManager}
+                onChange={(e) => setGrantManager(e.target.checked)}
+              />
+              <span
+                className="dot"
+                style={{
+                  borderRadius: 0,
+                  background: grantManager ? "var(--color-accent)" : undefined,
+                  borderColor: grantManager ? "var(--color-accent)" : undefined,
+                }}
+              />
+              기관 관리자 권한 부여
+            </label>
+          )}
           <Button
             variant="primary"
             onClick={async () => {
@@ -115,11 +150,13 @@ export function Accounts({ currentUserId }: { currentUserId: string }) {
                 displayName,
                 role,
                 organizationId: isConsumer ? null : organizationId,
+                isOrgManager: !scoped && !isConsumer && grantManager,
               });
               if (data) {
                 setIssued({ email: data.user.email, password: data.tempPassword });
                 setEmail("");
                 setDisplayName("");
+                setGrantManager(false);
               }
             }}
           >
@@ -177,11 +214,21 @@ export function Accounts({ currentUserId }: { currentUserId: string }) {
           </tr>
         </thead>
         <tbody>
-          {users.map((u) => (
+          {users.map((u) => {
+            // 기관 관리자는 다른 관리자 계정을 다룰 수 없다 — 오류가 나는 버튼을 아예 숨긴다.
+            const manageable = !scoped || !u.isOrgManager;
+            return (
             <tr key={u.id}>
               <td style={{ fontSize: 12 }}>{u.email}</td>
               <td style={{ fontSize: 12 }}>{u.displayName}</td>
-              <td style={{ fontSize: 12 }}>{ROLE_LABEL[u.role] ?? u.role}</td>
+              <td style={{ fontSize: 12 }}>
+                {ROLE_LABEL[u.role] ?? u.role}
+                {u.isOrgManager && (
+                  <span className="text-muted" style={{ marginLeft: 6, fontSize: 10 }}>
+                    기관 관리자
+                  </span>
+                )}
+              </td>
               <td style={{ fontSize: 12 }}>{u.organization?.name ?? "—"}</td>
               <td style={{ fontSize: 12 }}>{u._count.sessions}</td>
               <td>
@@ -191,7 +238,12 @@ export function Accounts({ currentUserId }: { currentUserId: string }) {
               </td>
               <td>
                 <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                  <Button
+                  {!manageable && (
+                    <span className="text-muted" style={{ fontSize: 11 }}>
+                      운영자만 관리
+                    </span>
+                  )}
+                  {manageable && <Button
                     variant="ghost"
                     style={{ fontSize: 11 }}
                     onClick={async () => {
@@ -200,8 +252,8 @@ export function Accounts({ currentUserId }: { currentUserId: string }) {
                     }}
                   >
                     비밀번호 재발급
-                  </Button>
-                  {u._count.sessions > 0 && (
+                  </Button>}
+                  {manageable && u._count.sessions > 0 && (
                     <Button
                       variant="ghost"
                       style={{ fontSize: 11 }}
@@ -210,7 +262,7 @@ export function Accounts({ currentUserId }: { currentUserId: string }) {
                       세션 종료
                     </Button>
                   )}
-                  {u.id !== currentUserId && (
+                  {manageable && u.id !== currentUserId && (
                     <Button
                       variant="ghost"
                       style={{ fontSize: 11 }}
@@ -224,7 +276,8 @@ export function Accounts({ currentUserId }: { currentUserId: string }) {
                 </div>
               </td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>

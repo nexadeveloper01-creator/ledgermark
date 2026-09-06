@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { recordAudit } from "@/lib/audit/log";
-import { authErrorResponse, requireRole } from "@/lib/auth/guards";
+import { authErrorResponse, requireUser } from "@/lib/auth/guards";
 import { resetPassword } from "@/lib/accounts/accountService";
-import { AccountPolicyError } from "@/lib/accounts/policy";
+import { AccountAccessError, AccountPolicyError } from "@/lib/accounts/policy";
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const actor = await requireRole("ADMIN");
-    const { tempPassword } = await resetPassword(params.id);
+    const actor = await requireUser();
+    const { tempPassword } = await resetPassword(actor, params.id);
 
     await recordAudit({
       action: "USER_PASSWORD_RESET",
@@ -22,6 +22,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   } catch (err) {
     const authResponse = authErrorResponse(err);
     if (authResponse) return authResponse;
+    if (err instanceof AccountAccessError) {
+      return NextResponse.json({ error: err.message }, { status: 403 });
+    }
     if (err instanceof AccountPolicyError) {
       return NextResponse.json({ error: err.message }, { status: 422 });
     }
