@@ -125,6 +125,7 @@ enum AuditAction {
   USER_ENABLED
   USER_PASSWORD_RESET
   USER_SESSIONS_REVOKED
+  USER_SIGNUP
 }
 
 // 감사 로그 — append-only. 수정·삭제 경로를 두지 않으며 열람은 감독기관·운영자로 제한한다.

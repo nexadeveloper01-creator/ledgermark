@@ -12,6 +12,7 @@ import {
   type AccountActor,
   type CreateUserInput,
 } from "./policy";
+import { validateSignup, type SignupInput } from "./signup";
 
 // 관리자가 약한 비밀번호를 직접 입력하지 않도록 시스템이 임시 비밀번호를 생성한다.
 // 생성 직후 한 번만 화면에 노출되고 저장되지 않는다.
@@ -108,6 +109,37 @@ export async function createUser(
   });
 
   return { user, tempPassword };
+}
+
+// 소비자 자가 가입. 공개 경로이므로 역할·소속을 입력으로 받지 않고 CONSUMER로 고정한다.
+export async function signupConsumer(input: SignupInput) {
+  const valid = validateSignup(input);
+
+  const existing = await prisma.user.findUnique({ where: { email: valid.email } });
+  if (existing) {
+    throw new AccountPolicyError("이미 사용 중인 이메일입니다.");
+  }
+
+  const passwordHash = await hashPassword(valid.password);
+
+  return prisma.$transaction(async (tx) => {
+    const consumer = await tx.consumer.create({
+      data: { displayName: valid.displayName, country: valid.country },
+    });
+
+    return tx.user.create({
+      data: {
+        email: valid.email,
+        displayName: valid.displayName,
+        role: "CONSUMER",
+        consumerId: consumer.id,
+        organizationId: null,
+        isOrgManager: false,
+        passwordHash,
+      },
+      select: { id: true, email: true, displayName: true, role: true },
+    });
+  });
 }
 
 export async function resetPassword(actor: AccountActor, userId: string) {

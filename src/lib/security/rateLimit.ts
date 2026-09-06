@@ -15,6 +15,15 @@ export const LOGIN_PER_IP: RateLimitConfig = {
   blockMs: 15 * 60 * 1000,
 };
 
+// 가입은 공개 엔드포인트라 대량 등록과 이메일 열거를 막아야 한다.
+// 다만 입력값 검증 실패도 시도로 집계되므로, 폼을 몇 번 잘못 채운 정상 사용자가
+// 잠기지 않도록 한도를 넉넉히 둔다(위협은 스크립트 기반 대량 시도다).
+export const SIGNUP_PER_IP: RateLimitConfig = {
+  limit: 20,
+  windowMs: 60 * 60 * 1000,
+  blockMs: 60 * 60 * 1000,
+};
+
 export const LOOKUP_PER_USER: RateLimitConfig = {
   limit: 20,
   windowMs: 10 * 60 * 1000,
