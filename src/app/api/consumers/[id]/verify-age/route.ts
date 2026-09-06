@@ -1,5 +1,6 @@
 import { createHash } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { recordAudit } from "@/lib/audit/log";
 import { assertIsSelf, authErrorResponse, requireUser } from "@/lib/auth/guards";
 import { getAgeVerificationProvider } from "@/lib/avp/router";
 import { UnsupportedCountryError } from "@/lib/avp/types";
@@ -33,6 +34,16 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         credentialHash,
       },
       select: { id: true, method: true, verified: true, verifiedAt: true, country: true },
+    });
+
+    // 검증 결과와 방식만 남기고 생년월일·ID 스캔 등 원본 입력은 기록하지 않는다.
+    await recordAudit({
+      action: "AGE_VERIFICATION",
+      actor: user,
+      req,
+      targetType: "AgeVerification",
+      targetId: record.id,
+      detail: { country, method: record.method, verified: record.verified },
     });
 
     return NextResponse.json({ verification: record, reasons: result.reasons });

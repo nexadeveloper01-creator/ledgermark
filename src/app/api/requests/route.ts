@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { recordAudit } from "@/lib/audit/log";
 import { authErrorResponse, requireUser } from "@/lib/auth/guards";
 import { LedgerError } from "@/lib/ledger/stateMachine";
 import {
@@ -81,6 +82,15 @@ export async function POST(req: NextRequest) {
               uidCode: body.uidCode,
               consumerId: user.consumerId,
             });
+
+      await recordAudit({
+        action: "REQUEST_CREATED",
+        actor: user,
+        req,
+        targetType: "TransferRequest",
+        targetId: request.id,
+        detail: { uidCode: request.uid.code, type, status: request.status },
+      });
 
       return NextResponse.json({ request }, { status: 201 });
     }

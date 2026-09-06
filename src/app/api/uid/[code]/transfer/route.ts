@@ -1,5 +1,6 @@
 import { createHash } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
+import { recordAudit } from "@/lib/audit/log";
 import { assertActsForOrg, authErrorResponse, requireUser } from "@/lib/auth/guards";
 import { getAgeVerificationProvider } from "@/lib/avp/router";
 import { UnsupportedCountryError } from "@/lib/avp/types";
@@ -124,6 +125,21 @@ export async function POST(req: NextRequest, { params }: { params: { code: strin
     }
 
     const result = await transferUid(params.code, input, body.metadata);
+
+    await recordAudit({
+      action: "UID_TRANSFERRED",
+      actor: user,
+      req,
+      targetType: "Uid",
+      targetId: result.uid.id,
+      detail: {
+        uidCode: result.uid.code,
+        txType,
+        newStatus: result.uid.status,
+        issuedUidCode: result.newUid?.code ?? null,
+      },
+    });
+
     return NextResponse.json({ uid: result.uid, newUid: result.newUid });
   } catch (err) {
     const authResponse = authErrorResponse(err);

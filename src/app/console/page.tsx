@@ -7,13 +7,14 @@ import { Corners } from "@/components/ui/Corners";
 import { Tag } from "@/components/ui/Tag";
 import { SessionBar, useSession } from "@/components/SessionBar";
 
-type Module = "dashboard" | "lookup" | "alerts" | "ledger";
+type Module = "dashboard" | "lookup" | "alerts" | "ledger" | "audit";
 
 const MODULES: { key: Module; label: string }[] = [
   { key: "dashboard", label: "대시보드" },
   { key: "lookup", label: "UID 조회" },
   { key: "alerts", label: "밀수 알림" },
   { key: "ledger", label: "원장 상태" },
+  { key: "audit", label: "감사 로그" },
 ];
 
 interface Kpis {
@@ -96,6 +97,7 @@ export default function ConsolePage() {
         {module === "lookup" && <UidLookup />}
         {module === "alerts" && <Alerts />}
         {module === "ledger" && <LedgerStatus canAnchor={user.role === "ADMIN"} />}
+        {module === "audit" && <AuditLog />}
       </div>
     </div>
   );
@@ -461,6 +463,111 @@ function LedgerStatus({ canAnchor }: { canAnchor: boolean }) {
           </tbody>
         </table>
       </div>
+    </div>
+  );
+}
+
+const AUDIT_LABEL: Record<string, string> = {
+  LOGIN_SUCCESS: "로그인",
+  LOGIN_FAILED: "로그인 실패",
+  LOGIN_BLOCKED: "로그인 차단",
+  LOGOUT: "로그아웃",
+  LOT_MINTED: "LOT 발급",
+  UID_TRANSFERRED: "소유권 이전",
+  REQUEST_CREATED: "이전 요청",
+  REQUEST_COMMITTED: "이전 커밋",
+  REQUEST_REJECTED: "요청 반려",
+  AGE_VERIFICATION: "연령인증",
+  CONSUMER_LOOKUP: "소비자 조회",
+  FIELD_INSPECTION: "현장 판정",
+  FIELD_REPORT_ISSUED: "조서 발행",
+  ALERT_CREATED: "알림 등록",
+  ALERT_RESOLVED: "알림 해결",
+  ANCHOR_RUN: "앵커링 실행",
+};
+
+function AuditLog() {
+  const [logs, setLogs] = useState<any[]>([]);
+  const [action, setAction] = useState("");
+
+  const load = useCallback(async () => {
+    const res = await fetch(`/api/console/audit${action ? `?action=${action}` : ""}`);
+    const body = await res.json();
+    setLogs(body.logs ?? []);
+  }, [action]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 12, flexWrap: "wrap" }}>
+        <div className="field" style={{ minWidth: 200 }}>
+          <label>동작 필터</label>
+          <select className="input" value={action} onChange={(e) => setAction(e.target.value)}>
+            <option value="">전체</option>
+            {Object.entries(AUDIT_LABEL).map(([key, label]) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <Button variant="secondary" onClick={load}>
+          새로고침
+        </Button>
+        <span style={{ fontSize: 12 }} className="text-muted">
+          감사 로그는 열람 전용이며 수정·삭제할 수 없습니다.
+        </span>
+      </div>
+
+      <table className="table">
+        <thead>
+          <tr>
+            <th>시각</th>
+            <th>동작</th>
+            <th>수행자</th>
+            <th>대상</th>
+            <th>IP</th>
+          </tr>
+        </thead>
+        <tbody>
+          {logs.map((l) => (
+            <tr key={l.id}>
+              <td style={{ whiteSpace: "nowrap", fontSize: 12 }}>
+                {new Date(l.createdAt).toLocaleString("ko-KR")}
+              </td>
+              <td style={{ fontSize: 12 }}>
+                <Tag variant={l.action.startsWith("LOGIN_F") || l.action === "LOGIN_BLOCKED" ? "accent" : "neutral"}>
+                  {AUDIT_LABEL[l.action] ?? l.action}
+                </Tag>
+              </td>
+              <td style={{ fontSize: 12 }}>
+                {l.actorUser?.displayName ?? l.actorEmail ?? "—"}
+                {l.actorRole && (
+                  <span className="text-muted" style={{ marginLeft: 6, fontSize: 10 }}>
+                    {l.actorRole}
+                  </span>
+                )}
+              </td>
+              <td style={{ fontSize: 11, fontFamily: "ui-monospace, Menlo, monospace" }}>
+                {l.detail?.uidCode ?? l.detail?.code ?? l.targetType ?? "—"}
+              </td>
+              <td style={{ fontSize: 11 }} className="text-muted">
+                {l.ip ?? "—"}
+              </td>
+            </tr>
+          ))}
+          {logs.length === 0 && (
+            <tr>
+              <td colSpan={5} className="text-muted">
+                기록이 없습니다.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }

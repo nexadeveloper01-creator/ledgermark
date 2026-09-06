@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { recordAudit } from "@/lib/audit/log";
 import { authErrorResponse, requireRole } from "@/lib/auth/guards";
 import { inspectUid } from "@/lib/field/fieldService";
 import { LedgerError } from "@/lib/ledger/stateMachine";
@@ -21,6 +22,15 @@ export async function POST(req: NextRequest) {
         : user.displayName,
       location: location || "미지정",
     });
+    await recordAudit({
+      action: "FIELD_INSPECTION",
+      actor: user,
+      req,
+      targetType: "FieldInspection",
+      targetId: inspection.id,
+      detail: { uidCode: inspection.uidCode, verdict: inspection.verdict.verdict, location },
+    });
+
     return NextResponse.json({ inspection }, { status: 201 });
   } catch (err) {
     const authResponse = authErrorResponse(err);

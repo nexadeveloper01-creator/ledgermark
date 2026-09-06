@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { recordAudit } from "@/lib/audit/log";
 import { authErrorResponse, requireRole } from "@/lib/auth/guards";
+import { consumeRateLimit, LOOKUP_PER_USER } from "@/lib/security/rateLimit";
 import { prisma } from "@/lib/prisma";
 
 // 중고거래 양수인 지정을 위한 단건 조회. 명부 전체를 노출하지 않기 위해
@@ -13,6 +15,17 @@ export async function POST(req: NextRequest) {
     if (!email) {
       return NextResponse.json({ error: "이메일을 입력해주세요." }, { status: 400 });
     }
+
+    // 단건 조회를 반복하면 가입 이메일을 열거할 수 있으므로 계정별로 제한한다.
+    const limit = await consumeRateLimit(`lookup:user:${user.id}`, LOOKUP_PER_USER);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: "조회 시도가 너무 많습니다. 잠시 후 다시 시도해주세요." },
+        { status: 429, headers: { "Retry-After": String(limit.retryAfterSec) } }
+      );
+    }
+
+    await recordAudit({ action: "CONSUMER_LOOKUP", actor: user, req, detail: { email } });
 
     const target = await prisma.user.findUnique({
       where: { email },

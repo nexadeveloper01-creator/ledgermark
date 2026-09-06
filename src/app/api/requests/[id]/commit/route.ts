@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { recordAudit } from "@/lib/audit/log";
 import { assertActsForOrg, authErrorResponse, requireRole } from "@/lib/auth/guards";
 import { LedgerError } from "@/lib/ledger/stateMachine";
 import { commitRequest } from "@/lib/requests/transferRequestService";
 import { prisma } from "@/lib/prisma";
 
-export async function POST(_req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const user = await requireRole("PARTNER_STAFF", "ADMIN");
 
@@ -23,6 +24,16 @@ export async function POST(_req: Request, { params }: { params: { id: string } }
     }
 
     const committed = await commitRequest(params.id);
+
+    await recordAudit({
+      action: "REQUEST_COMMITTED",
+      actor: user,
+      req,
+      targetType: "TransferRequest",
+      targetId: committed.id,
+      detail: { uidCode: committed.uid.code, type: committed.type },
+    });
+
     return NextResponse.json({ request: committed });
   } catch (err) {
     const authResponse = authErrorResponse(err);

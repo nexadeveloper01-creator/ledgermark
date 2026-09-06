@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { recordAudit } from "@/lib/audit/log";
 import { authErrorResponse, requireRole } from "@/lib/auth/guards";
 import { mintLot } from "@/lib/ledger/ledgerService";
 import { LedgerError } from "@/lib/ledger/stateMachine";
@@ -24,7 +25,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     // UID 최초 발급(MINT)은 원장 운영 주체만 수행한다.
-    await requireRole("ADMIN");
+    const user = await requireRole("ADMIN");
 
     const body = await req.json();
     const { code, productName, quantity, producerOrgId } = body ?? {};
@@ -37,6 +38,15 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await mintLot({ code, productName, quantity: Number(quantity), producerOrgId });
+
+    await recordAudit({
+      action: "LOT_MINTED",
+      actor: user,
+      req,
+      targetType: "Lot",
+      targetId: result.lot.id,
+      detail: { code, quantity: result.uidCodes.length, producerOrgId },
+    });
     return NextResponse.json(
       {
         lotId: result.lot.id,
