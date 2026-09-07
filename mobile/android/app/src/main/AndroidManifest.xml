@@ -5,7 +5,8 @@
     <application
         android:label="ledgermark_app"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true"><!-- 데모: http 개발 서버(LAN)와 통신하기 위함. 운영은 https라 제거해야 함 -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
