@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "postinstall": "prisma generate",
-    "start:prod": "prisma migrate deploy && next start",
+    "start:prod": "prisma migrate deploy && tsx prisma/seed-if-empty.ts && next start",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts",

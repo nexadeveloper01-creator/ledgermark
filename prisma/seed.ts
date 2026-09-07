@@ -1,13 +1,14 @@
 import { prisma } from "../src/lib/prisma";
 import { hashPassword } from "../src/lib/auth/password";
 import { mintLot, transferUid } from "../src/lib/ledger/ledgerService";
+import { pathToFileURL } from "url";
 import { createRetailSaleRequest } from "../src/lib/requests/transferRequestService";
 
 const DEMO_PASSWORD = "ledgermark1234";
 // 시드 계정은 메일 인증을 거칠 수 없으므로 인증 완료 상태로 만든다.
 const VERIFIED_AT = new Date();
 
-async function main() {
+export async function seed() {
   console.log("Seeding LEDGERMARK demo data...");
 
   const producer = await prisma.organization.create({
@@ -188,11 +189,16 @@ async function main() {
   console.log("Seed complete.");
 }
 
-main()
-  .catch((err) => {
-    console.error(err);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+// 직접 실행(npm run prisma:seed)했을 때만 자동으로 돌린다. 다른 스크립트가 import할 때는
+// 자동 실행하지 않는다(seed-if-empty가 조건부로 호출).
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isMain) {
+  seed()
+    .catch((err) => {
+      console.error(err);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}
