@@ -54,19 +54,27 @@ export type Receipt = {
   amount: number;
   discount: number;
   total: number;
+  method: string;
+  reference: string | null;
   coupon?: { code: string; label: string };
   checkoutId: string;
 };
 
-/** 결제 확정 — 쿠폰이 있으면 차감·사용 처리하고 결제 기록을 남긴다(원자적). */
+const METHODS = new Set(["CASH", "CARD", "OTHER"]);
+
+/** 결제 확정 — 쿠폰이 있으면 차감·사용 처리하고 결제 기록(결제수단 포함)을 남긴다(원자적). */
 export async function checkout(args: {
   orgId?: string | null;
   staffUserId?: string | null;
   amount: number;
   couponCode?: string | null;
+  method?: string | null;
+  reference?: string | null;
 }): Promise<Receipt> {
   const amount = Math.floor(Number(args.amount));
   if (!Number.isFinite(amount) || amount <= 0) throw new PointsError("결제 금액을 올바르게 입력해주세요.");
+  const method = METHODS.has((args.method ?? "").toUpperCase()) ? args.method!.toUpperCase() : "CASH";
+  const reference = args.reference?.trim() ? args.reference.trim().slice(0, 64) : null;
 
   return prisma.$transaction(async (tx) => {
     let discount = 0;
@@ -100,11 +108,13 @@ export async function checkout(args: {
         amount,
         discount,
         total,
+        method,
+        reference,
         couponId,
         couponCode,
       },
     });
 
-    return { amount, discount, total, coupon: receiptCoupon, checkoutId: record.id };
+    return { amount, discount, total, method, reference, coupon: receiptCoupon, checkoutId: record.id };
   });
 }

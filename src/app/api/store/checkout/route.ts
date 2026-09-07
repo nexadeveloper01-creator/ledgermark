@@ -14,6 +14,8 @@ export async function POST(req: NextRequest) {
       staffUserId: user.id,
       amount: body?.amount,
       couponCode: body?.couponCode ?? null,
+      method: body?.method ?? null,
+      reference: body?.reference ?? null,
     });
     await recordAudit({
       action: "REQUEST_COMMITTED", // 결제 이벤트를 감사 로그에 남긴다(별도 액션 없이 재사용)
