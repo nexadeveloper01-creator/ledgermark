@@ -1,15 +1,24 @@
 import Link from "next/link";
+import QRCode from "qrcode";
 
-// 소비자 앱 배포(퍼블리싱) 페이지 — APK 다운로드 + 설치 안내 + 시연 계정.
+// 소비자 앱 배포(퍼블리싱) 페이지 — APK 다운로드 + 설치 안내 + 시연 계정 + 설치 QR.
 // 공개 페이지(인증 불필요). APK는 /public/download/ 에서 정적 서빙된다.
 export const metadata = {
   title: "LEDGERMARK 앱 설치",
   description: "정품 인증 소비자 앱 다운로드",
 };
 
+const SITE = process.env.APP_BASE_URL || "https://app-production-daca.up.railway.app";
 const APK = "/download/ledgermark-consumer.apk";
 
-export default function DownloadPage() {
+export default async function DownloadPage() {
+  // 폰으로 스캔하면 이 설치 페이지가 열리도록 QR을 서버에서 생성한다.
+  const qrSvg = await QRCode.toString(`${SITE}/download`, {
+    type: "svg",
+    margin: 1,
+    width: 168,
+    color: { dark: "#0E1116", light: "#00000000" },
+  });
   return (
     <div style={{ minHeight: "100vh" }}>
       <div
@@ -44,16 +53,30 @@ export default function DownloadPage() {
           안드로이드 앱입니다. 아래 버튼으로 설치 파일(APK)을 내려받으세요.
         </p>
 
-        <a
-          href={APK}
-          className="btn btn-primary blueprint"
-          style={{ height: 52, fontSize: 15, display: "inline-flex", alignItems: "center", padding: "0 28px" }}
-        >
-          APK 다운로드 (Android)
-        </a>
-        <p className="text-muted" style={{ fontSize: 12, marginTop: 10 }}>
-          약 73MB · Android 6.0+ · 데모/파일럿 빌드
-        </p>
+        <div style={{ display: "flex", gap: 28, flexWrap: "wrap", alignItems: "center" }}>
+          <div>
+            <a
+              href={APK}
+              className="btn btn-primary blueprint"
+              style={{ height: 52, fontSize: 15, display: "inline-flex", alignItems: "center", padding: "0 28px" }}
+            >
+              APK 다운로드 (Android)
+            </a>
+            <p className="text-muted" style={{ fontSize: 12, marginTop: 10 }}>
+              약 73MB · Android 6.0+ · 데모/파일럿 빌드
+            </p>
+          </div>
+
+          <div
+            className="blueprint"
+            style={{ padding: 16, background: "transparent", display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}
+          >
+            <div style={{ width: 152, height: 152 }} dangerouslySetInnerHTML={{ __html: qrSvg }} />
+            <span className="text-muted" style={{ fontSize: 11, letterSpacing: "0.06em" }}>
+              폰으로 스캔해 설치
+            </span>
+          </div>
+        </div>
 
         <Section title="설치 방법">
           <ol style={{ paddingLeft: 18, fontSize: 13.5, lineHeight: 1.9, margin: 0 }}>
