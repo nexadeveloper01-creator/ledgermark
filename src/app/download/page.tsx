@@ -109,6 +109,12 @@ export default async function DownloadPage() {
                 다운로드
               </a>
             </div>
+            <p style={{ fontSize: 12, marginTop: 10, marginBottom: 0 }} className="text-muted">
+              English:{" "}
+              <a href="/download/demo-runsheet-en.html" target="_blank">Open</a>
+              {" · "}
+              <a href="/download/demo-runsheet-en.html" download>Download</a>
+            </p>
           </div>
           <div className="blueprint" style={{ padding: 18, background: "transparent" }}>
             <div className="card-kicker">DOC</div>
@@ -124,6 +130,12 @@ export default async function DownloadPage() {
                 다운로드
               </a>
             </div>
+            <p style={{ fontSize: 12, marginTop: 10, marginBottom: 0 }} className="text-muted">
+              English:{" "}
+              <a href="/download/demo-cheatsheet-en.html" target="_blank">Open</a>
+              {" · "}
+              <a href="/download/demo-cheatsheet-en.html" download>Download</a>
+            </p>
           </div>
         </div>
 
