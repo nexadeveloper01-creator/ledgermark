@@ -93,6 +93,40 @@ export default async function DownloadPage() {
           />
         </div>
 
+        <h2 style={{ fontSize: 17, margin: "36px 0 14px" }}>시연 자료</h2>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 18 }}>
+          <div className="blueprint" style={{ padding: 18, background: "transparent" }}>
+            <div className="card-kicker">DOC</div>
+            <h3 style={{ fontSize: 16, margin: "4px 0 6px" }}>10분 시연 런시트</h3>
+            <p className="text-muted" style={{ fontSize: 12.5, lineHeight: 1.55, margin: "0 0 12px" }}>
+              7단계 진행표 · 멘트 · 클릭 순서 · 계정 (리허설·준비용)
+            </p>
+            <div style={{ display: "flex", gap: 8 }}>
+              <a href="/download/demo-runsheet.html" target="_blank" className="btn btn-secondary" style={{ height: 38, display: "inline-flex", alignItems: "center", padding: "0 14px", fontSize: 13 }}>
+                열기
+              </a>
+              <a href="/download/demo-runsheet.html" download className="btn btn-primary" style={{ height: 38, display: "inline-flex", alignItems: "center", padding: "0 14px", fontSize: 13 }}>
+                다운로드
+              </a>
+            </div>
+          </div>
+          <div className="blueprint" style={{ padding: 18, background: "transparent" }}>
+            <div className="card-kicker">DOC</div>
+            <h3 style={{ fontSize: 16, margin: "4px 0 6px" }}>시연 치트시트 (1장)</h3>
+            <p className="text-muted" style={{ fontSize: 12.5, lineHeight: 1.55, margin: "0 0 12px" }}>
+              시간·핵심 클릭·킬러 멘트 한눈 요약 (발표 당일용)
+            </p>
+            <div style={{ display: "flex", gap: 8 }}>
+              <a href="/download/demo-cheatsheet.html" target="_blank" className="btn btn-secondary" style={{ height: 38, display: "inline-flex", alignItems: "center", padding: "0 14px", fontSize: 13 }}>
+                열기
+              </a>
+              <a href="/download/demo-cheatsheet.html" download className="btn btn-primary" style={{ height: 38, display: "inline-flex", alignItems: "center", padding: "0 14px", fontSize: 13 }}>
+                다운로드
+              </a>
+            </div>
+          </div>
+        </div>
+
         <div style={{ marginTop: 36 }}>
           <h2 style={{ fontSize: 17, margin: "0 0 12px" }}>APK 설치 방법 (Android)</h2>
           <ol style={{ paddingLeft: 18, fontSize: 13.5, lineHeight: 1.9, margin: 0 }}>
