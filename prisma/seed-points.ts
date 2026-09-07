@@ -58,7 +58,19 @@ const SURVEYS = [
   },
 ];
 
-const REWARDS = [
+type RewardSeed = {
+  slug: string;
+  title: string;
+  description: string;
+  cost: number;
+  type: "CONTENT" | "PRIZE_DRAW" | "GIFT" | "DISCOUNT";
+  stock: number | null;
+  sortOrder: number;
+  discountKind?: "PERCENT" | "AMOUNT";
+  discountValue?: number;
+};
+
+const REWARDS: RewardSeed[] = [
   {
     slug: "premium-content",
     title: "프리미엄 사용 가이드 해금",
@@ -93,7 +105,29 @@ const REWARDS = [
     cost: 1000,
     type: "GIFT" as const,
     stock: 50,
+    sortOrder: 6,
+  },
+  {
+    slug: "discount-10p",
+    title: "제품 구매 10% 할인 쿠폰",
+    description: "다음 정품 구매 시 10% 할인. 동의로 쌓은 포인트를 현금성 혜택으로.",
+    cost: 400,
+    type: "DISCOUNT" as const,
+    stock: null,
     sortOrder: 4,
+    discountKind: "PERCENT" as const,
+    discountValue: 10,
+  },
+  {
+    slug: "discount-100peso",
+    title: "₱100 구매 할인 쿠폰",
+    description: "다음 정품 구매 시 ₱100 즉시 할인.",
+    cost: 600,
+    type: "DISCOUNT" as const,
+    stock: null,
+    sortOrder: 5,
+    discountKind: "AMOUNT" as const,
+    discountValue: 100,
   },
 ];
 
@@ -123,9 +157,21 @@ export async function seedSurveysAndRewards() {
         type: r.type,
         sortOrder: r.sortOrder,
         active: true,
+        discountKind: r.discountKind ?? null,
+        discountValue: r.discountValue ?? null,
       },
       // 재고는 update에서 건드리지 않는다(운영 중 소진 상태를 시드가 되돌리지 않도록).
-      create: { ...r },
+      create: {
+        slug: r.slug,
+        title: r.title,
+        description: r.description,
+        cost: r.cost,
+        type: r.type,
+        stock: r.stock,
+        sortOrder: r.sortOrder,
+        discountKind: r.discountKind ?? null,
+        discountValue: r.discountValue ?? null,
+      },
     });
   }
   console.log(`Seeded ${SURVEYS.length} surveys, ${REWARDS.length} rewards.`);

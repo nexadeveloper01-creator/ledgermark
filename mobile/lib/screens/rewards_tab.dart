@@ -3,6 +3,7 @@ import '../api.dart';
 import '../theme.dart';
 import 'widgets.dart';
 import 'survey_screen.dart';
+import 'consent_screen.dart';
 
 // 포인트/혜택 허브: 잔액 · 주간 출석(스트릭) · 설문 참여 · 리워드 사용 · 적립 내역.
 class RewardsTab extends StatefulWidget {
@@ -17,6 +18,8 @@ class _RewardsTabState extends State<RewardsTab> {
   Map<String, dynamic>? _summary;
   List<dynamic> _surveys = [];
   Map<String, dynamic>? _rewards;
+  Map<String, dynamic>? _benefits;
+  List<dynamic> _coupons = [];
   bool _loading = true;
   bool _checkingIn = false;
 
@@ -28,12 +31,20 @@ class _RewardsTabState extends State<RewardsTab> {
 
   Future<void> _load() async {
     try {
-      final results = await Future.wait([api.pointsSummary(), api.surveys(), api.rewards()]);
+      final results = await Future.wait([
+        api.pointsSummary(),
+        api.surveys(),
+        api.rewards(),
+        api.benefits(),
+        api.coupons(),
+      ]);
       if (!mounted) return;
       setState(() {
         _summary = results[0] as Map<String, dynamic>;
         _surveys = results[1] as List<dynamic>;
         _rewards = results[2] as Map<String, dynamic>;
+        _benefits = results[3] as Map<String, dynamic>;
+        _coupons = results[4] as List<dynamic>;
         _loading = false;
       });
     } catch (_) {
@@ -92,6 +103,35 @@ class _RewardsTabState extends State<RewardsTab> {
     }
   }
 
+  Future<void> _openConsent() async {
+    final changed = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => const ConsentScreen()),
+    );
+    if (changed == true && mounted) await _load();
+  }
+
+  Future<void> _useCoupon(Map<String, dynamic> c) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(c['label'] as String? ?? '쿠폰 사용'),
+        content: Text('쿠폰(${c['code']})을 사용 처리할까요? 매장/결제 시 제시하세요.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('취소')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('사용')),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      await api.useCoupon(c['id'] as String);
+      if (mounted) _toast('쿠폰을 사용 처리했습니다.');
+      await _load();
+    } catch (e) {
+      if (mounted) _toast(e.toString());
+    }
+  }
+
   void _toast(String m) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m)));
   }
@@ -108,6 +148,14 @@ class _RewardsTabState extends State<RewardsTab> {
         padding: const EdgeInsets.fromLTRB(18, 12, 18, 120),
         children: [
           _balanceCard(),
+          const SizedBox(height: 14),
+          _benefitsCard(),
+          if (_coupons.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            _sectionTitle('내 쿠폰', '포인트로 받은 할인 혜택'),
+            const SizedBox(height: 12),
+            ..._coupons.map((c) => _couponCard(c as Map<String, dynamic>)),
+          ],
           const SizedBox(height: 16),
           const AdSlot(
             assets: adCreatives,
@@ -189,6 +237,109 @@ class _RewardsTabState extends State<RewardsTab> {
     );
   }
 
+  Widget _benefitsCard() {
+    final consent = (_benefits?['consentPointsEarned'] as num?)?.toInt() ?? 0;
+    final couponsActive = (_benefits?['couponsActive'] as num?)?.toInt() ?? 0;
+    final pesos = (_benefits?['discountPesosTotal'] as num?)?.toInt() ?? 0;
+    final pct = (_benefits?['discountPercentActive'] as num?)?.toInt() ?? 0;
+    final discountLabel = pct > 0 && pesos > 0
+        ? '$pct건 · ₱$pesos'
+        : pct > 0
+            ? '$pct건'
+            : '₱$pesos';
+    return Panel(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.verified_user_rounded, color: Lm.primary, size: 20),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text('개인정보 동의 & 혜택', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+              ),
+              TextButton(
+                onPressed: _openConsent,
+                style: TextButton.styleFrom(foregroundColor: Lm.primary, padding: const EdgeInsets.symmetric(horizontal: 8), minimumSize: const Size(0, 32)),
+                child: const Text('동의 관리', style: TextStyle(fontWeight: FontWeight.w700)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: _benefitStat('동의로 받은 포인트', '$consent P', Lm.primary)),
+              Container(width: 1, height: 34, color: Lm.line),
+              Expanded(child: _benefitStat('보유 쿠폰', '$couponsActive장', Lm.violet)),
+              Container(width: 1, height: 34, color: Lm.line),
+              Expanded(child: _benefitStat('할인 혜택', discountLabel, Lm.good)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _benefitStat(String label, String value, Color color) {
+    return Column(
+      children: [
+        Text(value, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: color)),
+        const SizedBox(height: 2),
+        Text(label, style: const TextStyle(fontSize: 11, color: Lm.muted), textAlign: TextAlign.center),
+      ],
+    );
+  }
+
+  Widget _couponCard(Map<String, dynamic> c) {
+    final status = c['status'] as String? ?? 'ISSUED';
+    final usable = status == 'ISSUED';
+    final (statusLabel, statusColor) = switch (status) {
+      'USED' => ('사용완료', Lm.muted),
+      'EXPIRED' => ('만료', Lm.muted),
+      _ => ('사용 가능', Lm.good),
+    };
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Panel(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(color: Lm.mintBg, borderRadius: BorderRadius.circular(14)),
+              child: const Icon(Icons.local_offer_rounded, color: Lm.mint),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(c['label'] as String? ?? '할인 쿠폰', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 2),
+                  Text(c['code'] as String? ?? '', style: const TextStyle(fontSize: 12, color: Lm.muted, fontFamily: 'monospace')),
+                  const SizedBox(height: 2),
+                  Text(statusLabel, style: TextStyle(fontSize: 11.5, color: statusColor, fontWeight: FontWeight.w700)),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            FilledButton(
+              onPressed: usable ? () => _useCoupon(c) : null,
+              style: FilledButton.styleFrom(
+                backgroundColor: Lm.primary,
+                disabledBackgroundColor: Lm.surface,
+                minimumSize: const Size(0, 40),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('사용'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _sectionTitle(String ko, String? sub) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,6 +408,7 @@ class _RewardsTabState extends State<RewardsTab> {
     final (icon, bg, fg) = switch (type) {
       'CONTENT' => (Icons.lock_open_rounded, Lm.skyBg, Lm.sky),
       'PRIZE_DRAW' => (Icons.confirmation_num_rounded, Lm.peachBg, Lm.peach),
+      'DISCOUNT' => (Icons.local_offer_rounded, Lm.goodBg, Lm.good),
       _ => (Icons.card_giftcard_rounded, Lm.mintBg, Lm.mint),
     };
     return Container(

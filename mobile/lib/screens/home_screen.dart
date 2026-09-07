@@ -6,6 +6,7 @@ import 'scan_flow.dart';
 import 'status_tab.dart';
 import 'products_tab.dart';
 import 'rewards_tab.dart';
+import 'consent_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -23,6 +24,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String get _consumerId => widget.user['consumerId'] as String? ?? '';
   bool get _emailVerified => widget.user['emailVerified'] == true;
+
+  @override
+  void initState() {
+    super.initState();
+    // 최초 로그인(동의 이력 없음) 시 동의 화면을 한 번 안내한다. 이미 동의한 계정은 뜨지 않는다.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _maybePromptConsent());
+  }
+
+  Future<void> _maybePromptConsent() async {
+    try {
+      final c = await api.getConsent();
+      final scopes = (c['scopes'] as Map?) ?? {};
+      final anyGranted = scopes.values.any((v) => v == true);
+      if (!anyGranted && mounted) {
+        await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ConsentScreen()));
+        if (mounted) setState(() => _reloadKey++);
+      }
+    } catch (_) {
+      // 동의 확인 실패는 조용히 무시
+    }
+  }
 
   Future<void> _openScan() async {
     final requestId = await Navigator.of(context).push<String>(

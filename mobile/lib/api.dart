@@ -177,6 +177,29 @@ class Api {
     return Map<String, dynamic>.from(
         await post('/api/rewards/${Uri.encodeComponent(id)}/redeem'));
   }
+
+  // ── 동의 / 쿠폰 / 혜택 ────────────────────────────────
+  Future<Map<String, dynamic>> getConsent() async {
+    return Map<String, dynamic>.from(await get('/api/consent'));
+  }
+
+  Future<Map<String, dynamic>> setConsent(Map<String, bool> scopes) async {
+    return Map<String, dynamic>.from(await post('/api/consent', {'scopes': scopes}));
+  }
+
+  Future<List<dynamic>> coupons() async {
+    final data = await get('/api/coupons');
+    return (data['coupons'] as List?) ?? [];
+  }
+
+  Future<Map<String, dynamic>> useCoupon(String id) async {
+    final data = await post('/api/coupons/${Uri.encodeComponent(id)}/use');
+    return Map<String, dynamic>.from(data['coupon'] as Map);
+  }
+
+  Future<Map<String, dynamic>> benefits() async {
+    return Map<String, dynamic>.from(await get('/api/benefits'));
+  }
 }
 
 final api = Api();

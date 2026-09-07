@@ -4,6 +4,7 @@ import { mintLot, transferUid } from "@/lib/ledger/ledgerService";
 import { awardPoints, POINTS, isoWeek } from "@/lib/points/pointsService";
 import { submitSurvey } from "@/lib/points/surveyService";
 import { redeemReward } from "@/lib/points/rewardsService";
+import { setConsent } from "@/lib/consent/consentService";
 
 // 투자자 시연용 "실제처럼 보이는" 데모 데이터 시드(서버사이드).
 // 운영 DB는 외부에서 직접 접속할 수 없으므로 관리자 엔드포인트로 컨테이너 안에서 실행한다.
@@ -162,8 +163,6 @@ export async function seedDemoActivity(): Promise<DemoEnrichResult> {
     result.createdConsumers++;
 
     await awardPoints({ consumerId: consumer.id, reason: "SIGNUP_BONUS", amount: POINTS.SIGNUP_BONUS, dedupeKey: `signup:${consumer.id}`, memo: "가입 축하 포인트" });
-    // 개인정보 수집·활용 동의 보상 — 동의 기반 데이터 활용의 상부상조 모델 반영
-    await awardPoints({ consumerId: consumer.id, reason: "PROFILE_COMPLETION", amount: POINTS.PROFILE_COMPLETION, dedupeKey: `consent:${consumer.id}`, memo: "개인정보 활용 동의 보상" });
 
     // 정품 등록: 풀에서 UID를 꺼내 정식 소매판매 전이 + 등록 포인트
     for (let d = 0; d < spec.devices && p < pool.length; d++) {
@@ -211,9 +210,42 @@ export async function seedDemoActivity(): Promise<DemoEnrichResult> {
     }
   }
 
+  // 동의(스코프별) + 할인 쿠폰 보장 — 신규/기존 데모 계정 모두에 idempotent하게 적용.
+  // 동의 보상 포인트는 dedupeKey로, 쿠폰은 "미보유일 때만 발급"으로 중복을 막는다.
+  const couponEmails = new Set(["juan@demo.ph", "maria@demo.ph", "ramon@demo.ph", "jose@demo.ph"]);
+  for (let i = 0; i < SPECS.length; i++) {
+    const spec = SPECS[i]!;
+    const user = await prisma.user.findUnique({ where: { email: spec.email } });
+    if (!user?.consumerId) continue;
+
+    // 대부분 프로필·사용습관 동의, 절반은 맞춤 광고까지 동의(동의 기반 데이터 활용 모델).
+    await setConsent(user.consumerId, {
+      profile: true,
+      usage: spec.surveys.includes("usage-habits"),
+      marketing: i % 2 === 0,
+      location: i % 3 === 0,
+    });
+
+    // 일부 데모 계정에 할인 쿠폰 1장 발급(미보유일 때만).
+    if (couponEmails.has(spec.email)) {
+      const hasCoupon = await prisma.coupon.count({ where: { consumerId: user.consumerId } });
+      if (hasCoupon === 0) {
+        const reward = await prisma.reward.findUnique({ where: { slug: "discount-10p" } });
+        if (reward) {
+          try {
+            await redeemReward({ consumerId: user.consumerId, rewardId: reward.id });
+            result.redemptions++;
+          } catch {
+            // 잔액 부족 등 무시
+          }
+        }
+      }
+    }
+  }
+
   result.note =
     result.createdConsumers > 0
-      ? `데모 소비자 ${result.createdConsumers}명 생성(등록 ${result.registrations}건, 설문 ${result.surveys}건, 리워드 ${result.redemptions}건).`
-      : "이미 데모 데이터가 존재합니다(변경 없음).";
+      ? `데모 소비자 ${result.createdConsumers}명 생성(등록 ${result.registrations}건, 설문 ${result.surveys}건, 리워드 ${result.redemptions}건). 동의·쿠폰 반영 완료.`
+      : "데모 계정 존재 — 동의·쿠폰만 idempotent하게 보장했습니다.";
   return result;
 }
