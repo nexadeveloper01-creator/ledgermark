@@ -1,0 +1,138 @@
+<title>Demo Cheat Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --ground:#F4F6FA; --surface:#FFFFFF; --surface-2:#EEF2F8;
+    --ink:#14161C; --muted:#5C6577; --faint:#8A93A6;
+    --line:#E4E8F0; --line-strong:#D3DAE6;
+    --accent:#2E6BFF; --accent-deep:#1E52D8; --accent-wash:#E8EFFF;
+    --good:#2E9E5B; --good-wash:#DFF3E7;
+    --danger:#C0392B; --danger-wash:#F7E1DE;
+    --star-wash:#EAF0FF;
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+    --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#0E1116; --surface:#171B22; --surface-2:#1E232C;
+      --ink:#E8ECF3; --muted:#9BA6B8; --faint:#6C7688;
+      --line:#262C37; --line-strong:#333B48;
+      --accent:#5B8CFF; --accent-deep:#7CA4FF; --accent-wash:#18233B;
+      --good:#54E39B; --good-wash:#153026;
+      --danger:#F07568; --danger-wash:#331d1b;
+      --star-wash:#141C30;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0E1116; --surface:#171B22; --surface-2:#1E232C;
+    --ink:#E8ECF3; --muted:#9BA6B8; --faint:#6C7688;
+    --line:#262C37; --line-strong:#333B48;
+    --accent:#5B8CFF; --accent-deep:#7CA4FF; --accent-wash:#18233B;
+    --good:#54E39B; --good-wash:#153026;
+    --danger:#F07568; --danger-wash:#331d1b;
+    --star-wash:#141C30;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); -webkit-font-smoothing:antialiased}
+  .sheet{max-width:920px; margin:0 auto; padding:22px 20px 30px}
+  .head{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; padding-bottom:12px; border-bottom:2px solid var(--accent); margin-bottom:14px}
+  .head h1{margin:0; font-size:20px; font-weight:700; letter-spacing:-.01em}
+  .head .eb{font-family:var(--mono); font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--accent-deep)}
+  .head .tot{margin-left:auto; font-family:var(--mono); font-size:12px; color:var(--muted)}
+  .head .tot b{color:var(--ink)}
+  .rows{display:flex; flex-direction:column; gap:6px}
+  .row{display:grid; grid-template-columns:58px 1.15fr 1.5fr; gap:14px; align-items:start; background:var(--surface); border:1px solid var(--line); border-radius:9px; padding:9px 13px}
+  .row.star{background:var(--star-wash); border-color:var(--accent)}
+  .row.trust{background:var(--good-wash); border-color:transparent}
+  .time{font-family:var(--mono); font-weight:600; font-size:13px; color:var(--accent-deep); font-variant-numeric:tabular-nums; padding-top:1px}
+  .row.trust .time{color:var(--good)}
+  .what .title{font-size:14px; font-weight:600; line-height:1.3; display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+  .what .title .st{font-size:10px}
+  .what .act{font-size:12px; color:var(--muted); margin-top:3px; line-height:1.45}
+  .what .act .mono{font-family:var(--mono); font-size:11px; color:var(--ink)}
+  .say{font-size:13px; line-height:1.4; color:var(--ink); align-self:center}
+  .say .q{color:var(--accent-deep); font-weight:600}
+  .strip{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px}
+  .box{background:var(--surface); border:1px solid var(--line); border-radius:9px; padding:11px 13px}
+  .box .lab{font-family:var(--mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); margin-bottom:7px}
+  .kv{font-size:12px; line-height:1.7; color:var(--muted)}
+  .kv .mono{font-family:var(--mono); font-size:11.5px; color:var(--ink)}
+  .tips{font-size:12px; line-height:1.65; color:var(--muted)}
+  .tips b{color:var(--ink)}
+  @media (max-width:620px){
+    .row{grid-template-columns:52px 1fr}
+    .say{grid-column:1 / -1; padding-top:4px; border-top:1px dashed var(--line)}
+    .strip{grid-template-columns:1fr}
+  }
+  @media print{ body{background:#fff} .row,.box{box-shadow:none} }
+</style>
+
+<div class="sheet">
+  <div class="head">
+    <span class="eb">Cheat Sheet</span>
+    <h1>LEDGERMARK · 10-min demo</h1>
+    <span class="tot"><b>7 stages · 10:00</b> · pw <span style="color:var(--accent-deep)">ledgermark1234</span></span>
+  </div>
+
+  <div class="rows">
+    <div class="row">
+      <div class="time">00:00</div>
+      <div class="what"><div class="title">Problem &amp; market</div><div class="act">Landing screen · market &amp; illicit-loss figures</div></div>
+      <div class="say"><span class="q">"A third is illicit. Not slides — live proof."</span></div>
+    </div>
+
+    <div class="row star">
+      <div class="time">01:00</div>
+      <div class="what"><div class="title"><span class="st">★</span>Vending buy → auto transfer</div><div class="act"><span class="mono">/kiosk</span> buy→verify→dispense (stock−1), <b>scan done-QR on phone</b></div></div>
+      <div class="say"><span class="q">"One scan = ownership + 300 pts."</span></div>
+    </div>
+
+    <div class="row">
+      <div class="time">03:00</div>
+      <div class="what"><div class="title">Consent · points win-win</div><div class="act">App Rewards · consent pts · coupons · discount total</div></div>
+      <div class="say"><span class="q">"Data exchanged for rewards — mutual win."</span></div>
+    </div>
+
+    <div class="row star">
+      <div class="time">04:30</div>
+      <div class="what"><div class="title"><span class="st">★</span>Store checkout — coupon</div><div class="act">App <b>Show coupon QR</b> → <span class="mono">/partner</span> enter price · <b>Scan QR</b> · confirm</div></div>
+      <div class="say"><span class="q">"Points redeemed like cash at the store."</span></div>
+    </div>
+
+    <div class="row trust">
+      <div class="time">06:00</div>
+      <div class="what"><div class="title"><span class="st">★</span>Trust tech — fake block · integrity</div><div class="act"><b>Off-ledger UID</b> blocked · console "No tampering" · police <span class="mono">/field</span> report</div></div>
+      <div class="say"><span class="q">"A tamper-proof ledger. Fakes blocked on screen."</span></div>
+    </div>
+
+    <div class="row">
+      <div class="time">07:30</div>
+      <div class="what"><div class="title">Market AI · free exchange</div><div class="act"><span class="mono">/console</span> Market AI insights &amp; actions · extra free exchange</div></div>
+      <div class="say"><span class="q">"Authenticity data → marketing intelligence."</span></div>
+    </div>
+
+    <div class="row">
+      <div class="time">09:00</div>
+      <div class="what"><div class="title">Close · ask</div><div class="act"><span class="mono">/download</span> · demo 95 · pilot 65 · prod 45 / next: pay·AVP·chain·customs</div></div>
+      <div class="say"><span class="q">"PH pilot → hub-country expansion. Join us."</span></div>
+    </div>
+  </div>
+
+  <div class="strip">
+    <div class="box">
+      <div class="lab">Accounts (pw ledgermark1234)</div>
+      <div class="kv">
+        Consumer <span class="mono">ramon@demo.ph</span> · Store <span class="mono">staff@mm014.test</span><br>
+        Police <span class="mono">officer@pnp.test</span> · Ops <span class="mono">admin@ledgermark.test</span>
+      </div>
+    </div>
+    <div class="box">
+      <div class="lab">Don't forget</div>
+      <div class="tips">
+        <b>Fake demo</b> = keep an off-ledger code ready · <b>QR fails</b> → type code manually · vending↔phone on <b>same Wi-Fi</b> · spend time on the ★ 3 moments (vending transfer · coupon redeem · fake block)
+      </div>
+    </div>
+  </div>
+</div>

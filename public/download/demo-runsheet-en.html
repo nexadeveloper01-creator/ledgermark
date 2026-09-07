@@ -1,0 +1,312 @@
+<title>LEDGERMARK Demo Run Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --ground:#F4F6FA; --surface:#FFFFFF; --surface-2:#EEF2F8;
+    --ink:#14161C; --muted:#5C6577; --faint:#8A93A6;
+    --line:#E4E8F0; --line-strong:#D3DAE6;
+    --accent:#2E6BFF; --accent-deep:#1E52D8; --accent-wash:#E8EFFF;
+    --good:#2E9E5B; --good-wash:#DFF3E7;
+    --warn:#D9642A; --warn-wash:#FBE9DC;
+    --danger:#C0392B; --danger-wash:#F7E1DE;
+    --shadow:0 1px 2px rgba(20,30,60,.04), 0 8px 24px rgba(20,30,60,.06);
+    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+    --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#0E1116; --surface:#171B22; --surface-2:#1E232C;
+      --ink:#E8ECF3; --muted:#9BA6B8; --faint:#6C7688;
+      --line:#262C37; --line-strong:#333B48;
+      --accent:#5B8CFF; --accent-deep:#7CA4FF; --accent-wash:#18233B;
+      --good:#54E39B; --good-wash:#153026;
+      --warn:#F0985B; --warn-wash:#33261B;
+      --danger:#F07568; --danger-wash:#331d1b;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0E1116; --surface:#171B22; --surface-2:#1E232C;
+    --ink:#E8ECF3; --muted:#9BA6B8; --faint:#6C7688;
+    --line:#262C37; --line-strong:#333B48;
+    --accent:#5B8CFF; --accent-deep:#7CA4FF; --accent-wash:#18233B;
+    --good:#54E39B; --good-wash:#153026;
+    --warn:#F0985B; --warn-wash:#33261B;
+    --danger:#F07568; --danger-wash:#331d1b;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--ground); color:var(--ink); font-family:var(--sans); line-height:1.6; -webkit-font-smoothing:antialiased}
+  .wrap{max-width:940px; margin:0 auto; padding:40px 24px 72px}
+  header.top{border-top:3px solid var(--accent); background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:26px 28px; box-shadow:var(--shadow)}
+  .eyebrow{font-family:var(--mono); font-size:11.5px; letter-spacing:.22em; text-transform:uppercase; color:var(--accent-deep); margin:0 0 12px}
+  h1{font-size:clamp(26px,4.4vw,38px); line-height:1.1; margin:0; font-weight:700; letter-spacing:-.02em; text-wrap:balance}
+  .lede{color:var(--muted); font-size:15px; margin:12px 0 0; max-width:64ch}
+  .meta{display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; padding-top:18px; border-top:1px solid var(--line)}
+  .meta .m{font-family:var(--mono); font-size:12px; color:var(--muted); background:var(--surface-2); border:1px solid var(--line); padding:6px 11px; border-radius:8px}
+  .meta .m b{color:var(--ink); font-weight:600}
+  section{margin-top:38px}
+  .sec-label{font-family:var(--mono); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--faint); display:flex; align-items:center; gap:12px; margin:0 0 16px}
+  .sec-label::after{content:""; flex:1; height:1px; background:var(--line)}
+  .prep{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:16px 17px}
+  .card h4{margin:0 0 10px; font-size:13px; letter-spacing:.02em; display:flex; align-items:center; gap:8px}
+  .card h4 .dot{width:7px; height:7px; border-radius:50%; background:var(--accent); flex:none}
+  .card ul{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:7px}
+  .card li{font-size:13px; color:var(--muted); padding-left:18px; position:relative}
+  .card li::before{content:"✓"; position:absolute; left:0; top:0; color:var(--good); font-weight:700; font-size:12px}
+  .card li .mono{font-family:var(--mono); font-size:12px; color:var(--ink)}
+  .timeline{display:flex; flex-direction:column; gap:14px}
+  .seg{display:grid; grid-template-columns:104px 1fr; background:var(--surface); border:1px solid var(--line); border-radius:12px; overflow:hidden; box-shadow:var(--shadow)}
+  .seg-time{background:var(--surface-2); border-right:1px solid var(--line); padding:18px 14px; display:flex; flex-direction:column; gap:2px; align-items:flex-start}
+  .seg-time .t{font-family:var(--mono); font-weight:600; font-size:15px; color:var(--ink); font-variant-numeric:tabular-nums}
+  .seg-time .to{font-family:var(--mono); font-size:12px; color:var(--faint)}
+  .seg-time .dur{margin-top:8px; font-family:var(--mono); font-size:11px; color:var(--accent-deep); background:var(--accent-wash); padding:2px 7px; border-radius:6px}
+  .seg-body{padding:18px 20px}
+  .seg-head{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:8px}
+  .seg-head h3{margin:0; font-size:17px; font-weight:600; letter-spacing:-.01em; text-wrap:balance}
+  .num{font-family:var(--mono); color:var(--faint); font-size:13px; font-weight:500}
+  .chip{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; padding:3px 9px; border-radius:20px; font-weight:600; white-space:nowrap}
+  .chip.star{background:var(--accent); color:#fff}
+  .chip.trust{background:var(--good-wash); color:var(--good)}
+  .surface{font-family:var(--mono); font-size:12px; color:var(--muted); display:flex; flex-wrap:wrap; gap:8px 14px; margin-bottom:12px}
+  .surface span{display:inline-flex; align-items:center; gap:6px}
+  .surface .k{color:var(--faint)}
+  .surface .v{color:var(--ink)}
+  .say{margin:0 0 12px; padding:11px 14px; border-left:3px solid var(--accent); background:var(--accent-wash); border-radius:0 8px 8px 0; font-size:14px; color:var(--ink)}
+  .say::before{content:"SAY  "; font-family:var(--mono); font-size:10px; letter-spacing:.1em; color:var(--accent-deep); text-transform:uppercase}
+  ol.steps{margin:0 0 12px; padding-left:20px; display:flex; flex-direction:column; gap:5px}
+  ol.steps li{font-size:13.5px; color:var(--muted)}
+  ol.steps li b{color:var(--ink); font-weight:600}
+  .kbd{font-family:var(--mono); font-size:12px; background:var(--surface-2); border:1px solid var(--line-strong); border-radius:5px; padding:1px 6px; color:var(--ink)}
+  .point{font-size:13px; color:var(--ink); background:var(--surface-2); border:1px solid var(--line); border-radius:9px; padding:10px 13px; display:flex; gap:9px}
+  .point.trust{background:var(--good-wash); border-color:transparent}
+  .point.danger{background:var(--danger-wash); border-color:transparent}
+  .point .lab{font-family:var(--mono); font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent-deep); flex:none; padding-top:2px}
+  .point.trust .lab{color:var(--good)}
+  .point.danger .lab{color:var(--danger)}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:20px}
+  table{width:100%; border-collapse:collapse; font-size:13px}
+  th,td{text-align:left; padding:9px 10px; border-bottom:1px solid var(--line)}
+  th{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); font-weight:500}
+  td .mono{font-family:var(--mono); color:var(--ink)}
+  td .role{color:var(--muted)}
+  .links{display:flex; flex-direction:column; gap:9px}
+  .links a{font-family:var(--mono); font-size:13px; color:var(--accent-deep); text-decoration:none; display:flex; justify-content:space-between; gap:12px; padding:10px 13px; background:var(--surface); border:1px solid var(--line); border-radius:9px}
+  .links a:hover{border-color:var(--accent)}
+  .links a .path{color:var(--muted)}
+  .links a:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  .note{margin-top:20px; font-size:13px; color:var(--muted); line-height:1.7; background:var(--warn-wash); border-radius:11px; padding:15px 17px}
+  .note b{color:var(--ink)}
+  .note .lab{font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--warn); display:block; margin-bottom:6px}
+  footer{margin-top:40px; padding-top:20px; border-top:1px solid var(--line); font-size:12px; color:var(--faint); font-family:var(--mono)}
+  @media (max-width:560px){
+    .seg{grid-template-columns:1fr}
+    .seg-time{flex-direction:row; align-items:center; gap:10px; border-right:0; border-bottom:1px solid var(--line); padding:12px 16px}
+    .seg-time .dur{margin-top:0; margin-left:auto}
+    .grid2{grid-template-columns:1fr}
+  }
+  @media print{ body{background:#fff} .seg,.card,header.top{box-shadow:none} }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">Investor Demo · Run Sheet</p>
+    <h1>LEDGERMARK 10-Minute Demo Run Sheet</h1>
+    <p class="lede">An anti-counterfeit distribution platform that tracks every product from factory to consumer with a single UID. A presenter run sheet for walking five role surfaces live on the production server.</p>
+    <div class="meta">
+      <span class="m"><b>10:00 total</b> · 7 stages</span>
+      <span class="m">5 roles · consumer · vending · store · police · gov/ops</span>
+      <span class="m">Env <b>live cloud</b></span>
+      <span class="m">Shared password <b>ledgermark1234</b></span>
+    </div>
+  </header>
+
+  <section>
+    <p class="sec-label">Pre-flight (T-10 min)</p>
+    <div class="prep">
+      <div class="card">
+        <h4><span class="dot"></span>4 devices</h4>
+        <ul>
+          <li>Vending screen — tablet/laptop <span class="mono">/kiosk</span></li>
+          <li>Consumer phone — app (APK)</li>
+          <li>Store POS — laptop <span class="mono">/partner</span></li>
+          <li>Ops console — laptop <span class="mono">/console</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4><span class="dot"></span>Sign in ahead</h4>
+        <ul>
+          <li>Consumer <span class="mono">ramon@demo.ph</span></li>
+          <li>Store <span class="mono">staff@mm014.test</span></li>
+          <li>Police <span class="mono">officer@pnp.test</span></li>
+          <li>Ops <span class="mono">admin@ledgermark.test</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4><span class="dot"></span>State check</h4>
+        <ul>
+          <li>Vending stock OK (not sold out)</li>
+          <li>One genuine UID ready</li>
+          <li>An off-ledger code for the fake test</li>
+          <li>Network · screen brightness</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4><span class="dot"></span>Backup</h4>
+        <ul>
+          <li>Pre-load each screen</li>
+          <li>Screenshot key moments</li>
+          <li>Allow phone camera</li>
+          <li>Show QR big &amp; bright</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="sec-label">Timeline</p>
+    <div class="timeline">
+
+      <article class="seg">
+        <div class="seg-time"><span class="t">00:00</span><span class="to">↓ 01:00</span><span class="dur">1 min</span></div>
+        <div class="seg-body">
+          <div class="seg-head"><span class="num">01</span><h3>The problem &amp; the market</h3></div>
+          <div class="surface"><span><span class="k">Screen</span> <span class="v">Landing /</span></span><span><span class="k">Lead</span> <span class="v">Presenter</span></span></div>
+          <p class="say">"The Philippine vape market is growing fast, but a third of it is illicit. We track every product from factory to consumer with one UID to stop that leakage."</p>
+          <ol class="steps">
+            <li>Point to the market-size and illicit-loss figures on the landing page</li>
+            <li>Pivot: "Today isn't slides — it's the <b>real server and apps</b>"</li>
+          </ol>
+          <div class="point"><span class="lab">Frame</span><span>Set up front that this is proven with a live product, not talk.</span></div>
+        </div>
+      </article>
+
+      <article class="seg">
+        <div class="seg-time"><span class="t">01:00</span><span class="to">↓ 03:00</span><span class="dur">2 min</span></div>
+        <div class="seg-body">
+          <div class="seg-head"><span class="num">02</span><h3>Vending purchase → automatic ownership transfer</h3><span class="chip star">Highlight</span></div>
+          <div class="surface"><span><span class="k">Screen</span> <span class="v">/kiosk (vending)</span></span><span><span class="k">Phone</span> <span class="v">ramon@demo.ph</span></span></div>
+          <p class="say">"The consumer buys at the machine. It verifies authenticity and age against the ledger, dispenses, and stock drops by one in real time. Then one QR scan on the phone transfers ownership."</p>
+          <ol class="steps">
+            <li>Vending: <span class="kbd">Start</span> → pick product → <b>Genuine · sellable</b> → <span class="kbd">Verify age</span> → <b>Dispensed</b> (stock −1)</li>
+            <li>Scan the <b>claim QR</b> on the done screen with the phone app</li>
+            <li>App: "Ownership transferred · +300 pts" instantly → new device appears in Products</li>
+          </ol>
+          <div class="point"><span class="lab">Punch</span><span>No store-clerk approval — one scan finishes ownership transfer, registration and <b>300 pts</b>. Zero paper.</span></div>
+        </div>
+      </article>
+
+      <article class="seg">
+        <div class="seg-time"><span class="t">03:00</span><span class="to">↓ 04:30</span><span class="dur">1.5 min</span></div>
+        <div class="seg-body">
+          <div class="seg-head"><span class="num">03</span><h3>Consent-based data · points win-win</h3></div>
+          <div class="surface"><span><span class="k">Screen</span> <span class="v">App · Rewards</span></span><span><span class="k">Account</span> <span class="v">ramon@demo.ph</span></span></div>
+          <p class="say">"Users consent to data use and get points in return. They earn more via surveys and weekly check-ins, then convert points into discount coupons and prizes. The company gets consented data; the user gets cash-like value."</p>
+          <ol class="steps">
+            <li>Rewards card: show <b>consent points · coupons held · discount total</b></li>
+            <li>Optionally answer one survey to bump points live</li>
+            <li>Confirm a 10% coupon is held → move on</li>
+          </ol>
+          <div class="point"><span class="lab">Punch</span><span>Data collection isn't "taking" — it's <b>exchanged for rewards</b>, the engine of retention and marketing data.</span></div>
+        </div>
+      </article>
+
+      <article class="seg">
+        <div class="seg-time"><span class="t">04:30</span><span class="to">↓ 06:00</span><span class="dur">1.5 min</span></div>
+        <div class="seg-body">
+          <div class="seg-head"><span class="num">04</span><h3>Store checkout — coupon QR scan &amp; redemption</h3><span class="chip star">Highlight</span></div>
+          <div class="surface"><span><span class="k">Screen</span> <span class="v">/partner · Checkout</span></span><span><span class="k">Account</span> <span class="v">staff@mm014.test</span></span></div>
+          <p class="say">"The discount coupon earned with points is used at real checkout. The app shows a QR, the store scans it, and the discount comes right off the price."</p>
+          <ol class="steps">
+            <li>App: Rewards → coupon <span class="kbd">Show QR</span></li>
+            <li>Store POS: enter price → <span class="kbd">Scan QR</span> → preview discount → <span class="kbd">Confirm payment</span></li>
+            <li>Receipt: price → discount → total, coupon marked <b>Used</b> (no reuse)</li>
+          </ol>
+          <div class="point"><span class="lab">Punch</span><span>Points return as real cash value at the store — user benefit and store revenue in one flow.</span></div>
+        </div>
+      </article>
+
+      <article class="seg">
+        <div class="seg-time"><span class="t">06:00</span><span class="to">↓ 07:30</span><span class="dur">1.5 min</span></div>
+        <div class="seg-body">
+          <div class="seg-head"><span class="num">05</span><h3>Trust tech — fake blocked · ledger integrity · field enforcement</h3><span class="chip trust">Differentiator</span></div>
+          <div class="surface"><span><span class="k">Screen</span> <span class="v">/kiosk · /console · /field</span></span><span><span class="k">Account</span> <span class="v">officer@pnp.test · admin</span></span></div>
+          <p class="say">"Products that skipped customs are blocked from sale at the machine and the store, and escalate to the console as a smuggling alert. The ledger is a hash chain — even we can't tamper with it. The police field terminal produces seizure grounds and a report in one scan."</p>
+          <ol class="steps">
+            <li>Try an <b>off-ledger UID</b> at vending/store → "Not sellable · counterfeit suspected" block</li>
+            <li>Console <span class="kbd">Ledger status</span>: "No tampering detected" integrity result</li>
+            <li>Police <span class="kbd">Field lookup</span>: verdict + report (officer · location · ledger snapshot) auto-generated</li>
+          </ol>
+          <div class="point danger"><span class="lab">Core</span><span>"Blockchain trust" shown with your own eyes — a <b>blocked screen</b> and a <b>tamper-proof ledger</b>, not a claim.</span></div>
+        </div>
+      </article>
+
+      <article class="seg">
+        <div class="seg-time"><span class="t">07:30</span><span class="to">↓ 09:00</span><span class="dur">1.5 min</span></div>
+        <div class="seg-body">
+          <div class="seg-head"><span class="num">06</span><h3>Company AI market intelligence · free exchange</h3></div>
+          <div class="surface"><span><span class="k">Screen</span> <span class="v">/console · Market AI</span></span><span><span class="k">Account</span> <span class="v">admin@ledgermark.test</span></span></div>
+          <p class="say">"The ops dashboard compares our measured data against the market and auto-generates daily insights and recommended actions — where to grow and where to spend on marketing."</p>
+          <ol class="steps">
+            <li>Market AI tab: measured (registrations · WAU · surveys) vs market (growth · illicit · segments)</li>
+            <li>AI insights (opportunity/risk) + auto recommended-action cards</li>
+            <li>App Products: note the <b>extra free exchange</b> unlocked for fully engaged users</li>
+          </ol>
+          <div class="point"><span class="lab">Punch</span><span>Authenticity data cycles back into <b>marketing intelligence</b> that grows the market.</span></div>
+        </div>
+      </article>
+
+      <article class="seg">
+        <div class="seg-time"><span class="t">09:00</span><span class="to">↓ 10:00</span><span class="dur">1 min</span></div>
+        <div class="seg-body">
+          <div class="seg-head"><span class="num">07</span><h3>Status · roadmap · ask</h3></div>
+          <div class="surface"><span><span class="k">Screen</span> <span class="v">/download (role builds)</span></span></div>
+          <p class="say">"Everything you saw is live today. Demo and pilot are ready; next is real integration of payments, age verification and public-chain anchoring, plus regulator connections. We start with a Philippine pilot and expand to hub countries."</p>
+          <ol class="steps">
+            <li>Completeness: <b>demo ~95% · pilot ~65% · production ~45%</b></li>
+            <li>Next integrations: payment PG · age verification (AVP) · public-chain anchoring · customs</li>
+            <li>Ask: pilot scale · investment · expansion roadmap</li>
+          </ol>
+          <div class="point trust"><span class="lab">Close</span><span>"Five roles, one ledger — you can scan it right now." Point to the download QR to install on the spot.</span></div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <section>
+    <p class="sec-label">Accounts · links</p>
+    <div class="grid2">
+      <div class="card" style="padding:6px 4px">
+        <table>
+          <thead><tr><th>Role</th><th>Email</th></tr></thead>
+          <tbody>
+            <tr><td class="role">Active consumer</td><td><span class="mono">ramon@demo.ph</span></td></tr>
+            <tr><td class="role">Regular consumer</td><td><span class="mono">juan@demo.ph</span></td></tr>
+            <tr><td class="role">Store staff</td><td><span class="mono">staff@mm014.test</span></td></tr>
+            <tr><td class="role">Police officer</td><td><span class="mono">officer@pnp.test</span></td></tr>
+            <tr><td class="role">Customs inspector</td><td><span class="mono">inspector@boc.test</span></td></tr>
+            <tr><td class="role">Platform operator</td><td><span class="mono">admin@ledgermark.test</span></td></tr>
+          </tbody>
+        </table>
+        <p style="font-family:var(--mono); font-size:11.5px; color:var(--faint); margin:8px 10px 4px">Shared password · ledgermark1234</p>
+      </div>
+      <div class="links">
+        <a href="https://app-production-daca.up.railway.app/download"><span>Role builds · download hub</span><span class="path">/download</span></a>
+        <a href="https://app-production-daca.up.railway.app/kiosk"><span>Unmanned vending</span><span class="path">/kiosk</span></a>
+        <a href="https://app-production-daca.up.railway.app/console"><span>Console · Market AI</span><span class="path">/console</span></a>
+        <a href="https://app-production-daca.up.railway.app/partner"><span>Store checkout POS</span><span class="path">/partner</span></a>
+        <a href="https://app-production-daca.up.railway.app/field"><span>Police field terminal</span><span class="path">/field</span></a>
+      </div>
+    </div>
+    <div class="note">
+      <span class="lab">Contingency</span>
+      <b>If the network is flaky</b>, pre-open each screen and run the vending→app QR scan on the same Wi-Fi. If the camera won't read, fall back to manual code entry (vending done-code / coupon code). For the fake-block demo, keep an <b>off-ledger arbitrary code</b> ready.
+    </div>
+  </section>
+
+  <footer>LEDGERMARK · Investor Demo Run Sheet · live at app-production-daca.up.railway.app</footer>
+</div>
