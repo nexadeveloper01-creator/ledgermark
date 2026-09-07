@@ -8,8 +8,17 @@ import { Tag } from "@/components/ui/Tag";
 import { SessionBar, useSession } from "@/components/SessionBar";
 import { Accounts } from "@/components/console/Accounts";
 import { Production } from "@/components/console/Production";
+import { MarketIntel } from "@/components/console/MarketIntel";
 
-type Module = "dashboard" | "lookup" | "alerts" | "ledger" | "audit" | "accounts" | "production";
+type Module =
+  | "dashboard"
+  | "lookup"
+  | "alerts"
+  | "ledger"
+  | "audit"
+  | "accounts"
+  | "production"
+  | "market";
 
 const MODULES: { key: Module; label: string }[] = [
   { key: "dashboard", label: "대시보드" },
@@ -20,6 +29,7 @@ const MODULES: { key: Module; label: string }[] = [
 ];
 
 const ADMIN_MODULES: { key: Module; label: string }[] = [
+  { key: "market", label: "시장분석 (AI)" },
   { key: "production", label: "생산·라벨" },
   { key: "accounts", label: "계정 관리" },
 ];
@@ -111,6 +121,7 @@ export default function ConsolePage() {
         {module === "production" && (
           <Production canMint={user.role === "ADMIN"} />
         )}
+        {module === "market" && user.role === "ADMIN" && <MarketIntel />}
       </div>
     </div>
   );
