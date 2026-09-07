@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../api.dart';
 import '../theme.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'widgets.dart';
 import 'survey_screen.dart';
 import 'consent_screen.dart';
@@ -110,26 +111,43 @@ class _RewardsTabState extends State<RewardsTab> {
     if (changed == true && mounted) await _load();
   }
 
-  Future<void> _useCoupon(Map<String, dynamic> c) async {
-    final ok = await showDialog<bool>(
+  // 쿠폰 QR 제시 — 매장 POS가 이 QR을 스캔해 결제 시 차감한다.
+  void _showCouponQr(Map<String, dynamic> c) {
+    final code = c['code'] as String? ?? '';
+    showModalBottomSheet(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(c['label'] as String? ?? '쿠폰 사용'),
-        content: Text('쿠폰(${c['code']})을 사용 처리할까요? 매장/결제 시 제시하세요.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('취소')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('사용')),
-        ],
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (_) => Padding(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: Lm.line, borderRadius: BorderRadius.circular(2))),
+            const SizedBox(height: 18),
+            Text(c['label'] as String? ?? '할인 쿠폰', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 4),
+            const Text('매장 계산대에서 이 QR을 보여주세요', style: TextStyle(fontSize: 13, color: Lm.muted)),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), boxShadow: Lm.cardShadow),
+              child: QrImageView(
+                data: code,
+                version: QrVersions.auto,
+                size: 220,
+                eyeStyle: const QrEyeStyle(eyeShape: QrEyeShape.square, color: Lm.text),
+                dataModuleStyle: const QrDataModuleStyle(dataModuleShape: QrDataModuleShape.square, color: Lm.text),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(code, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, fontFamily: 'monospace', letterSpacing: 1)),
+            const SizedBox(height: 6),
+            const Text('결제가 완료되면 자동으로 사용 처리됩니다.', style: TextStyle(fontSize: 11, color: Lm.muted)),
+          ],
+        ),
       ),
     );
-    if (ok != true) return;
-    try {
-      await api.useCoupon(c['id'] as String);
-      if (mounted) _toast('쿠폰을 사용 처리했습니다.');
-      await _load();
-    } catch (e) {
-      if (mounted) _toast(e.toString());
-    }
   }
 
   void _toast(String m) {
@@ -324,15 +342,16 @@ class _RewardsTabState extends State<RewardsTab> {
               ),
             ),
             const SizedBox(width: 10),
-            FilledButton(
-              onPressed: usable ? () => _useCoupon(c) : null,
+            FilledButton.icon(
+              onPressed: usable ? () => _showCouponQr(c) : null,
+              icon: const Icon(Icons.qr_code_2_rounded, size: 18),
+              label: const Text('QR 제시'),
               style: FilledButton.styleFrom(
                 backgroundColor: Lm.primary,
                 disabledBackgroundColor: Lm.surface,
                 minimumSize: const Size(0, 40),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text('사용'),
             ),
           ],
         ),

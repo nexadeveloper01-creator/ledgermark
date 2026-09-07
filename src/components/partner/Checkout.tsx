@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Corners } from "@/components/ui/Corners";
 
-// 매장 결제(POS): 정가 입력 + 소비자 쿠폰 코드 조회 → 할인 차감 → 결제 확정.
+// 매장 결제(POS): 정가 입력 + 소비자 쿠폰 QR 스캔(또는 코드 입력) → 할인 차감 → 결제 확정.
 export function Checkout() {
   const [amount, setAmount] = useState("");
   const [code, setCode] = useState("");
@@ -12,6 +12,8 @@ export function Checkout() {
   const [receipt, setReceipt] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const scannerRef = useRef<any>(null);
 
   const amountNum = Math.floor(Number(amount)) || 0;
   const previewDiscount =
@@ -22,12 +24,13 @@ export function Checkout() {
       : 0;
   const previewTotal = amountNum - previewDiscount;
 
-  const doLookup = async () => {
+  const doLookup = async (raw?: string) => {
+    const q = (raw ?? code).trim().toUpperCase();
     setError(null);
     setReceipt(null);
     setLookup(null);
-    if (!code.trim()) return;
-    const res = await fetch(`/api/store/coupon?code=${encodeURIComponent(code.trim())}`);
+    if (!q) return;
+    const res = await fetch(`/api/store/coupon?code=${encodeURIComponent(q)}`);
     const body = await res.json();
     if (!res.ok) {
       setError(body.error ?? "조회 실패");
@@ -36,6 +39,55 @@ export function Checkout() {
     setLookup(body);
     if (!body.found) setError("존재하지 않는 쿠폰 코드입니다.");
   };
+
+  const stopScan = async () => {
+    const s = scannerRef.current;
+    scannerRef.current = null;
+    if (s) {
+      try {
+        await s.stop();
+        await s.clear();
+      } catch {
+        /* 이미 정지됨 */
+      }
+    }
+    setScanning(false);
+  };
+
+  const startScan = async () => {
+    setError(null);
+    setReceipt(null);
+    setScanning(true);
+    try {
+      const { Html5Qrcode } = await import("html5-qrcode");
+      // 렌더 후 reader div가 존재하도록 다음 틱까지 대기
+      await new Promise((r) => setTimeout(r, 50));
+      const scanner = new Html5Qrcode("lm-qr-reader");
+      scannerRef.current = scanner;
+      await scanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 240 },
+        async (decoded: string) => {
+          const text = decoded.trim().toUpperCase();
+          setCode(text);
+          await stopScan();
+          doLookup(text);
+        },
+        () => {}
+      );
+    } catch (e) {
+      setError("카메라를 열 수 없습니다. 코드 직접 입력을 사용하세요.");
+      await stopScan();
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      // 언마운트 시 카메라 정리
+      const s = scannerRef.current;
+      if (s) s.stop().catch(() => {});
+    };
+  }, []);
 
   const pay = async () => {
     setError(null);
@@ -87,7 +139,7 @@ export function Checkout() {
         </div>
 
         <div className="field" style={{ marginBottom: 8 }}>
-          <label>쿠폰 코드 (선택)</label>
+          <label>쿠폰 (앱 QR 스캔 또는 코드 입력)</label>
           <div style={{ display: "flex", gap: 8 }}>
             <input
               className="input"
@@ -97,11 +149,26 @@ export function Checkout() {
               onKeyDown={(e) => e.key === "Enter" && doLookup()}
               style={{ flex: 1, fontFamily: "ui-monospace, Menlo, monospace" }}
             />
-            <Button variant="secondary" onClick={doLookup}>
+            <Button variant="primary" onClick={scanning ? stopScan : startScan}>
+              {scanning ? "중지" : "QR 스캔"}
+            </Button>
+            <Button variant="secondary" onClick={() => doLookup()}>
               조회
             </Button>
           </div>
         </div>
+
+        {scanning && (
+          <div style={{ margin: "8px 0 4px" }}>
+            <div
+              id="lm-qr-reader"
+              style={{ width: "100%", maxWidth: 320, margin: "0 auto", border: "1px solid var(--color-divider)" }}
+            />
+            <p className="text-muted" style={{ fontSize: 11, textAlign: "center", marginTop: 6 }}>
+              소비자 앱의 쿠폰 QR을 카메라에 비춰주세요.
+            </p>
+          </div>
+        )}
 
         {lookup?.found && (
           <div
