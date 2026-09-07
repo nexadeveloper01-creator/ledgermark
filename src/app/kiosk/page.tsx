@@ -8,7 +8,7 @@ import QRCode from "qrcode";
 // 결제·배출은 데모 시뮬레이션. 원장은 변경하지 않으며, 구매자는 배출된 제품의
 // 정품 등록 코드를 소비자 앱에서 등록한다.
 type Step = "idle" | "select" | "verify" | "age" | "pay" | "done" | "reject";
-type Item = { code: string; productName: string; lotCode: string };
+type Item = { code: string; productName: string; lotCode: string; available: number };
 
 export default function KioskPage() {
   const [step, setStep] = useState<Step>("idle");
@@ -37,6 +37,12 @@ export default function KioskPage() {
     setQr("");
     setClaimCode("");
     setStep("idle");
+    loadStock(); // 재고 갱신(직전 구매분 소진 반영)
+  };
+
+  const startShopping = () => {
+    loadStock();
+    setStep("select");
   };
 
   const pick = async (it: Item) => {
@@ -92,7 +98,7 @@ export default function KioskPage() {
           <div style={sx.center}>
             <div style={sx.big}>정품 전자담배 자판기</div>
             <p style={sx.sub}>블록체인 원장으로 정품을 확인하고 구매하세요.</p>
-            <button style={sx.cta} onClick={() => setStep("select")}>
+            <button style={sx.cta} onClick={startShopping}>
               구매 시작
             </button>
             <p style={sx.note}>만 20세 미만 구매 불가 · 신분 확인이 진행됩니다</p>
@@ -107,6 +113,7 @@ export default function KioskPage() {
                 <button key={it.code} style={sx.product} onClick={() => pick(it)}>
                   <div style={{ fontSize: 15, fontWeight: 800 }}>{it.productName}</div>
                   <div style={sx.mono}>{it.lotCode}</div>
+                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 6 }}>재고 {it.available}개</div>
                   <div style={sx.buy}>구매</div>
                 </button>
               ))}

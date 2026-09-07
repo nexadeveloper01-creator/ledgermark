@@ -21,10 +21,12 @@ export async function verifyForKiosk(code: string) {
   if (!uid) {
     return { found: false, code, verdict: "NOT_LEDGER" as KioskVerdict, label: VERDICT_LABEL.NOT_LEDGER };
   }
+  // 이미 배출(예약)됐거나 판매된 UID는 판매 불가로 본다.
+  const reserved = await prisma.kioskSale.count({ where: { uidId: uid.id } });
   let verdict: KioskVerdict;
   switch (uid.status) {
     case "WHOLESALE":
-      verdict = "SELLABLE";
+      verdict = reserved > 0 ? "ALREADY_SOLD" : "SELLABLE";
       break;
     case "RETAIL_SOLD":
     case "EXCHANGED":
@@ -53,22 +55,33 @@ function newClaimCode(): string {
   return `LMK-${b.slice(0, 4)}-${b.slice(4, 8)}`;
 }
 
-// 결제/배출 시점: 판매 가능한 UID에 대해 클레임을 발급한다(원장은 아직 변경하지 않음 —
-// 소유권은 소비자가 앱에서 클레임 스캔할 때 이전된다). QR에는 이 claimCode를 담는다.
+// 결제/배출 시점: 재고 UID를 예약(소진) 처리하고 클레임을 발급한다. 원장 소유권은 아직
+// 바꾸지 않고(소비자가 앱에서 클레임 스캔 시 이전), KioskSale 예약으로 재고에서 즉시 제외한다.
+// 선택한 UID가 이미 예약/판매됐으면 같은 제품(LOT)의 다른 가용 UID로 대체 배출한다.
 export async function dispenseSale(code: string): Promise<{ claimCode: string; productName: string }> {
-  const uid = await prisma.uid.findUnique({ where: { code }, include: { lot: true } });
+  const uid = await prisma.uid.findUnique({ where: { code }, include: { lot: true, kioskSales: true } });
   if (!uid) throw new LedgerError("존재하지 않는 제품입니다.");
-  if (uid.status !== "WHOLESALE" || !uid.ownerOrgId) {
-    throw new LedgerError("판매 가능한 상태의 제품이 아닙니다.");
+
+  // 이 UID에 이미 대기 클레임이 있으면 같은 세션의 재배출로 보고 재사용(중복 발급 방지).
+  const pending = uid.kioskSales.find((s) => s.status === "PENDING");
+  if (pending) return { claimCode: pending.claimCode, productName: uid.lot.productName };
+
+  // 대상 UID가 판매 불가(예약/판매됨/상태부적합)면 같은 LOT의 가용 UID로 대체.
+  let target = uid;
+  const unavailable = uid.kioskSales.length > 0 || uid.status !== "WHOLESALE" || !uid.ownerOrgId;
+  if (unavailable) {
+    const alt = await prisma.uid.findFirst({
+      where: { lotId: uid.lotId, status: "WHOLESALE", ownerOrgId: { not: null }, kioskSales: { none: {} } },
+      include: { lot: true, kioskSales: true },
+    });
+    if (!alt) throw new LedgerError("해당 제품의 재고가 소진되었습니다.");
+    target = alt;
   }
-  // 이미 대기 중인 클레임이 있으면 재사용(중복 배출 방지).
-  const existing = await prisma.kioskSale.findFirst({ where: { uidId: uid.id, status: "PENDING" } });
-  if (existing) return { claimCode: existing.claimCode, productName: uid.lot.productName };
 
   const sale = await prisma.kioskSale.create({
-    data: { uidId: uid.id, claimCode: newClaimCode(), orgId: uid.ownerOrgId },
+    data: { uidId: target.id, claimCode: newClaimCode(), orgId: target.ownerOrgId },
   });
-  return { claimCode: sale.claimCode, productName: uid.lot.productName };
+  return { claimCode: sale.claimCode, productName: target.lot.productName };
 }
 
 export type ClaimResult = { productName: string; uidCode: string; awarded: number; balance: number };
@@ -121,21 +134,20 @@ export async function claimSale(consumerId: string, claimCode: string): Promise<
   return { productName: uid.lot.productName, uidCode: uid.code, awarded, balance };
 }
 
-// 자판기 재고(판매 가능한 WHOLESALE UID)에서 제품별 대표 1개씩 노출.
-export async function kioskStock(limit = 4) {
+// 자판기 재고 — 판매 가능한(WHOLESALE, 예약/판매 이력 없는) UID를 제품별로 집계.
+// 대표 code 1개 + 가용 수량(available)을 함께 반환한다.
+export async function kioskStock(limit = 6) {
   const uids = await prisma.uid.findMany({
-    where: { status: "WHOLESALE" },
-    take: 40,
+    where: { status: "WHOLESALE", ownerOrgId: { not: null }, kioskSales: { none: {} } },
     orderBy: { createdAt: "asc" },
     select: { code: true, lot: { select: { productName: true, code: true } } },
   });
-  const seen = new Set<string>();
-  const items: { code: string; productName: string; lotCode: string }[] = [];
+  const byProduct = new Map<string, { code: string; productName: string; lotCode: string; available: number }>();
   for (const u of uids) {
-    if (seen.has(u.lot.productName)) continue;
-    seen.add(u.lot.productName);
-    items.push({ code: u.code, productName: u.lot.productName, lotCode: u.lot.code });
-    if (items.length >= limit) break;
+    const key = u.lot.productName;
+    const cur = byProduct.get(key);
+    if (cur) cur.available += 1;
+    else byProduct.set(key, { code: u.code, productName: key, lotCode: u.lot.code, available: 1 });
   }
-  return items;
+  return [...byProduct.values()].slice(0, limit);
 }
