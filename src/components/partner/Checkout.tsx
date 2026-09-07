@@ -13,6 +13,8 @@ export function Checkout() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [scanning, setScanning] = useState(false);
+  const [method, setMethod] = useState<"CASH" | "CARD" | "OTHER">("CASH");
+  const [reference, setReference] = useState("");
   const scannerRef = useRef<any>(null);
 
   const amountNum = Math.floor(Number(amount)) || 0;
@@ -100,7 +102,12 @@ export function Checkout() {
       const res = await fetch("/api/store/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: amountNum, couponCode: lookup?.usable ? code.trim() : null }),
+        body: JSON.stringify({
+          amount: amountNum,
+          couponCode: lookup?.usable ? code.trim() : null,
+          method,
+          reference: reference.trim() || null,
+        }),
       });
       const body = await res.json();
       if (!res.ok) {
@@ -111,6 +118,7 @@ export function Checkout() {
       setLookup(null);
       setCode("");
       setAmount("");
+      setReference("");
     } finally {
       setBusy(false);
     }
@@ -136,6 +144,39 @@ export function Checkout() {
             value={amount}
             onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ""))}
           />
+        </div>
+
+        <div className="field" style={{ marginBottom: 16 }}>
+          <label>결제 수단</label>
+          <div style={{ display: "flex", gap: 8 }}>
+            {(["CASH", "CARD", "OTHER"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMethod(m)}
+                className="btn"
+                style={{
+                  flex: 1,
+                  height: 40,
+                  fontSize: 13,
+                  border: `1px solid ${method === m ? "var(--color-accent)" : "var(--color-divider)"}`,
+                  background: method === m ? "var(--color-accent-100)" : "var(--color-surface, #fff)",
+                  color: method === m ? "var(--color-accent-900)" : "var(--color-muted)",
+                }}
+              >
+                {m === "CASH" ? "현금" : m === "CARD" ? "카드" : "기타"}
+              </button>
+            ))}
+          </div>
+          {method !== "CASH" && (
+            <input
+              className="input"
+              placeholder="승인번호·참조 (선택)"
+              value={reference}
+              onChange={(e) => setReference(e.target.value)}
+              style={{ marginTop: 8 }}
+            />
+          )}
         </div>
 
         <div className="field" style={{ marginBottom: 8 }}>
@@ -212,6 +253,8 @@ export function Checkout() {
           <Row k="정가" v={`₱${receipt.amount.toLocaleString()}`} />
           {receipt.coupon && <Row k={`쿠폰 (${receipt.coupon.code})`} v={receipt.coupon.label} />}
           <Row k="할인" v={receipt.discount > 0 ? `- ₱${receipt.discount.toLocaleString()}` : "₱0"} accent={receipt.discount > 0} />
+          <Row k="결제 수단" v={receipt.method === "CASH" ? "현금" : receipt.method === "CARD" ? "카드" : "기타"} />
+          {receipt.reference && <Row k="참조" v={receipt.reference} />}
           <Row k="결제 금액" v={`₱${receipt.total.toLocaleString()}`} strong />
           <p className="text-muted" style={{ fontSize: 11, marginTop: 10 }}>
             쿠폰은 사용 완료 처리되어 재사용할 수 없습니다.

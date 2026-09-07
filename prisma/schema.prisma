@@ -524,6 +524,8 @@ model StoreCheckout {
   amount      Int // 정가(페소)
   discount    Int // 할인액(페소)
   total       Int // 실제 결제액(페소)
+  method      String   @default("CASH") // CASH | CARD | OTHER (파일럿: PG 없이 수단 기록)
+  reference   String? // 카드 승인번호·영수증 번호 등(선택)
   couponId    String?  @unique
   coupon      Coupon?  @relation(fields: [couponId], references: [id])
   couponCode  String?
