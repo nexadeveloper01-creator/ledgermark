@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 서버 API 통신 및 WebView(단말 앱) 로딩에 필요. 릴리스 빌드에도 명시. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <!-- QR/UID 스캔에 후면 카메라를 사용한다. 카메라가 없는 기기도 설치 가능하도록 required=false. -->
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
