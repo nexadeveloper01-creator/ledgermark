@@ -8,7 +8,7 @@ import QRCode from "qrcode";
 // 결제·배출은 데모 시뮬레이션. 원장은 변경하지 않으며, 구매자는 배출된 제품의
 // 정품 등록 코드를 소비자 앱에서 등록한다.
 type Step = "idle" | "select" | "verify" | "age" | "pay" | "done" | "reject";
-type Item = { code: string; productName: string; lotCode: string; available: number };
+type Item = { code: string | null; productName: string; lotCode: string; available: number; soldOut: boolean };
 
 export default function KioskPage() {
   const [step, setStep] = useState<Step>("idle");
@@ -46,6 +46,7 @@ export default function KioskPage() {
   };
 
   const pick = async (it: Item) => {
+    if (it.soldOut || !it.code) return; // 품절 제품은 선택 불가
     setPicked(it);
     setStep("verify");
     const res = await fetch(`/api/kiosk/verify?code=${encodeURIComponent(it.code)}`);
@@ -110,11 +111,24 @@ export default function KioskPage() {
             <div style={sx.h}>제품 선택</div>
             <div style={sx.grid}>
               {items.map((it) => (
-                <button key={it.code} style={sx.product} onClick={() => pick(it)}>
-                  <div style={{ fontSize: 15, fontWeight: 800 }}>{it.productName}</div>
+                <button
+                  key={it.lotCode + it.productName}
+                  style={{ ...sx.product, ...(it.soldOut ? sx.productOut : {}), position: "relative" }}
+                  onClick={() => pick(it)}
+                  disabled={it.soldOut}
+                >
+                  <div style={{ fontSize: 15, fontWeight: 800, color: it.soldOut ? "rgba(255,255,255,0.4)" : "#fff" }}>
+                    {it.productName}
+                  </div>
                   <div style={sx.mono}>{it.lotCode}</div>
-                  <div style={{ fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 6 }}>재고 {it.available}개</div>
-                  <div style={sx.buy}>구매</div>
+                  <div style={{ fontSize: 12, color: it.soldOut ? "#FF8A5B" : "rgba(255,255,255,0.5)", marginTop: 6 }}>
+                    {it.soldOut ? "품절 · SOLD OUT" : `재고 ${it.available}개`}
+                  </div>
+                  {it.soldOut ? (
+                    <div style={{ ...sx.buy, background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.55)" }}>품절</div>
+                  ) : (
+                    <div style={sx.buy}>구매</div>
+                  )}
                 </button>
               ))}
               {items.length === 0 && <p style={sx.sub}>현재 판매 가능한 재고가 없습니다.</p>}
@@ -217,6 +231,7 @@ const sx: Record<string, React.CSSProperties> = {
   h: { fontSize: 22, fontWeight: 800, marginBottom: 18, textAlign: "center" },
   grid: { display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 16 },
   product: { background: "#171B22", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 18, padding: 22, textAlign: "left", color: "#fff", cursor: "pointer" },
+  productOut: { background: "#12151B", border: "1px dashed rgba(255,255,255,0.14)", cursor: "not-allowed", opacity: 0.75 },
   mono: { fontFamily: "ui-monospace, Menlo, monospace", fontSize: 12, color: "rgba(255,255,255,0.5)", marginTop: 8, wordBreak: "break-all" },
   buy: { marginTop: 14, display: "inline-block", background: "#2E6BFF", borderRadius: 10, padding: "8px 18px", fontSize: 13, fontWeight: 700 },
   check: { color: "#54E39B", fontSize: 20, fontWeight: 800 },
