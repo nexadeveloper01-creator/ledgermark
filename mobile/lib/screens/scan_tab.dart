@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../api.dart';
+import '../i18n.dart';
 import '../theme.dart';
 import 'widgets.dart';
 import 'qr_scanner.dart';
@@ -67,10 +68,10 @@ class _ScanTabState extends State<ScanTab> {
     try {
       final res = await api.claimKiosk(claimCode.trim());
       if (!mounted) return;
-      final product = res['productName']?.toString() ?? '제품';
+      final product = res['productName']?.toString() ?? tr('scan.product');
       final awarded = (res['awarded'] as num?)?.toInt() ?? 0;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('$product 정품 등록 완료! 소유권 이전 · +$awarded P')),
+        SnackBar(content: Text(trp('scan.claimDone', {'p': product, 'pt': '$awarded'}))),
       );
       Navigator.of(context).pop(); // 홈으로 복귀 → 데이터 새로고침
     } on ApiException catch (e) {
@@ -96,9 +97,9 @@ class _ScanTabState extends State<ScanTab> {
       final uid = await api.lookupUid(_code.text.trim());
       setState(() => _uid = uid);
     } on ApiException {
-      setState(() => _error = '원장에 존재하지 않는 UID입니다. 위조품일 수 있습니다.');
+      setState(() => _error = tr('scan.notFound'));
     } catch (_) {
-      setState(() => _error = '조회에 실패했습니다.');
+      setState(() => _error = tr('scan.lookupFail'));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -160,13 +161,13 @@ class _ScanTabState extends State<ScanTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionHeader(
+        SectionHeader(
           en: 'STEP 01 — SCAN',
-          ko: 'UID 스캔',
-          desc: '제품 하단 코드를 입력하면 원장에서 즉시 조회됩니다.',
+          ko: tr('scan.title'),
+          desc: tr('scan.desc'),
         ),
         const SizedBox(height: 20),
-        const Text('UID 코드', style: TextStyle(fontSize: 12, color: Lm.muted)),
+        Text(tr('scan.uidCode'), style: const TextStyle(fontSize: 12, color: Lm.muted)),
         const SizedBox(height: 5),
         TextField(
           controller: _code,
@@ -177,29 +178,29 @@ class _ScanTabState extends State<ScanTab> {
         ElevatedButton.icon(
           onPressed: _busy ? null : _openCamera,
           icon: const Icon(Icons.qr_code_scanner, size: 18),
-          label: const Text('카메라로 스캔 / SCAN QR'),
+          label: Text(tr('scan.camera')),
         ),
         const SizedBox(height: 8),
-        OutlinedButton(onPressed: _busy ? null : _scan, child: const Text('코드로 조회 / LOOKUP')),
+        OutlinedButton(onPressed: _busy ? null : _scan, child: Text(tr('scan.lookup'))),
         if (_error != null) ...[const SizedBox(height: 16), Warn(_error!)],
         if (uid != null) ...[
           const SizedBox(height: 20),
           Figure(
             label: 'SCANNED UID',
             value: uid['code'] as String,
-            note: uid['status'] == 'WHOLESALE' ? '원장 일치 · 정품 확인' : '원장 일치 · 상태 확인 필요',
+            note: uid['status'] == 'WHOLESALE' ? tr('scan.genuine') : tr('scan.checkStatus'),
           ),
           const SizedBox(height: 12),
-          KvRow('제품', uid['lot']?['productName']?.toString() ?? '—'),
+          KvRow(tr('scan.product'), uid['lot']?['productName']?.toString() ?? '—'),
           KvRow('LOT', uid['lot']?['code']?.toString() ?? '—'),
-          KvRow('현재 상태', statusLabel(uid['status'] as String)),
+          KvRow(tr('scan.status'), statusLabel(uid['status'] as String)),
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () => setState(() {
               _step = _Step.verify;
               _error = null;
             }),
-            child: const Text('연령인증으로 / CONTINUE'),
+            child: Text(tr('scan.continue')),
           ),
         ],
       ],
@@ -210,10 +211,10 @@ class _ScanTabState extends State<ScanTab> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const SectionHeader(
+        SectionHeader(
           en: 'STEP 02 — AGE VERIFICATION',
-          ko: '연령인증',
-          desc: 'RA 11900 요건에 따라 정부발급 ID 스캔과 Liveness 검사를 수행합니다.',
+          ko: tr('scan.ageTitle'),
+          desc: tr('scan.ageDesc'),
         ),
         const SizedBox(height: 20),
         const Figure(
@@ -222,7 +223,7 @@ class _ScanTabState extends State<ScanTab> {
           note: '등록국가 판별 → 필리핀 모듈 호출',
         ),
         const SizedBox(height: 16),
-        const Text('생년월일 (YYYY-MM-DD)', style: TextStyle(fontSize: 12, color: Lm.muted)),
+        Text(tr('scan.birth'), style: const TextStyle(fontSize: 12, color: Lm.muted)),
         const SizedBox(height: 5),
         TextField(controller: _birth),
         const SizedBox(height: 8),
@@ -233,7 +234,7 @@ class _ScanTabState extends State<ScanTab> {
           activeColor: Lm.accent,
           value: _idScanned,
           onChanged: (v) => setState(() => _idScanned = v ?? false),
-          title: const Text('정부발급 ID 스캔 완료', style: TextStyle(fontSize: 14)),
+          title: Text(tr('scan.idScanned'), style: const TextStyle(fontSize: 14)),
         ),
         CheckboxListTile(
           contentPadding: EdgeInsets.zero,
@@ -242,11 +243,11 @@ class _ScanTabState extends State<ScanTab> {
           activeColor: Lm.accent,
           value: _liveness,
           onChanged: (v) => setState(() => _liveness = v ?? false),
-          title: const Text('Liveness 검사 통과', style: TextStyle(fontSize: 14)),
+          title: Text(tr('scan.liveness'), style: const TextStyle(fontSize: 14)),
         ),
         const KvRow('원장 기록', '검증완료 여부·시각·방식'),
         const KvRow('신분정보 원본', '저장하지 않음'),
-        if (_verified != null) KvRow('검증 결과', _verified! ? '통과' : '실패'),
+        if (_verified != null) KvRow(tr('scan.verifyResult'), _verified! ? tr('scan.pass') : tr('scan.fail')),
         const SizedBox(height: 16),
         if (_error != null) ...[Warn(_error!), const SizedBox(height: 12)],
         if (_verified == false && _reasons != null) ...[
@@ -254,23 +255,23 @@ class _ScanTabState extends State<ScanTab> {
           const SizedBox(height: 12),
         ],
         if (!widget.emailVerified) ...[
-          const Warn('이메일 인증을 완료해야 정품 등록을 신청할 수 있습니다.'),
+          Warn(tr('scan.needEmail')),
           const SizedBox(height: 12),
         ],
         if (_verified == true)
           ElevatedButton(
             onPressed: _busy ? null : _register,
-            child: const Text('정품 등록 신청 / REGISTER'),
+            child: Text(tr('scan.register')),
           )
         else
           ElevatedButton(
             onPressed: _busy ? null : _verify,
-            child: const Text('인증 완료 / VERIFY'),
+            child: Text(tr('scan.verify')),
           ),
         const SizedBox(height: 8),
         TextButton(
           onPressed: () => setState(() => _step = _Step.scan),
-          child: const Text('← 스캔으로 돌아가기', style: TextStyle(color: Lm.accent700)),
+          child: Text(tr('scan.backToScan'), style: const TextStyle(color: Lm.accent700)),
         ),
       ],
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../api.dart';
+import '../i18n.dart';
 import '../theme.dart';
 
 // 설문 응답 화면. 질문 유형(single/multi/scale/text)에 맞춰 입력을 받고 제출하면
@@ -56,7 +57,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
         backgroundColor: Lm.bg,
         elevation: 0,
         foregroundColor: Lm.text,
-        title: Text(widget.survey['title'] as String? ?? '설문'),
+        title: Text(widget.survey['title'] as String? ?? (i18n.code == 'ko' ? '설문' : 'Survey')),
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(18, 6, 18, 40),
@@ -88,7 +89,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
             onPressed: (_complete && !_submitting) ? _submit : null,
             child: _submitting
                 ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                : Text('제출하고 $points P 받기'),
+                : Text(trp('survey.submit', {'p': '$points'})),
           ),
         ],
       ),
@@ -176,7 +177,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
   Widget _text(String id) {
     return TextField(
       maxLines: 3,
-      decoration: const InputDecoration(hintText: '자유롭게 입력해 주세요 (선택)'),
+      decoration: InputDecoration(hintText: tr('survey.freeText')),
       onChanged: (v) => _answers[id] = v,
     );
   }

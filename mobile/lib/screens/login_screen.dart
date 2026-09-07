@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../api.dart';
+import '../i18n.dart';
 import '../theme.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -40,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } on ApiException catch (e) {
       setState(() => _error = e.message);
     } catch (e) {
-      setState(() => _error = '연결에 실패했습니다. 서버가 실행 중인지 확인해주세요.');
+      setState(() => _error = tr('login.failed'));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -63,23 +64,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   const Text('LEDGERMARK · CONSUMER',
                       style: TextStyle(fontSize: 10, letterSpacing: 2.2, color: Lm.accent700)),
                   const SizedBox(height: 8),
-                  Text(_signupMode ? '소비자 가입' : '로그인',
+                  Text(_signupMode ? tr('login.signupSubmit') : tr('login.title'),
                       style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 8),
                   Text(
-                    _signupMode
-                        ? '가입 후 제품 UID를 스캔해 정품을 확인하고 등록할 수 있습니다.'
-                        : '소비자 계정으로 로그인하세요. 데모 비밀번호는 ledgermark1234 입니다.',
+                    tr('login.subtitle'),
                     style: const TextStyle(fontSize: 13, color: Lm.muted, height: 1.5),
                   ),
                   const SizedBox(height: 20),
-                  _field('이메일', _email, keyboard: TextInputType.emailAddress),
+                  _field(tr('login.email'), _email, keyboard: TextInputType.emailAddress),
                   if (_signupMode) ...[
                     const SizedBox(height: 12),
-                    _field('이름', _name),
+                    _field(tr('login.name'), _name),
                   ],
                   const SizedBox(height: 12),
-                  _field('비밀번호', _password, obscure: true),
+                  _field(tr('login.password'), _password, obscure: true),
                   if (_error != null) ...[
                     const SizedBox(height: 16),
                     Container(
@@ -95,7 +94,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _loading ? null : _submit,
-                    child: Text(_loading ? '처리 중...' : (_signupMode ? '가입하기' : '로그인')),
+                    child: Text(_loading
+                        ? tr('common.loading')
+                        : (_signupMode ? tr('login.signupSubmit') : tr('login.submit'))),
                   ),
                   const SizedBox(height: 12),
                   Center(
@@ -107,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 _error = null;
                               }),
                       child: Text(
-                        _signupMode ? '이미 계정이 있으신가요? 로그인' : '소비자이신가요? 가입하기',
+                        _signupMode ? tr('login.toLogin') : tr('login.signup'),
                         style: const TextStyle(color: Lm.accent700, fontSize: 13),
                       ),
                     ),

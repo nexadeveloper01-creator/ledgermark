@@ -150,6 +150,14 @@ class Api {
     await post('/api/auth/resend-verification');
   }
 
+  // 계정 삭제(개인정보 익명화 + 로그인 차단). 성공 시 로컬 토큰도 지운다.
+  Future<void> deleteAccount(String password) async {
+    final res = await http.delete(_uri('/api/auth/account'),
+        headers: _headers, body: jsonEncode({'password': password}));
+    _decode(res);
+    await _saveToken(null);
+  }
+
   // ── 포인트 / 리워드 ─────────────────────────────────────
   Future<Map<String, dynamic>> pointsSummary() async {
     return Map<String, dynamic>.from(await get('/api/points'));

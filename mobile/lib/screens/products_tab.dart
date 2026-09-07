@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../api.dart';
+import '../i18n.dart';
 import '../theme.dart';
 import 'widgets.dart';
 
@@ -53,7 +54,7 @@ class _ProductsTabState extends State<ProductsTab> {
     });
     try {
       await api.applyExchangeBonus(code);
-      setState(() => _message = '추가 무상 교환권이 활성화되었습니다. 이제 교환을 신청할 수 있어요.');
+      setState(() => _message = tr('products.bonusDone'));
       _load();
     } on ApiException catch (e) {
       setState(() => _error = e.message);
@@ -67,7 +68,7 @@ class _ProductsTabState extends State<ProductsTab> {
     });
     try {
       await api.requestExchange(code);
-      setState(() => _message = '교환 신청이 접수되었습니다. 매장 AS 검수 후 처리됩니다.');
+      setState(() => _message = tr('products.exchanged'));
       _load();
     } on ApiException catch (e) {
       setState(() => _error = e.message);
@@ -85,7 +86,9 @@ class _ProductsTabState extends State<ProductsTab> {
       final target = await api.lookupConsumer(email.trim());
       await api.resell(code, widget.consumerId, target['id'] as String);
       setState(() =>
-          _message = '${target['displayName']}님에게 양도되었습니다. 교환권은 재발급되지 않습니다.');
+          _message = i18n.code == 'ko'
+              ? '${target['displayName']}님에게 양도되었습니다. 교환권은 재발급되지 않습니다.'
+              : 'Transferred to ${target['displayName']}. The voucher is not reissued.');
       _load();
     } on ApiException catch (e) {
       setState(() => _error = e.message);
@@ -99,18 +102,18 @@ class _ProductsTabState extends State<ProductsTab> {
       builder: (ctx) => AlertDialog(
         backgroundColor: Lm.bg,
         shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-        title: const Text('중고거래 양수인', style: TextStyle(fontSize: 18)),
+        title: Text(tr('products.resellTitle'), style: const TextStyle(fontSize: 18)),
         content: TextField(
           controller: c,
           keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(labelText: '양수인 이메일', hintText: 'buyer@example.com'),
+          decoration: InputDecoration(labelText: tr('products.resellAsk'), hintText: 'buyer@example.com'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('취소')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr('common.cancel'))),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, c.text),
             style: ElevatedButton.styleFrom(minimumSize: const Size(80, 40)),
-            child: const Text('양도'),
+            child: Text(tr('products.resellCta')),
           ),
         ],
       ),
@@ -126,10 +129,10 @@ class _ProductsTabState extends State<ProductsTab> {
       child: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          const SectionHeader(
+          SectionHeader(
             en: 'STEP 04 — MY PRODUCTS',
-            ko: '내 제품',
-            desc: '보유 중인 제품의 교환권 상태를 확인하고 교환·중고거래를 신청합니다.',
+            ko: tr('products.title'),
+            desc: tr('products.desc'),
           ),
           const SizedBox(height: 20),
           _exchangeBanner(),
@@ -137,9 +140,9 @@ class _ProductsTabState extends State<ProductsTab> {
           if (_message != null) ...[Warn(_message!), const SizedBox(height: 12)],
           if (_error != null) ...[Warn(_error!), const SizedBox(height: 12)],
           if (_uids.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 24),
-              child: Text('보유한 제품이 없습니다.', style: TextStyle(color: Lm.muted)),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Text(tr('products.none'), style: const TextStyle(color: Lm.muted)),
             ),
           for (final u in _uids) ...[
             _card(u as Map<String, dynamic>),
@@ -172,17 +175,17 @@ class _ProductsTabState extends State<ProductsTab> {
             children: [
               const Icon(Icons.autorenew_rounded, size: 18, color: Lm.accent),
               const SizedBox(width: 8),
-              const Text('무상 교환 혜택', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+              Text(tr('products.exchangeTitle'), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
             ],
           ),
           const SizedBox(height: 8),
-          const Text('기기당 최초 1회 무상 교환이 제공됩니다.',
-              style: TextStyle(fontSize: 12, color: Lm.muted, height: 1.5)),
+          Text(tr('products.exchangeBase'),
+              style: const TextStyle(fontSize: 12, color: Lm.muted, height: 1.5)),
           const SizedBox(height: 4),
           Text(
             qualified
-                ? '자격 충족! 추가 무상 교환 $remaining회 사용 가능 — 교환권이 없는 기기에서 "추가 교환 활성화"를 누르세요.'
-                : '전체 설문 완료 + 정보 이용 동의 시 추가 1회 무상 교환이 열립니다.',
+                ? trp('products.bonusOpen', {'n': '$remaining'})
+                : tr('products.bonusLocked'),
             style: TextStyle(fontSize: 12, height: 1.5, color: qualified ? Lm.accent900 : Lm.text),
           ),
           if (!qualified && missing.isNotEmpty) ...[
@@ -209,7 +212,7 @@ class _ProductsTabState extends State<ProductsTab> {
         children: [
           Text(code, style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
           const SizedBox(height: 6),
-          Text('${u['lot']?['productName'] ?? ''} · 교환권 $voucher',
+          Text('${u['lot']?['productName'] ?? ''} · ${tr('products.voucher')} $voucher',
               style: const TextStyle(fontSize: 12, color: Lm.muted)),
           const SizedBox(height: 12),
           Row(
@@ -218,7 +221,7 @@ class _ProductsTabState extends State<ProductsTab> {
                 child: OutlinedButton(
                   onPressed: canExchange ? () => _exchange(code) : null,
                   style: OutlinedButton.styleFrom(minimumSize: const Size(0, 38)),
-                  child: const Text('교환 신청', style: TextStyle(fontSize: 12)),
+                  child: Text(tr('products.exchange'), style: const TextStyle(fontSize: 12)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -226,7 +229,7 @@ class _ProductsTabState extends State<ProductsTab> {
                 child: OutlinedButton(
                   onPressed: () => _resell(code),
                   style: OutlinedButton.styleFrom(minimumSize: const Size(0, 38)),
-                  child: const Text('중고거래 등록', style: TextStyle(fontSize: 12)),
+                  child: Text(tr('products.resell'), style: const TextStyle(fontSize: 12)),
                 ),
               ),
             ],
@@ -242,7 +245,7 @@ class _ProductsTabState extends State<ProductsTab> {
                   minimumSize: const Size(0, 38),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                child: const Text('추가 무상 교환 활성화', style: TextStyle(fontSize: 12)),
+                child: Text(tr('products.activateBonus'), style: const TextStyle(fontSize: 12)),
               ),
             ),
           ],
