@@ -35,6 +35,7 @@ export default function KioskPage() {
     setPicked(null);
     setVerdict(null);
     setQr("");
+    setClaimCode("");
     setStep("idle");
   };
 
@@ -47,10 +48,30 @@ export default function KioskPage() {
     setTimeout(() => setStep(body.sellable ? "age" : "reject"), 1100);
   };
 
+  const [claimCode, setClaimCode] = useState("");
+
   const confirmAge = () => {
     setStep("pay");
     setTimeout(async () => {
-      if (picked) setQr(await QRCode.toDataURL(picked.code, { margin: 1, width: 240 }));
+      // 결제/배출 → 클레임 발급. QR에는 클레임 코드를 담아 소비자 앱이 스캔 시
+      // 소유권이 자동 이전(정품 등록)되게 한다.
+      try {
+        if (picked) {
+          const res = await fetch("/api/kiosk/dispense", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code: picked.code }),
+          });
+          const body = await res.json();
+          const cc = body.claimCode as string | undefined;
+          if (cc) {
+            setClaimCode(cc);
+            setQr(await QRCode.toDataURL(cc, { margin: 1, width: 240 }));
+          }
+        }
+      } catch {
+        /* 발급 실패 시 QR 없이 완료 화면 */
+      }
       setStep("done");
     }, 1600);
   };
@@ -143,9 +164,9 @@ export default function KioskPage() {
           <div style={sx.center}>
             <div style={sx.check}>배출 완료</div>
             <div style={sx.big2}>{picked?.productName}</div>
-            <p style={sx.sub}>아래 정품 등록 코드를 앱에서 등록하면 300P가 적립됩니다.</p>
-            {qr && <img src={qr} alt="정품 등록 코드" style={sx.qr} />}
-            <div style={sx.mono}>{picked?.code}</div>
+            <p style={sx.sub}>소비자 앱으로 아래 QR을 스캔하면 소유권이 자동 이전되고 300P가 적립됩니다.</p>
+            {qr && <img src={qr} alt="정품 등록 QR" style={sx.qr} />}
+            <div style={sx.mono}>{claimCode || picked?.code}</div>
             <button style={{ ...sx.cta, marginTop: 18 }} onClick={reset}>
               처음으로
             </button>

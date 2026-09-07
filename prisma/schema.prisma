@@ -293,6 +293,23 @@ model Uid {
   alerts       SmuggleAlert[]
   requests     TransferRequest[]
   inspections  FieldInspection[]
+  kioskSales   KioskSale[]
+
+  @@index([status])
+}
+
+// 무인 자판기 판매 → 소비자 앱 클레임(자동 소유권 이전) 연결.
+// 결제/배출 시 claimCode를 발급하고, 소비자가 앱에서 스캔하면 RETAIL_SALE로 자동 커밋된다.
+model KioskSale {
+  id                String    @id @default(cuid())
+  uidId             String
+  uid               Uid       @relation(fields: [uidId], references: [id])
+  claimCode         String    @unique
+  status            String    @default("PENDING") // PENDING | CLAIMED
+  orgId             String? // 배출 시점 UID 보유 조직(총판/매장)
+  claimedConsumerId String?
+  createdAt         DateTime  @default(now())
+  claimedAt         DateTime?
 
   @@index([status])
 }

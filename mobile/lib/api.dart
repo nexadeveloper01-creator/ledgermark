@@ -209,6 +209,11 @@ class Api {
   Future<void> applyExchangeBonus(String uidCode) async {
     await post('/api/exchange/bonus', {'uidCode': uidCode});
   }
+
+  // ── 자판기 클레임(소유권 자동 이전) ─────────────────────
+  Future<Map<String, dynamic>> claimKiosk(String claimCode) async {
+    return Map<String, dynamic>.from(await post('/api/kiosk/claim', {'claimCode': claimCode}));
+  }
 }
 
 final api = Api();

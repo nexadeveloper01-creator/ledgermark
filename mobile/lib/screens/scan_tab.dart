@@ -48,12 +48,45 @@ class _ScanTabState extends State<ScanTab> {
       MaterialPageRoute(builder: (_) => const QrScannerScreen(), fullscreenDialog: true),
     );
     if (code == null || code.trim().isEmpty) return;
-    _code.text = code.trim();
+    final v = code.trim();
+    // 자판기 클레임 QR이면 소유권 자동 이전으로 분기한다.
+    if (v.toUpperCase().startsWith('LMK-')) {
+      await _claimKiosk(v);
+      return;
+    }
+    _code.text = v;
     await _scan();
+  }
+
+  // 자판기에서 배출된 제품의 클레임 코드 → 소유권 자동 이전(정품 등록·포인트 적립).
+  Future<void> _claimKiosk(String claimCode) async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      final res = await api.claimKiosk(claimCode.trim());
+      if (!mounted) return;
+      final product = res['productName']?.toString() ?? '제품';
+      final awarded = (res['awarded'] as num?)?.toInt() ?? 0;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$product 정품 등록 완료! 소유권 이전 · +$awarded P')),
+      );
+      Navigator.of(context).pop(); // 홈으로 복귀 → 데이터 새로고침
+    } on ApiException catch (e) {
+      setState(() => _error = e.message);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   Future<void> _scan() async {
     if (_code.text.trim().isEmpty) return;
+    // 클레임 코드를 코드 입력창에 직접 넣은 경우도 처리.
+    if (_code.text.trim().toUpperCase().startsWith('LMK-')) {
+      await _claimKiosk(_code.text.trim());
+      return;
+    }
     setState(() {
       _busy = true;
       _error = null;
