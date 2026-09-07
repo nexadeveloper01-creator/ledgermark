@@ -50,6 +50,15 @@ export async function verifyForKiosk(code: string) {
   };
 }
 
+// 자판기 재고 복구 — 아직 클레임되지 않은(PENDING) 예약만 삭제해 판매 가능 상태로 되돌린다.
+// 이미 CLAIMED(실제 소유권 이전)된 건은 건드리지 않는다. lotCode를 주면 해당 제품만 복구.
+export async function restock(lotCode?: string): Promise<{ restored: number }> {
+  const res = await prisma.kioskSale.deleteMany({
+    where: { status: "PENDING", ...(lotCode ? { uid: { lot: { code: lotCode } } } : {}) },
+  });
+  return { restored: res.count };
+}
+
 function newClaimCode(): string {
   const b = randomBytes(6).toString("hex").toUpperCase();
   return `LMK-${b.slice(0, 4)}-${b.slice(4, 8)}`;
