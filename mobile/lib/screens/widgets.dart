@@ -108,6 +108,19 @@ class Tag extends StatelessWidget {
   }
 }
 
+// 하드코딩 광고 소재 풀 (외부 광고 연동 전까지 사용).
+// assets/ads/ 에 아래 파일명으로 넣으면 모든 슬롯이 이 4개를 랜덤 회전한다.
+//   ad_ecig.gif      전자담배(정품 인증) 디바이스
+//   ad_beer.gif      맥주(루프탑 건배)
+//   ad_whiskey1.gif  위스키(따르는 컷)
+//   ad_whiskey2.gif  위스키(아이스볼 클로즈업)
+const List<String> adCreatives = [
+  'ad_ecig.gif',
+  'ad_beer.gif',
+  'ad_whiskey1.gif',
+  'ad_whiskey2.gif',
+];
+
 // 타겟 광고 슬롯. 여러 소재(assets/ads/<파일>)를 후보로 받아 랜덤 시작 + 일정 간격
 // 크로스페이드로 회전 표시한다. 슬롯마다 시작 인덱스가 랜덤이라 화면의 두 슬롯이
 // 동시에 서로 다른 광고(예: 전자담배 / 술)를 돌린다. 소재가 없으면 규격 안내
@@ -132,6 +145,7 @@ class AdSlot extends StatefulWidget {
 }
 
 class _AdSlotState extends State<AdSlot> {
+  final _rnd = Random();
   int _i = 0;
   Timer? _timer;
 
@@ -139,12 +153,23 @@ class _AdSlotState extends State<AdSlot> {
   void initState() {
     super.initState();
     final n = widget.assets.length;
-    if (n > 0) _i = Random().nextInt(n); // 랜덤 시작 → 슬롯마다 다른 소재부터
+    if (n > 0) _i = _rnd.nextInt(n); // 랜덤 시작 → 슬롯마다 다른 소재부터
     if (n > 1) {
       _timer = Timer.periodic(widget.interval, (_) {
-        if (mounted) setState(() => _i = (_i + 1) % widget.assets.length);
+        if (mounted) setState(() => _i = _nextIndex());
       });
     }
+  }
+
+  // 직전과 중복되지 않는 랜덤 인덱스를 고른다.
+  int _nextIndex() {
+    final n = widget.assets.length;
+    if (n <= 1) return 0;
+    int next;
+    do {
+      next = _rnd.nextInt(n);
+    } while (next == _i);
+    return next;
   }
 
   @override
@@ -167,14 +192,18 @@ class _AdSlotState extends State<AdSlot> {
             children: [
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 450),
-                child: assets.isEmpty
-                    ? _placeholder()
-                    : Image.asset(
-                        'assets/ads/${assets[_i]}',
-                        key: ValueKey(assets[_i]),
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, error, stack) => _placeholder(),
-                      ),
+                // AnimatedSwitcher는 자식에 확장 제약을 주지 않으므로 SizedBox.expand로
+                // 감싸 슬롯을 꽉 채우게 한다. 키는 확장 박스에 두어 크로스페이드를 트리거.
+                child: SizedBox.expand(
+                  key: ValueKey(assets.isEmpty ? '_placeholder' : assets[_i]),
+                  child: assets.isEmpty
+                      ? _placeholder()
+                      : Image.asset(
+                          'assets/ads/${assets[_i]}',
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, error, stack) => _placeholder(),
+                        ),
+                ),
               ),
               Positioned(
                 top: 8,

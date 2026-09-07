@@ -110,7 +110,7 @@ class _RewardsTabState extends State<RewardsTab> {
           _balanceCard(),
           const SizedBox(height: 16),
           const AdSlot(
-            assets: ['ad_alcohol.gif', 'ad_ecig.gif'],
+            assets: adCreatives,
             aspectRatio: 16 / 9,
             spec: '1080×608 · 16:9 · 랜덤 회전',
           ),
