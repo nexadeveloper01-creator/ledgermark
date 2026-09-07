@@ -109,7 +109,11 @@ class _RewardsTabState extends State<RewardsTab> {
         children: [
           _balanceCard(),
           const SizedBox(height: 16),
-          AdSlot(asset: 'ad_rewards.gif', aspectRatio: 16 / 9, spec: '1080×608 · 16:9'),
+          const AdSlot(
+            assets: ['ad_alcohol.gif', 'ad_ecig.gif'],
+            aspectRatio: 16 / 9,
+            spec: '1080×608 · 16:9 · 랜덤 회전',
+          ),
           const SizedBox(height: 20),
           _sectionTitle('포인트 쌓기', '설문에 참여하고 포인트를 받으세요'),
           const SizedBox(height: 12),

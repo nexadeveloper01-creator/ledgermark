@@ -84,7 +84,11 @@ class _DashboardTabState extends State<DashboardTab> {
                   const SizedBox(height: 18),
                   _scanCta(),
                   const SizedBox(height: 18),
-                  const AdSlot(asset: 'ad_home.gif', aspectRatio: 16 / 6, spec: '1080×405 · 16:6'),
+                  const AdSlot(
+                    assets: ['ad_ecig.gif', 'ad_alcohol.gif'],
+                    aspectRatio: 16 / 9,
+                    spec: '1080×608 · 16:9 · 랜덤 회전',
+                  ),
                   const SizedBox(height: 110),
                 ],
               ),

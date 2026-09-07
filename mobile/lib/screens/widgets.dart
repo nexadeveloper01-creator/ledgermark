@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../theme.dart';
 
@@ -106,36 +108,73 @@ class Tag extends StatelessWidget {
   }
 }
 
-// 타겟 광고 슬롯. assets/ads/<asset> 파일(GIF/이미지)이 있으면 표시하고,
-// 없으면 규격 안내 플레이스홀더를 렌더한다. 광고임을 항상 "AD" 라벨로 표시한다.
-class AdSlot extends StatelessWidget {
-  final String asset; // 예: 'ad_home.gif'
-  final double aspectRatio; // 예: 16/6
-  final String spec; // 플레이스홀더에 보여줄 권장 규격
+// 타겟 광고 슬롯. 여러 소재(assets/ads/<파일>)를 후보로 받아 랜덤 시작 + 일정 간격
+// 크로스페이드로 회전 표시한다. 슬롯마다 시작 인덱스가 랜덤이라 화면의 두 슬롯이
+// 동시에 서로 다른 광고(예: 전자담배 / 술)를 돌린다. 소재가 없으면 규격 안내
+// 플레이스홀더를 렌더하고, 광고임을 항상 "AD" 라벨로 표시한다.
+class AdSlot extends StatefulWidget {
+  final List<String> assets; // 후보 소재 파일명들 (예: ['ad_ecig.gif','ad_alcohol.gif'])
+  final double aspectRatio; // 예: 16/9
+  final String spec; // 플레이스홀더 안내 규격
+  final Duration interval; // 회전 간격
   final VoidCallback? onTap;
   const AdSlot({
     super.key,
-    required this.asset,
-    required this.aspectRatio,
+    required this.assets,
+    this.aspectRatio = 16 / 9,
     required this.spec,
+    this.interval = const Duration(seconds: 6),
     this.onTap,
   });
 
   @override
+  State<AdSlot> createState() => _AdSlotState();
+}
+
+class _AdSlotState extends State<AdSlot> {
+  int _i = 0;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    final n = widget.assets.length;
+    if (n > 0) _i = Random().nextInt(n); // 랜덤 시작 → 슬롯마다 다른 소재부터
+    if (n > 1) {
+      _timer = Timer.periodic(widget.interval, (_) {
+        if (mounted) setState(() => _i = (_i + 1) % widget.assets.length);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final assets = widget.assets;
     return GestureDetector(
-      onTap: onTap,
+      onTap: widget.onTap,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(Lm.radius),
         child: AspectRatio(
-          aspectRatio: aspectRatio,
+          aspectRatio: widget.aspectRatio,
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.asset(
-                'assets/ads/$asset',
-                fit: BoxFit.cover,
-                errorBuilder: (_, error, stack) => _placeholder(),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 450),
+                child: assets.isEmpty
+                    ? _placeholder()
+                    : Image.asset(
+                        'assets/ads/${assets[_i]}',
+                        key: ValueKey(assets[_i]),
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, error, stack) => _placeholder(),
+                      ),
               ),
               Positioned(
                 top: 8,
@@ -179,7 +218,7 @@ class AdSlot extends StatelessWidget {
             const SizedBox(height: 8),
             const Text('타겟 광고 영역', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: Lm.text)),
             const SizedBox(height: 2),
-            Text(spec, style: const TextStyle(fontSize: 10.5, color: Lm.muted)),
+            Text(widget.spec, style: const TextStyle(fontSize: 10.5, color: Lm.muted)),
           ],
         ),
       ),
