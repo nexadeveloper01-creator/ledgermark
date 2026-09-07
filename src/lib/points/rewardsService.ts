@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { getOrCreateAccount, PointsError } from "./pointsService";
+import { issueCouponTx } from "@/lib/coupons/couponService";
 
 // 쌓은 포인트로 앱 내 콘텐츠를 해금하거나 경품에 응모/교환한다.
 // 차감·재고·응모 기록을 하나의 트랜잭션으로 처리해 이중 차감이나 재고 초과를 막는다.
@@ -14,6 +15,8 @@ export type RewardView = {
   stock: number | null;
   soldOut: boolean;
   affordable: boolean;
+  discountKind: string | null;
+  discountValue: number | null;
 };
 
 /** 활성 리워드 목록 + 소비자 잔액 기준 구매 가능 여부. */
@@ -35,11 +38,19 @@ export async function listRewards(consumerId: string): Promise<{ balance: number
       stock: r.stock,
       soldOut: r.stock != null && r.stock <= 0,
       affordable: account.balance >= r.cost,
+      discountKind: r.discountKind,
+      discountValue: r.discountValue,
     })),
   };
 }
 
-export type RedeemResult = { balance: number; redemptionId: string; title: string; cost: number };
+export type RedeemResult = {
+  balance: number;
+  redemptionId: string;
+  title: string;
+  cost: number;
+  coupon?: { code: string; kind: string; value: number };
+};
 
 /** 리워드 사용/응모 — 포인트 차감 + 재고 감소 + 응모 기록을 원자적으로. */
 export async function redeemReward(args: {
@@ -82,6 +93,24 @@ export async function redeemReward(args: {
       },
     });
 
-    return { balance: balanceAfter, redemptionId: redemption.id, title: reward.title, cost: reward.cost };
+    // 구매 할인 쿠폰 타입이면 쿠폰을 발급한다.
+    let coupon: { code: string; kind: string; value: number } | undefined;
+    if (reward.type === "DISCOUNT" && reward.discountKind && reward.discountValue != null) {
+      const issued = await issueCouponTx(tx, {
+        consumerId: args.consumerId,
+        rewardId: reward.id,
+        kind: reward.discountKind,
+        value: reward.discountValue,
+      });
+      coupon = { code: issued.code, kind: issued.kind, value: issued.value };
+    }
+
+    return {
+      balance: balanceAfter,
+      redemptionId: redemption.id,
+      title: reward.title,
+      cost: reward.cost,
+      coupon,
+    };
   });
 }
