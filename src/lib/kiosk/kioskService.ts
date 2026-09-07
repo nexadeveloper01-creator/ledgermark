@@ -134,20 +134,40 @@ export async function claimSale(consumerId: string, claimCode: string): Promise<
   return { productName: uid.lot.productName, uidCode: uid.code, awarded, balance };
 }
 
-// 자판기 재고 — 판매 가능한(WHOLESALE, 예약/판매 이력 없는) UID를 제품별로 집계.
-// 대표 code 1개 + 가용 수량(available)을 함께 반환한다.
-export async function kioskStock(limit = 6) {
+// 자판기 재고 — 취급 제품(현재 WHOLESALE이거나 자판기 판매이력이 있는 제품)을 모두 노출하고,
+// 제품별 가용 수량(available)과 품절 여부(soldOut)를 함께 반환한다. 품절 제품도 숨기지 않는다.
+export type StockItem = {
+  productName: string;
+  lotCode: string;
+  code: string | null; // 판매 가능한 대표 UID (품절이면 null)
+  available: number;
+  soldOut: boolean;
+};
+
+export async function kioskStock(limit = 6): Promise<StockItem[]> {
   const uids = await prisma.uid.findMany({
-    where: { status: "WHOLESALE", ownerOrgId: { not: null }, kioskSales: { none: {} } },
+    where: { OR: [{ status: "WHOLESALE" }, { kioskSales: { some: {} } }] },
     orderBy: { createdAt: "asc" },
-    select: { code: true, lot: { select: { productName: true, code: true } } },
+    select: {
+      code: true,
+      status: true,
+      ownerOrgId: true,
+      lot: { select: { productName: true, code: true } },
+      kioskSales: { select: { id: true } },
+    },
   });
-  const byProduct = new Map<string, { code: string; productName: string; lotCode: string; available: number }>();
+  const map = new Map<string, StockItem>();
   for (const u of uids) {
     const key = u.lot.productName;
-    const cur = byProduct.get(key);
-    if (cur) cur.available += 1;
-    else byProduct.set(key, { code: u.code, productName: key, lotCode: u.lot.code, available: 1 });
+    const sellable = u.status === "WHOLESALE" && !!u.ownerOrgId && u.kioskSales.length === 0;
+    const cur =
+      map.get(key) ?? { productName: key, lotCode: u.lot.code, code: null, available: 0, soldOut: true };
+    if (sellable) {
+      cur.available += 1;
+      cur.soldOut = false;
+      if (!cur.code) cur.code = u.code;
+    }
+    map.set(key, cur);
   }
-  return [...byProduct.values()].slice(0, limit);
+  return [...map.values()].slice(0, limit);
 }
