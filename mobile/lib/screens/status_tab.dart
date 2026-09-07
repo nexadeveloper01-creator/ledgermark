@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../api.dart';
+import '../i18n.dart';
 import '../theme.dart';
 import 'widgets.dart';
 
@@ -45,13 +46,19 @@ class _StatusTabState extends State<StatusTab> {
   }
 
   String _label(String s) {
-    const m = {
-      'PENDING': '매장 승인 대기',
-      'COMMITTED': '정품 등록 완료',
-      'BLOCKED': '판매 차단됨',
-      'REJECTED': '매장에서 반려됨',
-    };
-    return m[s] ?? s;
+    final ko = i18n.code == 'ko';
+    switch (s) {
+      case 'PENDING':
+        return ko ? '매장 승인 대기' : 'Awaiting store approval';
+      case 'COMMITTED':
+        return ko ? '정품 등록 완료' : 'Registered';
+      case 'BLOCKED':
+        return ko ? '판매 차단됨' : 'Sale blocked';
+      case 'REJECTED':
+        return ko ? '매장에서 반려됨' : 'Rejected by store';
+      default:
+        return s;
+    }
   }
 
   @override
@@ -63,17 +70,19 @@ class _StatusTabState extends State<StatusTab> {
       child: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          const SectionHeader(
+          SectionHeader(
             en: 'STEP 03 — REGISTRATION',
-            ko: '정품 등록 상태',
-            desc: '신청한 정품 등록의 진행 상태를 확인합니다. 매장이 소유권 이전을 커밋하면 완료됩니다.',
+            ko: tr('status.title'),
+            desc: i18n.code == 'ko'
+                ? '신청한 정품 등록의 진행 상태를 확인합니다. 매장이 소유권 이전을 커밋하면 완료됩니다.'
+                : 'Track your registration requests. Completed when the store commits the ownership transfer.',
           ),
           const SizedBox(height: 20),
           if (_error != null) Warn(_error!),
           if (_requests.isEmpty && _error == null)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 24),
-              child: Text('아직 등록 신청 이력이 없습니다.', style: TextStyle(color: Lm.muted)),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Text(tr('status.none'), style: const TextStyle(color: Lm.muted)),
             ),
           for (final r in _requests) ...[
             _card(r as Map<String, dynamic>),
@@ -106,10 +115,20 @@ class _StatusTabState extends State<StatusTab> {
           const SizedBox(height: 10),
           Text(uid?['code']?.toString() ?? '',
               style: const TextStyle(fontFamily: 'monospace', fontSize: 13)),
-          KvRow('제품', uid?['lot']?['productName']?.toString() ?? '—'),
-          KvRow('연령인증', r['ageVerified'] == true ? '완료 (RA 11900)' : '미완료'),
+          KvRow(tr('scan.product'), uid?['lot']?['productName']?.toString() ?? '—'),
+          KvRow(
+            i18n.code == 'ko' ? '연령인증' : 'Age check',
+            r['ageVerified'] == true
+                ? (i18n.code == 'ko' ? '완료 (RA 11900)' : 'Verified (RA 11900)')
+                : (i18n.code == 'ko' ? '미완료' : 'Not verified'),
+          ),
           if (committed)
-            KvRow('교환권', uid?['voucherState'] == 'AVAILABLE' ? '유효 · 불량/색상 교환 1회' : (uid?['voucherState']?.toString() ?? '—')),
+            KvRow(
+              tr('products.voucher'),
+              uid?['voucherState'] == 'AVAILABLE'
+                  ? (i18n.code == 'ko' ? '유효 · 교환 1회' : 'Valid · 1 exchange')
+                  : (uid?['voucherState']?.toString() ?? '—'),
+            ),
           if (status == 'BLOCKED' && r['blockedReason'] != null) ...[
             const SizedBox(height: 10),
             Warn(r['blockedReason'] as String),

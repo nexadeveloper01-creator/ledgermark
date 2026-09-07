@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../api.dart';
+import '../i18n.dart';
 import '../theme.dart';
 import 'dashboard_tab.dart';
 import 'scan_flow.dart';
@@ -7,6 +8,7 @@ import 'status_tab.dart';
 import 'products_tab.dart';
 import 'rewards_tab.dart';
 import 'consent_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -46,6 +48,12 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _openSettings() {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => SettingsScreen(user: widget.user, onLogout: widget.onLogout),
+    ));
+  }
+
   Future<void> _openScan() async {
     final requestId = await Navigator.of(context).push<String>(
       MaterialPageRoute(
@@ -72,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
         user: widget.user,
         onScan: _openScan,
         onOpenRewards: () => setState(() => _index = 3),
-        onLogout: widget.onLogout,
+        onOpenSettings: _openSettings,
       ),
       StatusTab(
         key: ValueKey('status$_reloadKey'),
@@ -180,9 +188,9 @@ class _VerifyBannerState extends State<_VerifyBanner> {
     setState(() => _sending = true);
     try {
       await api.resendVerification();
-      setState(() => _message = '인증 메일을 다시 보냈습니다.');
+      setState(() => _message = tr('verify.sent'));
     } catch (_) {
-      setState(() => _message = '재발송에 실패했습니다.');
+      setState(() => _message = tr('verify.resendFail'));
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -201,9 +209,9 @@ class _VerifyBannerState extends State<_VerifyBanner> {
             children: [
               const Icon(Icons.mark_email_unread_rounded, color: Lm.warnFg, size: 18),
               const SizedBox(width: 8),
-              const Expanded(
-                child: Text('이메일 인증 후 정품 등록을 신청할 수 있습니다.',
-                    style: TextStyle(fontSize: 12.5, color: Lm.warnFg, height: 1.4)),
+              Expanded(
+                child: Text(tr('verify.banner'),
+                    style: const TextStyle(fontSize: 12.5, color: Lm.warnFg, height: 1.4)),
               ),
             ],
           ),
@@ -217,7 +225,7 @@ class _VerifyBannerState extends State<_VerifyBanner> {
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   minimumSize: const Size(0, 30),
                 ),
-                child: const Text('인증 메일 다시 보내기', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                child: Text(tr('verify.resend'), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
               ),
               if (_message != null)
                 Flexible(child: Text(_message!, style: const TextStyle(fontSize: 11, color: Lm.warnFg))),

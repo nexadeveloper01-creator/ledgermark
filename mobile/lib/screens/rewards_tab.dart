@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../api.dart';
 import '../theme.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import '../i18n.dart';
 import 'widgets.dart';
 import 'survey_screen.dart';
 import 'consent_screen.dart';
@@ -63,7 +64,7 @@ class _RewardsTabState extends State<RewardsTab> {
       final res = await api.checkin();
       final awarded = (res['awarded'] as num?)?.toInt() ?? 0;
       final streak = (res['streak'] as num?)?.toInt() ?? 0;
-      if (mounted) _toast('출석 완료! +$awarded P · $streak주 연속');
+      if (mounted) _toast(trp('rewards.checkinDone', {'p': '$awarded', 'n': '$streak'}));
       await _load();
     } catch (e) {
       if (mounted) _toast(e.toString());
@@ -77,7 +78,7 @@ class _RewardsTabState extends State<RewardsTab> {
       MaterialPageRoute(builder: (_) => SurveyScreen(survey: s)),
     );
     if (awarded != null && awarded > 0 && mounted) {
-      _toast('설문 참여 완료! +$awarded P');
+      _toast(trp('rewards.surveyDone', {'p': '$awarded'}));
       await _load();
     }
   }
@@ -87,17 +88,17 @@ class _RewardsTabState extends State<RewardsTab> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(r['title'] as String),
-        content: Text('${r['cost']} P를 사용해 신청하시겠어요?'),
+        content: Text(trp('rewards.redeemConfirm', {'p': '${r['cost']}'})),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('취소')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('사용')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('common.cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr('rewards.use'))),
         ],
       ),
     );
     if (ok != true) return;
     try {
       final res = await api.redeemReward(r['id'] as String);
-      if (mounted) _toast('신청 완료! 잔액 ${res['balance']} P');
+      if (mounted) _toast(trp('rewards.redeemDone', {'b': '${res['balance']}'}));
       await _load();
     } catch (e) {
       if (mounted) _toast(e.toString());
@@ -125,9 +126,9 @@ class _RewardsTabState extends State<RewardsTab> {
           children: [
             Container(width: 40, height: 4, decoration: BoxDecoration(color: Lm.line, borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: 18),
-            Text(c['label'] as String? ?? '할인 쿠폰', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            Text(c['label'] as String? ?? tr('coupons.title'), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
             const SizedBox(height: 4),
-            const Text('매장 계산대에서 이 QR을 보여주세요', style: TextStyle(fontSize: 13, color: Lm.muted)),
+            Text(tr('coupons.qrTitle'), style: const TextStyle(fontSize: 13, color: Lm.muted)),
             const SizedBox(height: 20),
             Container(
               padding: const EdgeInsets.all(16),
@@ -143,7 +144,7 @@ class _RewardsTabState extends State<RewardsTab> {
             const SizedBox(height: 16),
             Text(code, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, fontFamily: 'monospace', letterSpacing: 1)),
             const SizedBox(height: 6),
-            const Text('결제가 완료되면 자동으로 사용 처리됩니다.', style: TextStyle(fontSize: 11, color: Lm.muted)),
+            Text(tr('coupons.qrNote'), style: const TextStyle(fontSize: 11, color: Lm.muted)),
           ],
         ),
       ),
@@ -170,7 +171,7 @@ class _RewardsTabState extends State<RewardsTab> {
           _benefitsCard(),
           if (_coupons.isNotEmpty) ...[
             const SizedBox(height: 20),
-            _sectionTitle('내 쿠폰', '포인트로 받은 할인 혜택'),
+            _sectionTitle(tr('coupons.title'), tr('coupons.desc')),
             const SizedBox(height: 12),
             ..._coupons.map((c) => _couponCard(c as Map<String, dynamic>)),
           ],
@@ -181,15 +182,15 @@ class _RewardsTabState extends State<RewardsTab> {
             spec: '1080×608 · 16:9 · 랜덤 회전',
           ),
           const SizedBox(height: 20),
-          _sectionTitle('포인트 쌓기', '설문에 참여하고 포인트를 받으세요'),
+          _sectionTitle(tr('rewards.earnTitle'), tr('rewards.earnDesc')),
           const SizedBox(height: 12),
           ..._surveys.map((s) => _surveyCard(s as Map<String, dynamic>)),
           const SizedBox(height: 20),
-          _sectionTitle('포인트 사용', '경품 응모 · 콘텐츠 해금'),
+          _sectionTitle(tr('rewards.useTitle'), tr('rewards.useDesc')),
           const SizedBox(height: 12),
           ...((_rewards?['rewards'] as List?) ?? []).map((r) => _rewardCard(r as Map<String, dynamic>)),
           const SizedBox(height: 20),
-          _sectionTitle('적립 내역', null),
+          _sectionTitle(tr('rewards.history'), null),
           const SizedBox(height: 12),
           _history(),
         ],
@@ -212,7 +213,7 @@ class _RewardsTabState extends State<RewardsTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('내 포인트', style: TextStyle(color: Colors.white70, fontSize: 13)),
+          Text(tr('rewards.myPoints'), style: const TextStyle(color: Colors.white70, fontSize: 13)),
           const SizedBox(height: 6),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -232,7 +233,7 @@ class _RewardsTabState extends State<RewardsTab> {
             children: [
               const Icon(Icons.local_fire_department_rounded, color: Colors.amberAccent, size: 20),
               const SizedBox(width: 6),
-              Text('$_streak주 연속 출석', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
+              Text(trp('rewards.streak', {'n': '$_streak'}), style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600)),
               const Spacer(),
               FilledButton(
                 onPressed: (_checkedIn || _checkingIn) ? null : _checkin,
@@ -246,7 +247,7 @@ class _RewardsTabState extends State<RewardsTab> {
                 ),
                 child: _checkingIn
                     ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                    : Text(_checkedIn ? '출석 완료' : '주간 출석'),
+                    : Text(_checkedIn ? tr('rewards.checkedIn') : tr('rewards.checkin')),
               ),
             ],
           ),
@@ -273,24 +274,24 @@ class _RewardsTabState extends State<RewardsTab> {
             children: [
               const Icon(Icons.verified_user_rounded, color: Lm.primary, size: 20),
               const SizedBox(width: 8),
-              const Expanded(
-                child: Text('개인정보 동의 & 혜택', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+              Expanded(
+                child: Text(tr('benefits.title'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
               ),
               TextButton(
                 onPressed: _openConsent,
                 style: TextButton.styleFrom(foregroundColor: Lm.primary, padding: const EdgeInsets.symmetric(horizontal: 8), minimumSize: const Size(0, 32)),
-                child: const Text('동의 관리', style: TextStyle(fontWeight: FontWeight.w700)),
+                child: Text(tr('benefits.manage'), style: const TextStyle(fontWeight: FontWeight.w700)),
               ),
             ],
           ),
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: _benefitStat('동의로 받은 포인트', '$consent P', Lm.primary)),
+              Expanded(child: _benefitStat(tr('benefits.consentPts'), '$consent P', Lm.primary)),
               Container(width: 1, height: 34, color: Lm.line),
-              Expanded(child: _benefitStat('보유 쿠폰', '$couponsActive장', Lm.violet)),
+              Expanded(child: _benefitStat(tr('benefits.coupons'), '$couponsActive${tr('benefits.couponsUnit')}', Lm.violet)),
               Container(width: 1, height: 34, color: Lm.line),
-              Expanded(child: _benefitStat('할인 혜택', discountLabel, Lm.good)),
+              Expanded(child: _benefitStat(tr('benefits.discount'), discountLabel, Lm.good)),
             ],
           ),
         ],
@@ -312,9 +313,9 @@ class _RewardsTabState extends State<RewardsTab> {
     final status = c['status'] as String? ?? 'ISSUED';
     final usable = status == 'ISSUED';
     final (statusLabel, statusColor) = switch (status) {
-      'USED' => ('사용완료', Lm.muted),
-      'EXPIRED' => ('만료', Lm.muted),
-      _ => ('사용 가능', Lm.good),
+      'USED' => (tr('coupons.used'), Lm.muted),
+      'EXPIRED' => (tr('coupons.expired'), Lm.muted),
+      _ => (tr('coupons.usable'), Lm.good),
     };
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -333,7 +334,7 @@ class _RewardsTabState extends State<RewardsTab> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(c['label'] as String? ?? '할인 쿠폰', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                  Text(c['label'] as String? ?? tr('coupons.title'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 2),
                   Text(c['code'] as String? ?? '', style: const TextStyle(fontSize: 12, color: Lm.muted, fontFamily: 'monospace')),
                   const SizedBox(height: 2),
@@ -345,7 +346,7 @@ class _RewardsTabState extends State<RewardsTab> {
             FilledButton.icon(
               onPressed: usable ? () => _showCouponQr(c) : null,
               icon: const Icon(Icons.qr_code_2_rounded, size: 18),
-              label: const Text('QR 제시'),
+              label: Text(tr('coupons.showQr')),
               style: FilledButton.styleFrom(
                 backgroundColor: Lm.primary,
                 disabledBackgroundColor: Lm.surface,
@@ -403,7 +404,7 @@ class _RewardsTabState extends State<RewardsTab> {
             ),
             const SizedBox(width: 10),
             done
-                ? const Text('완료', style: TextStyle(color: Lm.good, fontWeight: FontWeight.w700, fontSize: 13))
+                ? Text(tr('rewards.done'), style: const TextStyle(color: Lm.good, fontWeight: FontWeight.w700, fontSize: 13))
                 : FilledButton(
                     onPressed: () => _openSurvey(s),
                     style: FilledButton.styleFrom(
@@ -466,7 +467,7 @@ class _RewardsTabState extends State<RewardsTab> {
                 minimumSize: const Size(0, 40),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: Text(soldOut ? '품절' : (affordable ? '신청' : '부족')),
+              child: Text(soldOut ? tr('rewards.soldOut') : (affordable ? tr('rewards.redeem') : tr('rewards.insufficient'))),
             ),
           ],
         ),
@@ -477,7 +478,7 @@ class _RewardsTabState extends State<RewardsTab> {
   Widget _history() {
     final entries = (_summary?['entries'] as List?) ?? [];
     if (entries.isEmpty) {
-      return const Panel(child: Text('아직 적립 내역이 없어요.', style: TextStyle(color: Lm.muted, fontSize: 13)));
+      return Panel(child: Text(tr('rewards.noHistory'), style: const TextStyle(color: Lm.muted, fontSize: 13)));
     }
     return Panel(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -512,17 +513,13 @@ class _RewardsTabState extends State<RewardsTab> {
   }
 
   String _reasonLabel(String? reason, String? memo) {
+    // memo(서버 생성 문자열)는 한국어일 수 있으나 원본 기록이므로 그대로 노출한다.
     if (memo != null && memo.isNotEmpty) return memo;
-    const m = {
-      'SIGNUP_BONUS': '가입 축하',
-      'DEVICE_REGISTRATION': '정품 등록',
-      'WEEKLY_CHECKIN': '주간 출석',
-      'STREAK_BONUS': '연속 출석 보너스',
-      'SURVEY_COMPLETION': '설문 참여',
-      'PROFILE_COMPLETION': '프로필 입력',
-      'REWARD_REDEMPTION': '리워드 사용',
-      'ADJUSTMENT': '조정',
+    if (reason == null) return '';
+    const known = {
+      'SIGNUP_BONUS', 'DEVICE_REGISTRATION', 'WEEKLY_CHECKIN', 'STREAK_BONUS',
+      'SURVEY_COMPLETION', 'PROFILE_COMPLETION', 'CONSENT_REWARD', 'REWARD_REDEMPTION', 'ADJUSTMENT',
     };
-    return m[reason] ?? (reason ?? '');
+    return known.contains(reason) ? tr('reason.$reason') : reason;
   }
 }

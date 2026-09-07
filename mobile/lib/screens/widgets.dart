@@ -108,17 +108,11 @@ class Tag extends StatelessWidget {
   }
 }
 
-// 하드코딩 광고 소재 풀 (외부 광고 연동 전까지 사용).
-// assets/ads/ 에 아래 파일명으로 넣으면 모든 슬롯이 이 4개를 랜덤 회전한다.
-//   ad_ecig.gif      전자담배(정품 인증) 디바이스
-//   ad_beer.gif      맥주(루프탑 건배)
-//   ad_whiskey1.gif  위스키(따르는 컷)
-//   ad_whiskey2.gif  위스키(아이스볼 클로즈업)
+// 앱 내 배너 소재 풀. 스토어 정책상(주류·담배 광고 제한) 자사 정품 브랜드 이미지만 노출한다.
+// 주류 광고 소재(ad_beer/ad_whiskey*)는 스토어 제출 빌드에서 제외했다. 외부 타겟광고 연동은
+// 연령인증·정책 검토를 거친 별도 채널로 서빙한다.
 const List<String> adCreatives = [
-  'ad_ecig.gif',
-  'ad_beer.gif',
-  'ad_whiskey1.gif',
-  'ad_whiskey2.gif',
+  'ad_ecig.gif', // 자사 정품 디바이스 브랜드 이미지
 ];
 
 // 타겟 광고 슬롯. 여러 소재(assets/ads/<파일>)를 후보로 받아 랜덤 시작 + 일정 간격

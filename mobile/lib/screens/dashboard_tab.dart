@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../api.dart';
+import '../i18n.dart';
 import '../theme.dart';
 import 'widgets.dart';
 
@@ -7,13 +8,13 @@ class DashboardTab extends StatefulWidget {
   final Map<String, dynamic> user;
   final VoidCallback onScan;
   final VoidCallback onOpenRewards;
-  final Future<void> Function() onLogout;
+  final VoidCallback onOpenSettings;
   const DashboardTab({
     super.key,
     required this.user,
     required this.onScan,
     required this.onOpenRewards,
-    required this.onLogout,
+    required this.onOpenSettings,
   });
 
   @override
@@ -129,7 +130,7 @@ class _DashboardTabState extends State<DashboardTab> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('안녕하세요 👋', style: TextStyle(fontSize: 13, color: Lm.muted)),
+                    Text(tr('home.hello'), style: const TextStyle(fontSize: 13, color: Lm.muted)),
                     const SizedBox(height: 2),
                     Text(name,
                         style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, height: 1.1)),
@@ -137,8 +138,8 @@ class _DashboardTabState extends State<DashboardTab> {
                 ),
               ),
               IconButton(
-                onPressed: widget.onLogout,
-                icon: const Icon(Icons.logout_rounded, color: Lm.muted, size: 22),
+                onPressed: widget.onOpenSettings,
+                icon: const Icon(Icons.settings_rounded, color: Lm.muted, size: 22),
               ),
             ],
           ),
@@ -158,9 +159,9 @@ class _DashboardTabState extends State<DashboardTab> {
               children: [
                 Row(
                   children: [
-                    const Text('보유 정품', style: TextStyle(fontSize: 13, color: Lm.muted)),
+                    Text(tr('dash.ownedGenuine'), style: const TextStyle(fontSize: 13, color: Lm.muted)),
                     const SizedBox(width: 8),
-                    _pill('정품 인증', Lm.good, Lm.goodBg),
+                    _pill(tr('dash.genuineBadge'), Lm.good, Lm.goodBg),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -171,9 +172,9 @@ class _DashboardTabState extends State<DashboardTab> {
                     Text('$_owned',
                         style: const TextStyle(fontSize: 40, fontWeight: FontWeight.w800, height: 1)),
                     const SizedBox(width: 6),
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 6),
-                      child: Text('개 등록', style: TextStyle(fontSize: 14, color: Lm.muted)),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Text(tr('dash.registeredCount'), style: const TextStyle(fontSize: 14, color: Lm.muted)),
                     ),
                   ],
                 ),
@@ -214,7 +215,7 @@ class _DashboardTabState extends State<DashboardTab> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('내 포인트', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                  Text(tr('dash.myPoints'), style: const TextStyle(color: Colors.white70, fontSize: 12)),
                   const SizedBox(height: 2),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -233,14 +234,14 @@ class _DashboardTabState extends State<DashboardTab> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-                child: const Text('출석하기', style: TextStyle(color: Lm.primary, fontSize: 12, fontWeight: FontWeight.w800)),
+                child: Text(tr('dash.checkinCta'), style: const TextStyle(color: Lm.primary, fontSize: 12, fontWeight: FontWeight.w800)),
               )
             else
               Row(
                 children: [
                   const Icon(Icons.local_fire_department_rounded, color: Colors.amberAccent, size: 18),
                   const SizedBox(width: 4),
-                  Text('$_streak주', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
+                  Text('$_streak${tr('dash.weeks')}', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
                 ],
               ),
             const SizedBox(width: 6),
@@ -273,19 +274,19 @@ class _DashboardTabState extends State<DashboardTab> {
   Widget _overview() {
     return Row(
       children: [
-        const Text('개요', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+        Text(tr('dash.overview'), style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
         const SizedBox(width: 8),
-        Text('Overview', style: TextStyle(fontSize: 11, color: Lm.muted, letterSpacing: 1)),
+        const Text('Overview', style: TextStyle(fontSize: 11, color: Lm.muted, letterSpacing: 1)),
       ],
     );
   }
 
   Widget _statGrid() {
     final cards = [
-      _stat('보유 제품', '$_owned', Icons.inventory_2_rounded, Lm.violet, Lm.violetBg),
-      _stat('유효 교환권', '$_vouchers', Icons.card_giftcard_rounded, Lm.mint, Lm.mintBg),
-      _stat('등록 대기', '$_pending', Icons.hourglass_bottom_rounded, Lm.peach, Lm.peachBg),
-      _stat('등록 완료', '$_committed', Icons.verified_rounded, Lm.sky, Lm.skyBg),
+      _stat(tr('dash.statOwned'), '$_owned', Icons.inventory_2_rounded, Lm.violet, Lm.violetBg),
+      _stat(tr('dash.statVouchers'), '$_vouchers', Icons.card_giftcard_rounded, Lm.mint, Lm.mintBg),
+      _stat(tr('dash.statPending'), '$_pending', Icons.hourglass_bottom_rounded, Lm.peach, Lm.peachBg),
+      _stat(tr('dash.statCommitted'), '$_committed', Icons.verified_rounded, Lm.sky, Lm.skyBg),
     ];
     return GridView.count(
       crossAxisCount: 2,
@@ -335,13 +336,13 @@ class _DashboardTabState extends State<DashboardTab> {
             child: const Icon(Icons.qr_code_scanner_rounded, color: Lm.primary),
           ),
           const SizedBox(width: 14),
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('제품 정품 확인', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-                SizedBox(height: 2),
-                Text('QR·UID를 스캔해 정품을 등록하세요', style: TextStyle(fontSize: 12, color: Lm.muted)),
+                Text(tr('dash.scanTitle'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 2),
+                Text(tr('dash.scanDesc'), style: const TextStyle(fontSize: 12, color: Lm.muted)),
               ],
             ),
           ),
@@ -352,7 +353,7 @@ class _DashboardTabState extends State<DashboardTab> {
               minimumSize: const Size(0, 44),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             ),
-            child: const Text('스캔'),
+            child: Text(tr('nav.scan')),
           ),
         ],
       ),

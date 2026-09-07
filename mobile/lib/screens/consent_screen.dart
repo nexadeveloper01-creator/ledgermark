@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../api.dart';
+import '../i18n.dart';
 import '../theme.dart';
 
 // 개인정보 수집·활용 동의 화면. 스코프별로 동의를 켜고 저장하면 최초 동의 시 보상 포인트가
@@ -14,7 +15,6 @@ class ConsentScreen extends StatefulWidget {
 class _ConsentScreenState extends State<ConsentScreen> {
   static const _scopes = ['profile', 'usage', 'location', 'marketing'];
   final Map<String, bool> _on = {for (final s in _scopes) s: false};
-  Map<String, dynamic> _labels = {};
   Map<String, dynamic> _points = {};
   List<dynamic> _rewarded = [];
   bool _loading = true, _saving = false;
@@ -34,7 +34,6 @@ class _ConsentScreenState extends State<ConsentScreen> {
         for (final s in _scopes) {
           _on[s] = scopes[s] == true;
         }
-        _labels = (c['scopeLabels'] as Map?)?.cast<String, dynamic>() ?? {};
         _points = (c['scopePoints'] as Map?)?.cast<String, dynamic>() ?? {};
         _rewarded = (c['rewardedScopes'] as List?) ?? [];
         _loading = false;
@@ -51,7 +50,7 @@ class _ConsentScreenState extends State<ConsentScreen> {
       final awarded = (res['awarded'] as num?)?.toInt() ?? 0;
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(awarded > 0 ? '동의 완료! +$awarded P 적립' : '동의 설정을 저장했습니다.')),
+        SnackBar(content: Text(awarded > 0 ? trp('consent.savedAwarded', {'p': '$awarded'}) : tr('consent.saved'))),
       );
       Navigator.of(context).pop(true);
     } catch (e) {
@@ -69,7 +68,7 @@ class _ConsentScreenState extends State<ConsentScreen> {
         backgroundColor: Lm.bg,
         elevation: 0,
         foregroundColor: Lm.text,
-        title: const Text('개인정보 동의 & 혜택'),
+        title: Text(tr('consent.title')),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator(color: Lm.primary))
@@ -82,11 +81,9 @@ class _ConsentScreenState extends State<ConsentScreen> {
                     children: [
                       const Icon(Icons.verified_user_rounded, color: Lm.primary),
                       const SizedBox(width: 10),
-                      const Expanded(
-                        child: Text(
-                          '동의하신 정보는 맞춤 혜택·제품 개선에만 활용되며, 그 대가로 포인트와 할인 혜택을 드립니다. 언제든 철회할 수 있어요.',
-                          style: TextStyle(fontSize: 12.5, height: 1.45),
-                        ),
+                      Expanded(
+                        child: Text(tr('consent.intro'),
+                          style: const TextStyle(fontSize: 12.5, height: 1.45)),
                       ),
                     ],
                   ),
@@ -98,12 +95,12 @@ class _ConsentScreenState extends State<ConsentScreen> {
                   onPressed: _saving ? null : _save,
                   child: _saving
                       ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Text('동의 설정 저장'),
+                      : Text(tr('consent.save')),
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  '이미 보상을 받은 항목은 철회 후 재동의해도 다시 지급되지 않습니다.',
-                  style: TextStyle(fontSize: 11, color: Lm.muted, height: 1.4),
+                Text(
+                  tr('consent.footnote'),
+                  style: const TextStyle(fontSize: 11, color: Lm.muted, height: 1.4),
                 ),
               ],
             ),
@@ -111,7 +108,7 @@ class _ConsentScreenState extends State<ConsentScreen> {
   }
 
   Widget _scopeTile(String s) {
-    final label = _labels[s]?.toString() ?? s;
+    final label = tr('scope.$s');
     final pts = (_points[s] as num?)?.toInt() ?? 0;
     final rewarded = _rewarded.contains(s);
     return Container(
@@ -127,7 +124,7 @@ class _ConsentScreenState extends State<ConsentScreen> {
                   Text(label, style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 2),
                   Text(
-                    rewarded ? '보상 완료 · +$pts P' : '동의 시 +$pts P',
+                    rewarded ? trp('consent.rewarded', {'p': '$pts'}) : trp('consent.grantPts', {'p': '$pts'}),
                     style: TextStyle(fontSize: 12, color: rewarded ? Lm.good : Lm.primary, fontWeight: FontWeight.w600),
                   ),
                 ],

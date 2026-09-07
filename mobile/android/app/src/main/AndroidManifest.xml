@@ -8,7 +8,7 @@
         android:label="ledgermark_app"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:usesCleartextTraffic="true"><!-- 데모: http 개발 서버(LAN)와 통신하기 위함. 운영은 https라 제거해야 함 -->
+        android:usesCleartextTraffic="false"><!-- 운영: 클라우드 https만 사용(스토어 보안 요건). 로컬 http 개발이 필요하면 debug 매니페스트에서만 허용할 것 -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
