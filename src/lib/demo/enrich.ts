@@ -219,11 +219,13 @@ export async function seedDemoActivity(): Promise<DemoEnrichResult> {
     if (!user?.consumerId) continue;
 
     // 대부분 프로필·사용습관 동의, 절반은 맞춤 광고까지 동의(동의 기반 데이터 활용 모델).
+    // ramon은 추가 무상 교환 자격(전체 설문+전체 동의) 시연을 위해 전체 동의로 둔다.
+    const fullConsent = spec.email === "ramon@demo.ph";
     await setConsent(user.consumerId, {
       profile: true,
-      usage: spec.surveys.includes("usage-habits"),
-      marketing: i % 2 === 0,
-      location: i % 3 === 0,
+      usage: fullConsent || spec.surveys.includes("usage-habits"),
+      marketing: fullConsent || i % 2 === 0,
+      location: fullConsent || i % 3 === 0,
     });
 
     // 일부 데모 계정에 할인 쿠폰 1장 발급(미보유일 때만).
@@ -238,6 +240,30 @@ export async function seedDemoActivity(): Promise<DemoEnrichResult> {
           } catch {
             // 잔액 부족 등 무시
           }
+        }
+      }
+    }
+  }
+
+  // 추가 무상 교환 시연: ramon(전체 자격)의 기기 1대를 한 번 교환해 교환권 소진(NONE) 상태를
+  // 만든다. 그러면 앱에서 "추가 무상 교환 활성화" 버튼이 나타난다(멱등: 이미 교환 이력 있으면 skip).
+  const showcase = await prisma.user.findUnique({ where: { email: "ramon@demo.ph" } });
+  if (showcase?.consumerId) {
+    const alreadyExchanged = await prisma.uid.findFirst({
+      where: { ownerConsumerId: showcase.consumerId, status: "EXCHANGED" },
+    });
+    const hasNone = await prisma.uid.findFirst({
+      where: { ownerConsumerId: showcase.consumerId, voucherState: "NONE" },
+    });
+    if (!alreadyExchanged && !hasNone) {
+      const dev = await prisma.uid.findFirst({
+        where: { ownerConsumerId: showcase.consumerId, voucherState: "AVAILABLE" },
+      });
+      if (dev) {
+        try {
+          await transferUid(dev.code, { txType: "EXCHANGE_TRANSFER", from: { type: "CONSUMER", consumerId: showcase.consumerId } });
+        } catch {
+          // 교환 실패는 시연 보조이므로 무시
         }
       }
     }

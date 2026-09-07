@@ -200,6 +200,15 @@ class Api {
   Future<Map<String, dynamic>> benefits() async {
     return Map<String, dynamic>.from(await get('/api/benefits'));
   }
+
+  // ── 무상 교환 자격 ────────────────────────────────────
+  Future<Map<String, dynamic>> exchangeEntitlement() async {
+    return Map<String, dynamic>.from(await get('/api/exchange/entitlement'));
+  }
+
+  Future<void> applyExchangeBonus(String uidCode) async {
+    await post('/api/exchange/bonus', {'uidCode': uidCode});
+  }
 }
 
 final api = Api();
