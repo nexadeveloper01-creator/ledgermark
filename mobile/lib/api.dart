@@ -149,6 +149,34 @@ class Api {
   Future<void> resendVerification() async {
     await post('/api/auth/resend-verification');
   }
+
+  // ── 포인트 / 리워드 ─────────────────────────────────────
+  Future<Map<String, dynamic>> pointsSummary() async {
+    return Map<String, dynamic>.from(await get('/api/points'));
+  }
+
+  Future<Map<String, dynamic>> checkin() async {
+    return Map<String, dynamic>.from(await post('/api/points/checkin'));
+  }
+
+  Future<List<dynamic>> surveys() async {
+    final data = await get('/api/surveys');
+    return (data['surveys'] as List?) ?? [];
+  }
+
+  Future<Map<String, dynamic>> respondSurvey(String id, Map<String, dynamic> answers) async {
+    return Map<String, dynamic>.from(
+        await post('/api/surveys/${Uri.encodeComponent(id)}/respond', {'answers': answers}));
+  }
+
+  Future<Map<String, dynamic>> rewards() async {
+    return Map<String, dynamic>.from(await get('/api/rewards'));
+  }
+
+  Future<Map<String, dynamic>> redeemReward(String id) async {
+    return Map<String, dynamic>.from(
+        await post('/api/rewards/${Uri.encodeComponent(id)}/redeem'));
+  }
 }
 
 final api = Api();

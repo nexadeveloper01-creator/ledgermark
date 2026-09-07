@@ -121,6 +121,9 @@ class _ProductsTabState extends State<ProductsTab> {
             _card(u as Map<String, dynamic>),
             const SizedBox(height: 14),
           ],
+          const SizedBox(height: 6),
+          const AdSlot(asset: 'ad_products.gif', aspectRatio: 16 / 6, spec: '1080×405 · 16:6'),
+          const SizedBox(height: 40),
         ],
       ),
     );

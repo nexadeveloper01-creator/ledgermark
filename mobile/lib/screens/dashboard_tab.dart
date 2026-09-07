@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import '../api.dart';
 import '../theme.dart';
+import 'widgets.dart';
 
 class DashboardTab extends StatefulWidget {
   final Map<String, dynamic> user;
   final VoidCallback onScan;
+  final VoidCallback onOpenRewards;
   final Future<void> Function() onLogout;
-  const DashboardTab({super.key, required this.user, required this.onScan, required this.onLogout});
+  const DashboardTab({
+    super.key,
+    required this.user,
+    required this.onScan,
+    required this.onOpenRewards,
+    required this.onLogout,
+  });
 
   @override
   State<DashboardTab> createState() => _DashboardTabState();
@@ -14,6 +22,8 @@ class DashboardTab extends StatefulWidget {
 
 class _DashboardTabState extends State<DashboardTab> {
   int _owned = 0, _vouchers = 0, _pending = 0, _committed = 0;
+  int _points = 0, _streak = 0;
+  bool _checkedIn = true;
 
   String get _consumerId => widget.user['consumerId'] as String? ?? '';
 
@@ -37,6 +47,15 @@ class _DashboardTabState extends State<DashboardTab> {
     } catch (_) {
       // 대시보드 집계 실패는 조용히 0으로 둔다.
     }
+    try {
+      final p = await api.pointsSummary();
+      if (!mounted) return;
+      setState(() {
+        _points = (p['balance'] as num?)?.toInt() ?? 0;
+        _streak = (p['checkinStreak'] as num?)?.toInt() ?? 0;
+        _checkedIn = p['checkedInThisWeek'] == true;
+      });
+    } catch (_) {}
   }
 
   @override
@@ -56,12 +75,16 @@ class _DashboardTabState extends State<DashboardTab> {
               child: Column(
                 children: [
                   _heroCard(),
+                  const SizedBox(height: 14),
+                  _pointsBanner(),
                   const SizedBox(height: 22),
                   _overview(),
                   const SizedBox(height: 18),
                   _statGrid(),
                   const SizedBox(height: 18),
                   _scanCta(),
+                  const SizedBox(height: 18),
+                  const AdSlot(asset: 'ad_home.gif', aspectRatio: 16 / 6, spec: '1080×405 · 16:6'),
                   const SizedBox(height: 110),
                 ],
               ),
@@ -156,6 +179,70 @@ class _DashboardTabState extends State<DashboardTab> {
           const SizedBox(width: 8),
           _miniBars(),
         ],
+      ),
+    );
+  }
+
+  Widget _pointsBanner() {
+    return GestureDetector(
+      onTap: widget.onOpenRewards,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+            colors: [Lm.primary, Lm.violet],
+          ),
+          borderRadius: BorderRadius.circular(Lm.radius),
+          boxShadow: Lm.cardShadow,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(14)),
+              child: const Icon(Icons.stars_rounded, color: Colors.white),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('내 포인트', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                  const SizedBox(height: 2),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text('$_points',
+                          style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w800, height: 1)),
+                      const SizedBox(width: 4),
+                      const Text('P', style: TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w700)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            if (!_checkedIn)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+                child: const Text('출석하기', style: TextStyle(color: Lm.primary, fontSize: 12, fontWeight: FontWeight.w800)),
+              )
+            else
+              Row(
+                children: [
+                  const Icon(Icons.local_fire_department_rounded, color: Colors.amberAccent, size: 18),
+                  const SizedBox(width: 4),
+                  Text('$_streak주', style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w700)),
+                ],
+              ),
+            const SizedBox(width: 6),
+            const Icon(Icons.chevron_right_rounded, color: Colors.white70),
+          ],
+        ),
       ),
     );
   }

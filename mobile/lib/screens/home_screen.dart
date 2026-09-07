@@ -5,6 +5,7 @@ import 'dashboard_tab.dart';
 import 'scan_flow.dart';
 import 'status_tab.dart';
 import 'products_tab.dart';
+import 'rewards_tab.dart';
 
 class HomeScreen extends StatefulWidget {
   final Map<String, dynamic> user;
@@ -48,6 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
         key: ValueKey('dash$_reloadKey'),
         user: widget.user,
         onScan: _openScan,
+        onOpenRewards: () => setState(() => _index = 3),
         onLogout: widget.onLogout,
       ),
       StatusTab(
@@ -56,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
         highlightRequestId: _lastRequestId,
       ),
       ProductsTab(key: ValueKey('prod$_reloadKey'), consumerId: _consumerId),
+      RewardsTab(key: ValueKey('rewards$_reloadKey'), consumerId: _consumerId),
     ];
 
     return Scaffold(
@@ -106,6 +109,7 @@ class _PillNav extends StatelessWidget {
                     _navIcon(Icons.home_rounded, 0),
                     _navIcon(Icons.assignment_turned_in_rounded, 1),
                     _navIcon(Icons.inventory_2_rounded, 2),
+                    _navIcon(Icons.card_giftcard_rounded, 3),
                   ],
                 ),
               ),

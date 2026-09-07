@@ -106,6 +106,87 @@ class Tag extends StatelessWidget {
   }
 }
 
+// 타겟 광고 슬롯. assets/ads/<asset> 파일(GIF/이미지)이 있으면 표시하고,
+// 없으면 규격 안내 플레이스홀더를 렌더한다. 광고임을 항상 "AD" 라벨로 표시한다.
+class AdSlot extends StatelessWidget {
+  final String asset; // 예: 'ad_home.gif'
+  final double aspectRatio; // 예: 16/6
+  final String spec; // 플레이스홀더에 보여줄 권장 규격
+  final VoidCallback? onTap;
+  const AdSlot({
+    super.key,
+    required this.asset,
+    required this.aspectRatio,
+    required this.spec,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(Lm.radius),
+        child: AspectRatio(
+          aspectRatio: aspectRatio,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.asset(
+                'assets/ads/$asset',
+                fit: BoxFit.cover,
+                errorBuilder: (_, error, stack) => _placeholder(),
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.45),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Text('AD',
+                      style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 1)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _placeholder() {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Lm.skyBg, Lm.violetBg],
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle, boxShadow: Lm.cardShadow),
+              child: const Icon(Icons.play_arrow_rounded, color: Lm.primary, size: 24),
+            ),
+            const SizedBox(height: 8),
+            const Text('타겟 광고 영역', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700, color: Lm.text)),
+            const SizedBox(height: 2),
+            Text(spec, style: const TextStyle(fontSize: 10.5, color: Lm.muted)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 String statusLabel(String s) {
   const m = {
     'MINTED': '발급됨',
