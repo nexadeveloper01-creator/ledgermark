@@ -239,6 +239,7 @@ model Consumer {
   consent           ConsentRecord?
   consentEvents     ConsentEvent[]
   coupons           Coupon[]
+  exchangeBonus     ExchangeBonus?
 }
 
 // 연령인증 — 원본 신분정보는 저장하지 않고 "검증 결과 크리덴셜"만 기록한다 (기획서 3.3)
@@ -481,8 +482,37 @@ model Coupon {
   issuedAt   DateTime     @default(now())
   expiresAt  DateTime?
   usedAt     DateTime?
+  checkout   StoreCheckout?
 
   @@index([consumerId, status])
+}
+
+// 추가 무상 교환 자격 사용 기록. 자격(전체 설문 완료 + 정보 이용 동의)은 실시간으로
+// 판정하고, 이 모델은 "추가 교환 1회를 이미 소진했는지"만 추적한다(consumer당 1회).
+model ExchangeBonus {
+  id         String    @id @default(cuid())
+  consumerId String    @unique
+  consumer   Consumer  @relation(fields: [consumerId], references: [id])
+  usedAt     DateTime? // 사용 시각(소진). null이면 미사용.
+  usedUidId  String? // 어느 UID에 추가 교환권을 부여했는지
+  createdAt  DateTime  @default(now())
+}
+
+// 매장 결제(POS) 기록 — 쿠폰 차감이 실제 결제에 반영된 근거. 쿠폰 1장당 결제 1건.
+model StoreCheckout {
+  id          String   @id @default(cuid())
+  orgId       String?
+  staffUserId String?
+  consumerId  String?
+  amount      Int // 정가(페소)
+  discount    Int // 할인액(페소)
+  total       Int // 실제 결제액(페소)
+  couponId    String?  @unique
+  coupon      Coupon?  @relation(fields: [couponId], references: [id])
+  couponCode  String?
+  createdAt   DateTime @default(now())
+
+  @@index([orgId, createdAt])
 }
 
 model PointAccount {

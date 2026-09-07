@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Corners } from "@/components/ui/Corners";
 import { SessionBar, useSession } from "@/components/SessionBar";
 import { Accounts } from "@/components/console/Accounts";
+import { Checkout } from "@/components/partner/Checkout";
 
 const TYPE_LABEL: Record<string, { en: string; ko: string; cta: string; note: string }> = {
   RETAIL_SALE: {
@@ -37,7 +38,7 @@ const STATE_LABEL: Record<string, string> = {
 
 export default function PartnerPage() {
   const { user, loading } = useSession(["PARTNER_STAFF", "ADMIN"]);
-  const [tab, setTab] = useState<"queue" | "staff">("queue");
+  const [tab, setTab] = useState<"queue" | "checkout" | "staff">("queue");
   const [requests, setRequests] = useState<any[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -108,17 +109,26 @@ export default function PartnerPage() {
         >
           DISTRIBUTOR · RETAIL
         </span>
-        {user.isOrgManager && (
-          <div className="seg" style={{ marginLeft: 12 }}>
-            <label className="seg-opt">
-              <input
-                type="radio"
-                name="partner-tab"
-                checked={tab === "queue"}
-                onChange={() => setTab("queue")}
-              />
-              소유권 이전 큐
-            </label>
+        <div className="seg" style={{ marginLeft: 12 }}>
+          <label className="seg-opt">
+            <input
+              type="radio"
+              name="partner-tab"
+              checked={tab === "queue"}
+              onChange={() => setTab("queue")}
+            />
+            소유권 이전 큐
+          </label>
+          <label className="seg-opt">
+            <input
+              type="radio"
+              name="partner-tab"
+              checked={tab === "checkout"}
+              onChange={() => setTab("checkout")}
+            />
+            매장 결제
+          </label>
+          {user.isOrgManager && (
             <label className="seg-opt">
               <input
                 type="radio"
@@ -128,8 +138,8 @@ export default function PartnerPage() {
               />
               직원 관리
             </label>
-          </div>
-        )}
+          )}
+        </div>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
           <SessionBar user={user} />
           <Link href="/" style={{ fontSize: 13 }}>
@@ -148,6 +158,12 @@ export default function PartnerPage() {
               organizationName: user.organizationName ?? "소속 기관",
             }}
           />
+        </div>
+      )}
+
+      {tab === "checkout" && (
+        <div style={{ padding: 32, maxWidth: 1200, margin: "0 auto" }}>
+          <Checkout />
         </div>
       )}
 
