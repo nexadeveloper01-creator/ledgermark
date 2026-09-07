@@ -138,7 +138,7 @@ export async function signupConsumer(input: SignupInput) {
         isOrgManager: false,
         passwordHash,
       },
-      select: { id: true, email: true, displayName: true, role: true },
+      select: { id: true, email: true, displayName: true, role: true, consumerId: true },
     });
   });
 }

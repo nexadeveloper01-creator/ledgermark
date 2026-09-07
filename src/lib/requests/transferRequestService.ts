@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { transferUid } from "@/lib/ledger/ledgerService";
 import { LedgerError } from "@/lib/ledger/stateMachine";
+import { awardPoints, POINTS } from "@/lib/points/pointsService";
 import { checkRetailSaleEligibility } from "./eligibility";
 
 // 소비자 앱에서 올라온 소매 판매 요청. 매장이 커밋하기 전까지 원장에는 아무것도 기록되지 않는다.
@@ -131,6 +132,23 @@ export async function commitRequest(id: string) {
       to: { type: "CONSUMER", consumerId: request.requestedConsumerId },
       ageVerified: true,
     });
+
+    // 정품(기기) 등록이 확정되는 시점 — 소비자에게 등록 포인트를 적립한다.
+    // UID당 1회만 지급되며(dedupeKey), 원장 이전은 이미 확정됐으므로 적립 실패가
+    // 등록을 되돌리지 않도록 감싼다(멱등이라 이후 재적립 가능).
+    try {
+      await awardPoints({
+        consumerId: request.requestedConsumerId,
+        reason: "DEVICE_REGISTRATION",
+        amount: POINTS.DEVICE_REGISTRATION,
+        dedupeKey: `reg:${uid.id}`,
+        memo: `정품 등록: ${uid.code}`,
+        refType: "Uid",
+        refId: uid.id,
+      });
+    } catch (err) {
+      console.error("[commitRequest] 등록 포인트 적립 실패(등록은 완료됨):", err);
+    }
   } else if (request.type === "EXCHANGE_TRANSFER") {
     if (!uid.ownerConsumerId) throw new LedgerError("현재 소유자가 소비자가 아닙니다.");
 

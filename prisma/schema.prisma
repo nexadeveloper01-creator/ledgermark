@@ -232,6 +232,10 @@ model Consumer {
   ledgerTxAsTo     LedgerTransaction[] @relation("ToConsumer")
   transferRequests TransferRequest[]
   user             User?
+
+  pointAccount      PointAccount?
+  surveyResponses   SurveyResponse[]
+  rewardRedemptions RewardRedemption[]
 }
 
 // 연령인증 — 원본 신분정보는 저장하지 않고 "검증 결과 크리덴셜"만 기록한다 (기획서 3.3)
@@ -390,6 +394,127 @@ enum FieldVerdict {
   VERIFIED // 정품 · 정상 유통
   SEIZURE_GROUNDS // 통관 미확인 · 압수 근거 성립
   COUNTERFEIT_SUSPECTED // 원장 미존재 · 위조 의심
+}
+
+// ── 소비자 포인트/리워드 ──────────────────────────────────────────────
+// 포인트는 현금을 대신하는 가치를 지니므로 잔액을 임의로 바꾸지 않고,
+// 모든 적립·차감을 append-only 원장(PointLedgerEntry)으로만 기록한다.
+// 잔액은 원장 합계를 물리화한 값이며 dedupeKey로 중복 적립을 DB가 막는다.
+
+enum PointReason {
+  DEVICE_REGISTRATION // 정품(기기) 등록
+  WEEKLY_CHECKIN // 주간 접속 출석
+  STREAK_BONUS // 연속 출석 보너스
+  SURVEY_COMPLETION // 설문·질문 응답
+  PROFILE_COMPLETION // 프로필 정보 입력
+  SIGNUP_BONUS // 가입 축하
+  REWARD_REDEMPTION // 경품·콘텐츠 사용(차감)
+  ADJUSTMENT // 운영자 수동 조정
+}
+
+enum RewardType {
+  CONTENT // 앱 내 콘텐츠 해금
+  PRIZE_DRAW // 경품 응모
+  GIFT // 상품 교환
+}
+
+enum RedemptionStatus {
+  REQUESTED
+  FULFILLED
+  CANCELLED
+}
+
+model PointAccount {
+  id              String    @id @default(cuid())
+  consumerId      String    @unique
+  consumer        Consumer  @relation(fields: [consumerId], references: [id])
+  balance         Int       @default(0)
+  lifetimeEarned  Int       @default(0)
+  checkinStreak   Int       @default(0) // 연속 출석한 주 수
+  lastCheckinWeek String? // 마지막 출석 ISO 주 (예: "2026-W37")
+  lastCheckinAt   DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  entries     PointLedgerEntry[]
+  redemptions RewardRedemption[]
+}
+
+model PointLedgerEntry {
+  id           String       @id @default(cuid())
+  sequence     Int          @unique @default(autoincrement())
+  accountId    String
+  account      PointAccount @relation(fields: [accountId], references: [id])
+  reason       PointReason
+  amount       Int // + 적립 / - 차감
+  balanceAfter Int
+  memo         String?
+  // 중복 적립 방지 멱등키 (예: "reg:<uidId>", "checkin:<week>", "survey:<surveyId>")
+  dedupeKey    String?      @unique
+  refType      String?
+  refId        String?
+  createdAt    DateTime     @default(now())
+
+  @@index([accountId, createdAt])
+}
+
+model Survey {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String
+  points      Int
+  category    String   @default("GENERAL") // 마케팅 분석 태깅
+  questions   Json // [{ id, text, type: 'single'|'multi'|'scale'|'text', options?: [] }]
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  responses SurveyResponse[]
+}
+
+model SurveyResponse {
+  id         String   @id @default(cuid())
+  surveyId   String
+  survey     Survey   @relation(fields: [surveyId], references: [id])
+  consumerId String
+  consumer   Consumer @relation(fields: [consumerId], references: [id])
+  answers    Json
+  awarded    Int
+  createdAt  DateTime @default(now())
+
+  @@unique([surveyId, consumerId])
+}
+
+model Reward {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  title       String
+  description String
+  cost        Int
+  type        RewardType
+  stock       Int? // null = 무제한
+  active      Boolean    @default(true)
+  sortOrder   Int        @default(0)
+  createdAt   DateTime   @default(now())
+
+  redemptions RewardRedemption[]
+}
+
+model RewardRedemption {
+  id          String           @id @default(cuid())
+  rewardId    String
+  reward      Reward           @relation(fields: [rewardId], references: [id])
+  accountId   String
+  account     PointAccount     @relation(fields: [accountId], references: [id])
+  consumerId  String
+  consumer    Consumer         @relation(fields: [consumerId], references: [id])
+  cost        Int
+  status      RedemptionStatus @default(REQUESTED)
+  createdAt   DateTime         @default(now())
+  fulfilledAt DateTime?
+
+  @@index([consumerId])
 }
 
 // 현장 단속 조회 기록. 조서를 발행한 건은 reportNumber가 부여된다.

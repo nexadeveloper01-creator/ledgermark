@@ -3,6 +3,9 @@ import { hashPassword } from "../src/lib/auth/password";
 import { mintLot, transferUid } from "../src/lib/ledger/ledgerService";
 import { pathToFileURL } from "url";
 import { createRetailSaleRequest } from "../src/lib/requests/transferRequestService";
+import { awardPoints, POINTS } from "../src/lib/points/pointsService";
+import { submitSurvey } from "../src/lib/points/surveyService";
+import { seedSurveysAndRewards } from "./seed-points";
 
 const DEMO_PASSWORD = "ledgermark1234";
 // 시드 계정은 메일 인증을 거칠 수 없으므로 인증 완료 상태로 만든다.
@@ -185,6 +188,43 @@ export async function seed() {
     consumerId: consumerB.id,
     ageVerified: true,
   });
+
+  // ── 포인트 제도: 설문·리워드 카탈로그 + 데모 소비자 적립 ──────────────
+  await seedSurveysAndRewards();
+
+  // 소비자 A는 앱을 활발히 쓴 상태로 보이도록 포인트를 채워 둔다.
+  await awardPoints({
+    consumerId: consumerA.id,
+    reason: "SIGNUP_BONUS",
+    amount: POINTS.SIGNUP_BONUS,
+    dedupeKey: `signup:${consumerA.id}`,
+    memo: "가입 축하 포인트",
+  });
+  // A가 실제로 보유한 UID마다 등록 포인트를 지급(실서비스 커밋 경로와 동일한 dedupeKey).
+  const ownedByA = await prisma.uid.findMany({
+    where: { ownerConsumerId: consumerA.id },
+    select: { id: true, code: true },
+  });
+  for (const u of ownedByA) {
+    await awardPoints({
+      consumerId: consumerA.id,
+      reason: "DEVICE_REGISTRATION",
+      amount: POINTS.DEVICE_REGISTRATION,
+      dedupeKey: `reg:${u.id}`,
+      memo: `정품 등록: ${u.code}`,
+      refType: "Uid",
+      refId: u.id,
+    });
+  }
+  // 온보딩 설문 1건 완료 상태로 둔다.
+  const onboarding = await prisma.survey.findUnique({ where: { slug: "onboarding-profile" } });
+  if (onboarding) {
+    await submitSurvey({
+      consumerId: consumerA.id,
+      surveyId: onboarding.id,
+      answers: { ageBand: "30대", region: "Metro Manila", gender: "남성" },
+    });
+  }
 
   console.log("Seed complete.");
 }

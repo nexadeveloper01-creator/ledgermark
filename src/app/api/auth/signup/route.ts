@@ -7,6 +7,7 @@ import { issueToken } from "@/lib/accounts/tokens";
 import { appBaseUrl, getMailer } from "@/lib/mail";
 import { verificationEmail } from "@/lib/mail/templates";
 import { clientIp, consumeRateLimit, SIGNUP_PER_IP } from "@/lib/security/rateLimit";
+import { awardPoints, POINTS } from "@/lib/points/pointsService";
 
 // 공개 엔드포인트. 요청 본문의 role·organizationId·isOrgManager는 읽지 않으며,
 // 생성되는 계정은 항상 소비자다.
@@ -32,6 +33,21 @@ export async function POST(req: NextRequest) {
 
     // 가입 직후 바로 앱을 쓸 수 있도록 세션을 발급한다.
     const { token } = await createSession(user.id);
+
+    // 가입 축하 포인트(1회). 적립 실패가 가입을 막지 않도록 감싼다.
+    if (user.consumerId) {
+      try {
+        await awardPoints({
+          consumerId: user.consumerId,
+          reason: "SIGNUP_BONUS",
+          amount: POINTS.SIGNUP_BONUS,
+          dedupeKey: `signup:${user.consumerId}`,
+          memo: "가입 축하 포인트",
+        });
+      } catch (pointErr) {
+        console.error("[signup] 가입 포인트 적립 실패(가입은 계속):", pointErr);
+      }
+    }
 
     // 인증 메일 발송이 실패해도 가입 자체는 성공시킨다(계정·세션은 이미 생성됨).
     // 사용자는 앱 상단 배너의 "재발송"으로 다시 시도할 수 있다.
