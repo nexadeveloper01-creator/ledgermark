@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../api.dart';
 import '../theme.dart';
-import 'scan_tab.dart';
+import 'dashboard_tab.dart';
+import 'scan_flow.dart';
 import 'status_tab.dart';
 import 'products_tab.dart';
 
@@ -16,82 +17,126 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _index = 0;
-  String? _lastRequestId; // 스캔 탭에서 등록 신청 후 상태 탭으로 넘길 때 사용
+  int _reloadKey = 0; // 탭 데이터 강제 새로고침용
+  String? _lastRequestId;
 
   String get _consumerId => widget.user['consumerId'] as String? ?? '';
   bool get _emailVerified => widget.user['emailVerified'] == true;
 
-  void _goStatus(String requestId) {
+  Future<void> _openScan() async {
+    final requestId = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => ScanFlowScreen(consumerId: _consumerId, emailVerified: _emailVerified),
+      ),
+    );
+    if (!mounted) return;
+    // 스캔 흐름이 등록 신청까지 마치면 등록 상태 탭으로, 그 외엔 데이터만 새로고침.
     setState(() {
-      _lastRequestId = requestId;
-      _index = 1;
+      _reloadKey++;
+      if (requestId != null) {
+        _lastRequestId = requestId;
+        _index = 1;
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final tabs = [
-      ScanTab(
-        consumerId: _consumerId,
-        emailVerified: _emailVerified,
-        onRegistered: _goStatus,
+      DashboardTab(
+        key: ValueKey('dash$_reloadKey'),
+        user: widget.user,
+        onScan: _openScan,
+        onLogout: widget.onLogout,
       ),
-      StatusTab(consumerId: _consumerId, highlightRequestId: _lastRequestId),
-      ProductsTab(consumerId: _consumerId),
+      StatusTab(
+        key: ValueKey('status$_reloadKey'),
+        consumerId: _consumerId,
+        highlightRequestId: _lastRequestId,
+      ),
+      ProductsTab(key: ValueKey('prod$_reloadKey'), consumerId: _consumerId),
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Lm.bg,
-        surfaceTintColor: Lm.bg,
-        elevation: 0,
-        shape: const Border(bottom: BorderSide(color: Lm.divider)),
-        titleSpacing: 20,
-        title: Row(
-          children: [
-            const Text('LEDGERMARK',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, letterSpacing: 1.4)),
-            const SizedBox(width: 10),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(border: Border.all(color: Lm.divider)),
-              child: const Text('CONSUMER',
-                  style: TextStyle(fontSize: 10, letterSpacing: 1.4, color: Lm.accent700)),
-            ),
-          ],
-        ),
-        actions: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: Text(widget.user['displayName'] as String? ?? '',
-                  style: const TextStyle(fontSize: 12, color: Lm.muted)),
-            ),
-          ),
-          IconButton(
-            tooltip: '로그아웃',
-            icon: const Icon(Icons.logout, size: 18, color: Lm.muted),
-            onPressed: widget.onLogout,
-          ),
-        ],
-      ),
+      extendBody: true,
       body: Column(
         children: [
-          if (!_emailVerified) _VerifyBanner(),
+          if (!_emailVerified) SafeArea(bottom: false, child: _VerifyBanner()),
           Expanded(child: tabs[_index]),
         ],
       ),
-      bottomNavigationBar: NavigationBar(
-        backgroundColor: Lm.surface,
-        indicatorColor: Lm.accent100,
-        selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.qr_code_scanner), label: 'UID 스캔'),
-          NavigationDestination(icon: Icon(Icons.assignment_turned_in), label: '등록 상태'),
-          NavigationDestination(icon: Icon(Icons.inventory_2), label: '내 제품'),
-        ],
+      bottomNavigationBar: _PillNav(
+        index: _index,
+        onSelect: (i) => setState(() => _index = i),
+        onScan: _openScan,
       ),
+    );
+  }
+}
+
+// 어두운 알약형 하단 내비 + 파란 원형 "+" (스캔) 버튼.
+class _PillNav extends StatelessWidget {
+  final int index;
+  final ValueChanged<int> onSelect;
+  final VoidCallback onScan;
+  const _PillNav({required this.index, required this.onSelect, required this.onScan});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(18, 0, 18, 14),
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                height: 64,
+                decoration: BoxDecoration(
+                  color: Lm.dark,
+                  borderRadius: BorderRadius.circular(32),
+                  boxShadow: const [
+                    BoxShadow(color: Color(0x2914161C), blurRadius: 20, offset: Offset(0, 8)),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _navIcon(Icons.home_rounded, 0),
+                    _navIcon(Icons.assignment_turned_in_rounded, 1),
+                    _navIcon(Icons.inventory_2_rounded, 2),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            GestureDetector(
+              onTap: onScan,
+              child: Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: Lm.primary,
+                  shape: BoxShape.circle,
+                  boxShadow: const [
+                    BoxShadow(color: Color(0x552E6BFF), blurRadius: 18, offset: Offset(0, 8)),
+                  ],
+                ),
+                child: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white, size: 28),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _navIcon(IconData icon, int i) {
+    final selected = index == i;
+    return IconButton(
+      onPressed: () => onSelect(i),
+      icon: Icon(icon, color: selected ? Colors.white : Colors.white38, size: 26),
     );
   }
 }
@@ -110,7 +155,7 @@ class _VerifyBannerState extends State<_VerifyBanner> {
     try {
       await api.resendVerification();
       setState(() => _message = '인증 메일을 다시 보냈습니다.');
-    } catch (e) {
+    } catch (_) {
       setState(() => _message = '재발송에 실패했습니다.');
     } finally {
       if (mounted) setState(() => _sending = false);
@@ -120,31 +165,36 @@ class _VerifyBannerState extends State<_VerifyBanner> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      color: Lm.accent100,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(color: Lm.warnBg, borderRadius: BorderRadius.circular(16)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '이메일 인증이 완료되지 않았습니다. 메일의 링크를 열어 인증하면 정품 등록을 신청할 수 있습니다.',
-            style: TextStyle(fontSize: 12, color: Lm.accent900, height: 1.5),
+          Row(
+            children: [
+              const Icon(Icons.mark_email_unread_rounded, color: Lm.warnFg, size: 18),
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text('이메일 인증 후 정품 등록을 신청할 수 있습니다.',
+                    style: TextStyle(fontSize: 12.5, color: Lm.warnFg, height: 1.4)),
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              OutlinedButton(
+              TextButton(
                 onPressed: _sending ? null : _resend,
-                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 34)),
-                child: const Text('인증 메일 다시 보내기', style: TextStyle(fontSize: 12)),
-              ),
-              if (_message != null) ...[
-                const SizedBox(width: 10),
-                Flexible(
-                  child: Text(_message!,
-                      style: const TextStyle(fontSize: 11, color: Lm.muted)),
+                style: TextButton.styleFrom(
+                  foregroundColor: Lm.warnFg,
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  minimumSize: const Size(0, 30),
                 ),
-              ],
+                child: const Text('인증 메일 다시 보내기', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+              ),
+              if (_message != null)
+                Flexible(child: Text(_message!, style: const TextStyle(fontSize: 11, color: Lm.warnFg))),
             ],
           ),
         ],

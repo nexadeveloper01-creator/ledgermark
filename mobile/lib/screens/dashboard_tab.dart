@@ -1,0 +1,278 @@
+import 'package:flutter/material.dart';
+import '../api.dart';
+import '../theme.dart';
+
+class DashboardTab extends StatefulWidget {
+  final Map<String, dynamic> user;
+  final VoidCallback onScan;
+  final Future<void> Function() onLogout;
+  const DashboardTab({super.key, required this.user, required this.onScan, required this.onLogout});
+
+  @override
+  State<DashboardTab> createState() => _DashboardTabState();
+}
+
+class _DashboardTabState extends State<DashboardTab> {
+  int _owned = 0, _vouchers = 0, _pending = 0, _committed = 0;
+
+  String get _consumerId => widget.user['consumerId'] as String? ?? '';
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final uids = await api.myUids(_consumerId);
+      final reqs = await api.myRequests(_consumerId);
+      if (!mounted) return;
+      setState(() {
+        _owned = uids.length;
+        _vouchers = uids.where((u) => u['voucherState'] == 'AVAILABLE').length;
+        _pending = reqs.where((r) => r['status'] == 'PENDING').length;
+        _committed = reqs.where((r) => r['status'] == 'COMMITTED').length;
+      });
+    } catch (_) {
+      // 대시보드 집계 실패는 조용히 0으로 둔다.
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final name = widget.user['displayName'] as String? ?? '소비자';
+    return RefreshIndicator(
+      onRefresh: _load,
+      color: Lm.primary,
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          _header(name),
+          Transform.translate(
+            offset: const Offset(0, -28),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(18, 0, 18, 0),
+              child: Column(
+                children: [
+                  _heroCard(),
+                  const SizedBox(height: 22),
+                  _overview(),
+                  const SizedBox(height: 18),
+                  _statGrid(),
+                  const SizedBox(height: 18),
+                  _scanCta(),
+                  const SizedBox(height: 110),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _header(String name) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Lm.headerGrad1, Lm.headerGrad2],
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+          child: Row(
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: Lm.cardShadow,
+                ),
+                child: const Icon(Icons.person_rounded, color: Lm.primary),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('안녕하세요 👋', style: TextStyle(fontSize: 13, color: Lm.muted)),
+                    const SizedBox(height: 2),
+                    Text(name,
+                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, height: 1.1)),
+                  ],
+                ),
+              ),
+              IconButton(
+                onPressed: widget.onLogout,
+                icon: const Icon(Icons.logout_rounded, color: Lm.muted, size: 22),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _heroCard() {
+    return Panel(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Text('보유 정품', style: TextStyle(fontSize: 13, color: Lm.muted)),
+                    const SizedBox(width: 8),
+                    _pill('정품 인증', Lm.good, Lm.goodBg),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Text('$_owned',
+                        style: const TextStyle(fontSize: 40, fontWeight: FontWeight.w800, height: 1)),
+                    const SizedBox(width: 6),
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 6),
+                      child: Text('개 등록', style: TextStyle(fontSize: 14, color: Lm.muted)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          _miniBars(),
+        ],
+      ),
+    );
+  }
+
+  Widget _miniBars() {
+    const heights = [16.0, 30.0, 22.0, 40.0, 26.0, 34.0, 20.0];
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        for (var i = 0; i < heights.length; i++)
+          Container(
+            width: 5,
+            height: heights[i],
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              color: i.isEven ? Lm.primary : Lm.sky.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(3),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _overview() {
+    return Row(
+      children: [
+        const Text('개요', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+        const SizedBox(width: 8),
+        Text('Overview', style: TextStyle(fontSize: 11, color: Lm.muted, letterSpacing: 1)),
+      ],
+    );
+  }
+
+  Widget _statGrid() {
+    final cards = [
+      _stat('보유 제품', '$_owned', Icons.inventory_2_rounded, Lm.violet, Lm.violetBg),
+      _stat('유효 교환권', '$_vouchers', Icons.card_giftcard_rounded, Lm.mint, Lm.mintBg),
+      _stat('등록 대기', '$_pending', Icons.hourglass_bottom_rounded, Lm.peach, Lm.peachBg),
+      _stat('등록 완료', '$_committed', Icons.verified_rounded, Lm.sky, Lm.skyBg),
+    ];
+    return GridView.count(
+      crossAxisCount: 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: 14,
+      crossAxisSpacing: 14,
+      childAspectRatio: 1.55,
+      children: cards,
+    );
+  }
+
+  Widget _stat(String label, String value, IconData icon, Color fg, Color bg) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(color: Lm.card, borderRadius: BorderRadius.circular(Lm.radius), boxShadow: Lm.cardShadow),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(label, style: const TextStyle(fontSize: 12.5, color: Lm.muted)),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(10)),
+                child: Icon(icon, size: 16, color: fg),
+              ),
+            ],
+          ),
+          Text(value, style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w800, height: 1)),
+        ],
+      ),
+    );
+  }
+
+  Widget _scanCta() {
+    return Panel(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(color: Lm.skyBg, borderRadius: BorderRadius.circular(14)),
+            child: const Icon(Icons.qr_code_scanner_rounded, color: Lm.primary),
+          ),
+          const SizedBox(width: 14),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('제품 정품 확인', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                SizedBox(height: 2),
+                Text('QR·UID를 스캔해 정품을 등록하세요', style: TextStyle(fontSize: 12, color: Lm.muted)),
+              ],
+            ),
+          ),
+          FilledButton(
+            onPressed: widget.onScan,
+            style: FilledButton.styleFrom(
+              backgroundColor: Lm.primary,
+              minimumSize: const Size(0, 44),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            ),
+            child: const Text('스캔'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _pill(String text, Color fg, Color bg) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+      child: Text(text, style: TextStyle(fontSize: 11, color: fg, fontWeight: FontWeight.w700)),
+    );
+  }
+}
