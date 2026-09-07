@@ -16,7 +16,8 @@
     "prisma:seed": "tsx prisma/seed.ts",
     "db:up": "docker compose up -d db",
     "db:local": "tsx scripts/dev-db.ts",
-    "anchor:worker": "tsx scripts/anchor-worker.ts"
+    "anchor:worker": "tsx scripts/anchor-worker.ts",
+    "mail:test": "tsx scripts/mail-test.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

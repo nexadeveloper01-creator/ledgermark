@@ -34,17 +34,21 @@ export async function POST(req: NextRequest) {
     const { raw } = await issueToken(user.id, "PASSWORD_RESET");
     const link = `${appBaseUrl()}/reset-password?token=${encodeURIComponent(raw)}`;
 
-    await getMailer().send(
-      passwordResetEmail({ to: user.email, displayName: user.displayName, link })
-    );
-
-    await recordAudit({
-      action: "PASSWORD_RESET_REQUESTED",
-      actorEmail: user.email,
-      req,
-      targetType: "User",
-      targetId: user.id,
-    });
+    // 응답은 계정 존재 여부와 무관하게 동일해야 하므로 메일 실패도 삼킨다(열거 방지).
+    try {
+      await getMailer().send(
+        passwordResetEmail({ to: user.email, displayName: user.displayName, link })
+      );
+      await recordAudit({
+        action: "PASSWORD_RESET_REQUESTED",
+        actorEmail: user.email,
+        req,
+        targetType: "User",
+        targetId: user.id,
+      });
+    } catch (mailErr) {
+      console.error("[forgot-password] 재설정 메일 발송 실패:", mailErr);
+    }
   }
 
   return NextResponse.json(GENERIC_RESPONSE);

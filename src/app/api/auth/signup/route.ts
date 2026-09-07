@@ -33,19 +33,24 @@ export async function POST(req: NextRequest) {
     // 가입 직후 바로 앱을 쓸 수 있도록 세션을 발급한다.
     const { token } = await createSession(user.id);
 
+    // 인증 메일 발송이 실패해도 가입 자체는 성공시킨다(계정·세션은 이미 생성됨).
+    // 사용자는 앱 상단 배너의 "재발송"으로 다시 시도할 수 있다.
     const { raw } = await issueToken(user.id, "EMAIL_VERIFY");
     const link = `${appBaseUrl()}/verify-email?token=${encodeURIComponent(raw)}`;
-    await getMailer().send(
-      verificationEmail({ to: user.email, displayName: user.displayName, link })
-    );
-
-    await recordAudit({
-      action: "EMAIL_VERIFY_SENT",
-      actorEmail: user.email,
-      req,
-      targetType: "User",
-      targetId: user.id,
-    });
+    try {
+      await getMailer().send(
+        verificationEmail({ to: user.email, displayName: user.displayName, link })
+      );
+      await recordAudit({
+        action: "EMAIL_VERIFY_SENT",
+        actorEmail: user.email,
+        req,
+        targetType: "User",
+        targetId: user.id,
+      });
+    } catch (mailErr) {
+      console.error("[signup] 인증 메일 발송 실패(가입은 계속):", mailErr);
+    }
 
     await recordAudit({
       action: "USER_SIGNUP",
