@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ConiaMark 소비자 앱 소개</title>
+<style>
+  :root {
+    --bg: #f5f6f4;
+    --surface: #ffffff;
+    --surface-2: #eef1ee;
+    --ink: #14181d;
+    --muted: #5c6577;
+    --faint: #8a93a6;
+    --line: #e0e3de;
+    --accent: #35516f;
+    --accent-deep: #21324a;
+    --accent-soft: #e7ecf1;
+    --good: #2f7d5b;
+    --good-soft: #e3f1ea;
+    --warn: #c2410c;
+    --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    --sans: "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1116; --surface: #161b22; --surface-2: #1b2129;
+      --ink: #e8ebf0; --muted: #98a2b3; --faint: #6b7684; --line: #2a3038;
+      --accent: #7aa0c9; --accent-deep: #9fbede; --accent-soft: #1b2430;
+      --good: #4fae82; --good-soft: #14241c; --warn: #f59e6b;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e1116; --surface: #161b22; --surface-2: #1b2129;
+    --ink: #e8ebf0; --muted: #98a2b3; --faint: #6b7684; --line: #2a3038;
+    --accent: #7aa0c9; --accent-deep: #9fbede; --accent-soft: #1b2430;
+    --good: #4fae82; --good-soft: #14241c; --warn: #f59e6b;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--sans); line-height: 1.6; -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+  .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); }
+
+  /* Hero */
+  header.hero { padding: 64px 0 48px; border-bottom: 1px solid var(--line); }
+  .brand { display: flex; align-items: baseline; gap: 12px; margin-bottom: 30px; flex-wrap: wrap; }
+  .brand .logo { font-size: 22px; font-weight: 800; letter-spacing: 0.06em; }
+  .brand .tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.16em; color: var(--accent); border: 1px solid var(--line); padding: 3px 8px; text-transform: uppercase; }
+  h1 { font-size: clamp(30px, 5.2vw, 50px); line-height: 1.12; letter-spacing: -0.02em; margin: 12px 0 0; text-wrap: balance; }
+  .hero .lede { font-size: clamp(15px, 2.2vw, 18px); color: var(--muted); max-width: 54ch; margin: 20px 0 0; }
+  .hero .en { font-size: 13px; color: var(--faint); margin-top: 10px; }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+  .badge { font-size: 12px; padding: 5px 11px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); }
+  .badge.good { color: var(--good); background: var(--good-soft); border-color: transparent; font-weight: 600; }
+
+  section { padding: 52px 0; border-bottom: 1px solid var(--line); }
+  section h2 { font-size: clamp(21px, 3vw, 27px); margin: 8px 0 6px; letter-spacing: -0.01em; }
+  section .sec-sub { color: var(--muted); font-size: 14.5px; margin: 0 0 26px; max-width: 60ch; }
+
+  /* Problem → value */
+  .value { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 720px) { .value { grid-template-columns: 1fr; } }
+  .vcard { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; }
+  .vcard .k { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+  .vcard.problem .k { color: var(--warn); }
+  .vcard.solution { border-color: var(--accent); }
+  .vcard.solution .k { color: var(--accent); }
+  .vcard p { margin: 8px 0 0; font-size: 14.5px; }
+
+  /* Features */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+  .card .n { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+  .card h3 { font-size: 16.5px; margin: 8px 0 6px; }
+  .card p { font-size: 13.5px; color: var(--muted); margin: 0; }
+  .card .mono { font-family: var(--mono); background: var(--accent-soft); color: var(--accent-deep); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+
+  /* Flow */
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 720px) { .flow { grid-template-columns: 1fr 1fr; } }
+  .step { position: relative; background: var(--surface-2); border-radius: 12px; padding: 18px 16px; }
+  .step .num { font-family: var(--mono); font-size: 12px; color: var(--accent); font-weight: 700; }
+  .step .t { font-size: 15px; font-weight: 700; margin: 8px 0 4px; }
+  .step .d { font-size: 12.5px; color: var(--muted); }
+
+  /* Trust */
+  .trust { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .trust { grid-template-columns: 1fr; } }
+  .trust .item { display: flex; gap: 12px; align-items: flex-start; }
+  .trust .dot { width: 8px; height: 8px; border-radius: 2px; background: var(--accent); margin-top: 7px; flex-shrink: 0; }
+  .trust .item h4 { margin: 0 0 3px; font-size: 15px; }
+  .trust .item p { margin: 0; font-size: 13.5px; color: var(--muted); }
+
+  /* CTA */
+  .cta { text-align: center; border-bottom: none; }
+  .cta .box { background: var(--accent-deep); color: #fff; border-radius: 18px; padding: 44px 28px; }
+  :root[data-theme="dark"] .cta .box, :root:not([data-theme="light"]) .cta .box { background: var(--accent-soft); }
+  .cta h2 { color: inherit; }
+  .cta .box h2 { color: #fff; }
+  :root[data-theme="dark"] .cta .box h2, :root:not([data-theme="light"]) .cta .box h2 { color: var(--ink); }
+  .cta p { opacity: 0.85; font-size: 14.5px; margin: 8px 0 22px; }
+  .btn { display: inline-block; background: #fff; color: var(--accent-deep); font-weight: 700; text-decoration: none; padding: 13px 26px; border-radius: 999px; font-size: 15px; }
+  .cta .url { font-family: var(--mono); font-size: 13px; opacity: 0.9; margin-top: 16px; word-break: break-all; }
+
+  footer { padding: 30px 0 60px; text-align: center; color: var(--faint); font-size: 12px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="wrap">
+      <div class="brand">
+        <span class="logo">ConiaMark</span>
+        <span class="tag">Consumer App</span>
+        <span class="tag">정품 인증</span>
+      </div>
+      <p class="eyebrow">Scan once. Prove it's genuine.</p>
+      <h1>스캔 한 번으로<br>정품을 증명하는 앱</h1>
+      <p class="lede">ConiaMark는 제품에 인쇄된 UID를 스캔해 <b>정품 여부를 즉시 확인</b>하고, 등록·연령인증·무상 교환·포인트까지 앱 하나로 끝냅니다. 위조·밀수품은 원장에 없으므로 바로 걸러집니다.</p>
+      <p class="en">A consumer app that verifies product authenticity in one scan — backed by a national distribution ledger.</p>
+      <div class="badges">
+        <span class="badge good">✓ 국가 연동형 유통 원장 기반</span>
+        <span class="badge">Android APK</span>
+        <span class="badge">한국어 · English</span>
+        <span class="badge">연령인증 (RA 11900)</span>
+      </div>
+    </div>
+  </header>
+
+  <section>
+    <div class="wrap">
+      <p class="eyebrow">Why ConiaMark</p>
+      <h2>"이거 진짜예요?"에 답합니다</h2>
+      <p class="sec-sub">시장에는 밀수·위조 제품이 섞여 있어 소비자는 진품인지 알 수 없습니다. ConiaMark는 생산 시점에 발급된 UID로 정품만 인증합니다.</p>
+      <div class="value">
+        <div class="vcard problem">
+          <div class="k">문제</div>
+          <p>무허가·밀수·위조 제품이 유통되어도 소비자는 겉모습만으로 구분할 수 없습니다. 정품 보증·A/S도 받기 어렵습니다.</p>
+        </div>
+        <div class="vcard solution">
+          <div class="k">ConiaMark</div>
+          <p>생산 시 발급된 개별 UID를 스캔하면 원장과 대조해 <b>정품/위조를 즉시 판정</b>합니다. 등록하면 정품 신뢰와 무상 교환·혜택이 따라옵니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <p class="eyebrow">Features</p>
+      <h2>앱 하나로 끝나는 정품 경험</h2>
+      <p class="sec-sub">매장 전용 단말기 없이 소비자 폰만으로 확인·등록·교환·혜택이 모두 이루어집니다.</p>
+      <div class="grid">
+        <div class="card">
+          <div class="n">01</div>
+          <h3>정품 확인</h3>
+          <p>UID를 스캔하면 원장과 대조해 <b>✓정품 / ✕위조</b>를 즉시 표시합니다. 통관·유통 이력이 없는 제품은 걸러집니다.</p>
+        </div>
+        <div class="card">
+          <div class="n">02</div>
+          <h3>정품 등록 · 개인정보 보호</h3>
+          <p>내 소유로 등록합니다. 화면에는 UID의 <span class="mono">앞 2 · 뒤 2</span>만 보이고 가운데는 <span class="mono">XXXX</span>로 가려집니다(예: <span class="mono">PHXXXX01</span>).</p>
+        </div>
+        <div class="card">
+          <div class="n">03</div>
+          <h3>무상 교환권</h3>
+          <p>구매(판매 인증) 시 <b>1회 교환권</b>이 발급됩니다. <b>3개월 유효</b>, 불량·색상 교환에 사용합니다.</p>
+        </div>
+        <div class="card">
+          <div class="n">04</div>
+          <h3>포인트 · 혜택</h3>
+          <p>정보 이용 동의·설문·주간 출석으로 포인트를 쌓고, <b>할인 쿠폰</b>으로 매장 결제에서 바로 차감합니다.</p>
+        </div>
+        <div class="card">
+          <div class="n">05</div>
+          <h3>연령인증</h3>
+          <p>구매 시점에 성인 인증을 진행합니다(RA 11900 준수). 원장에는 신분정보 원본이 아니라 <b>검증 결과</b>만 남습니다.</p>
+        </div>
+        <div class="card">
+          <div class="n">06</div>
+          <h3>중고 거래</h3>
+          <p>소비자 간 소유권 이전을 지원합니다. 중고 거래 시 교환권은 재발급되지 않아 남용을 막습니다.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <p class="eyebrow">How it works</p>
+      <h2>4단계면 끝</h2>
+      <p class="sec-sub">스캔에서 혜택까지, 종이·수기 없이 앱 안에서 이어집니다.</p>
+      <div class="flow">
+        <div class="step"><div class="num">01</div><div class="t">스캔</div><div class="d">제품 하단 UID를 앱으로 스캔</div></div>
+        <div class="step"><div class="num">02</div><div class="t">정품 확인</div><div class="d">원장 대조 → 정품/위조 즉시 판정</div></div>
+        <div class="step"><div class="num">03</div><div class="t">등록 · 연령인증</div><div class="d">내 소유로 등록, 성인 인증</div></div>
+        <div class="step"><div class="num">04</div><div class="t">교환권 · 포인트</div><div class="d">무상 교환·할인 쿠폰·중고 거래</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <p class="eyebrow">Trust</p>
+      <h2>믿을 수 있는 이유</h2>
+      <p class="sec-sub">"블록체인 신뢰"를 말이 아니라 구조로 증명합니다.</p>
+      <div class="trust">
+        <div class="item"><span class="dot"></span><div><h4>조작 불가 원장</h4><p>허가형 원장에 해시체인으로 기록하고, 주기적으로 퍼블릭 체인에 앵커링해 제3자가 검증할 수 있습니다. 당사도 임의로 바꿀 수 없습니다.</p></div></div>
+        <div class="item"><span class="dot"></span><div><h4>위조 자동 차단</h4><p>정식 통관·유통 이력이 없는 UID는 판매·인증 단계에서 걸러지고 위조로 판정됩니다.</p></div></div>
+        <div class="item"><span class="dot"></span><div><h4>개인정보 최소화</h4><p>원장에는 신분정보 원본이 아니라 검증 결과 크리덴셜만 남고, 화면의 UID도 마스킹됩니다.</p></div></div>
+        <div class="item"><span class="dot"></span><div><h4>다국어 지원</h4><p>기기 언어에 따라 한국어·English로 표시되며, 설정에서 직접 전환할 수 있습니다.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="wrap">
+      <div class="box">
+        <h2>지금 설치해 보세요</h2>
+        <p>다운로드 페이지의 QR을 폰으로 스캔하면 바로 설치됩니다. (Android APK · 한국어/English)</p>
+        <a class="btn" href="https://app-production-daca.up.railway.app/download">앱 다운로드 →</a>
+        <div class="url">https://app-production-daca.up.railway.app/download</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    ConiaMark · 정품 인증 소비자 앱 · LEDGERMARK 플랫폼 기반<br>
+    본 소개서는 데모/파일럿 기준이며 기능은 계속 업데이트됩니다.
+  </footer>
+
+</body>
+</html>
