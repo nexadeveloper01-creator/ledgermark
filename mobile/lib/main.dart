@@ -21,7 +21,7 @@ class LedgermarkApp extends StatelessWidget {
     return ListenableBuilder(
       listenable: i18n,
       builder: (context, _) => MaterialApp(
-        title: 'LEDGERMARK',
+        title: 'ConiaMark',
         debugShowCheckedModeBanner: false,
         theme: buildTheme(),
         locale: i18n.localeOverride,

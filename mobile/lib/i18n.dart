@@ -83,7 +83,7 @@ String trp(String key, Map<String, String> args) => i18n.tp(key, args);
 // ── 문자열 테이블 ─────────────────────────────────────────────────────
 const Map<String, Map<String, String>> _strings = {
   // 공통
-  'app.name': {'ko': 'LEDGERMARK', 'en': 'LEDGERMARK'},
+  'app.name': {'ko': 'ConiaMark', 'en': 'ConiaMark'},
   'common.cancel': {'ko': '취소', 'en': 'Cancel'},
   'common.confirm': {'ko': '확인', 'en': 'Confirm'},
   'common.close': {'ko': '닫기', 'en': 'Close'},

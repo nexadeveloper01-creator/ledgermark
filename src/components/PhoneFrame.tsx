@@ -21,7 +21,7 @@ export function PhoneFrame({ children }: { children: ReactNode }) {
         }}
       >
         <span>09:41</span>
-        <span style={{ fontFamily: "var(--font-heading)", letterSpacing: "0.16em" }}>LEDGERMARK</span>
+        <span style={{ fontFamily: "var(--font-heading)", letterSpacing: "0.16em" }}>CONIAMARK</span>
         <span className="text-muted">PH</span>
       </div>
       <div

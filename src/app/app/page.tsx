@@ -57,7 +57,7 @@ export default function ConsumerAppPage() {
         style={{ borderBottom: "1px solid var(--color-divider)", padding: "0 32px", height: 64, gap: 18 }}
       >
         <span className="nav-brand" style={{ fontSize: 17, letterSpacing: "0.12em" }}>
-          LEDGERMARK
+          ConiaMark
         </span>
         <span
           style={{
