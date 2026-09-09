@@ -5,97 +5,79 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Corners } from "@/components/ui/Corners";
 import { SessionBar, useSession } from "@/components/SessionBar";
+import { useT, LangToggle, type Dict } from "@/lib/i18n/web";
 
-interface Inspection {
-  id: string;
-  uidCode: string;
-  verdict: {
-    verdict: "VERIFIED" | "SEIZURE_GROUNDS" | "COUNTERFEIT_SUSPECTED";
-    verdictEn: string;
-    label: string;
-    rule: string;
-    basis: string;
-    cta: string;
-    hasReport: boolean;
-    reportTitle: string;
-    reportEn: string;
-    legalNote: string;
-  };
-  rows: { k: string; v: string }[];
-  ledgerSnapshot: string | null;
-  reportNumber: string | null;
-  officerName: string;
-  location: string;
-  createdAt: string;
+const D: Dict = {
+  landing: { ko: "랜딩", en: "Landing" },
+  loading: { ko: "불러오는 중...", en: "Loading..." },
+  title: { ko: "현장 정품 확인", en: "Field authenticity check" },
+  desc: { ko: "제품에 인쇄된 UID를 스캔·입력하면 정품 여부만 즉시 확인합니다. 원장에 등록된 UID(코니아랩 생산분)면 정품, 없으면 위조입니다.", en: "Scan or enter the UID printed on a product to instantly check authenticity only. A UID registered in the ledger (produced by Conia Lab) is genuine; otherwise it is counterfeit." },
+  uidCode: { ko: "UID 코드", en: "UID code" },
+  scan: { ko: "정품 확인 / SCAN", en: "Check / SCAN" },
+  checking: { ko: "확인 중...", en: "Checking..." },
+  rescan: { ko: "재스캔", en: "Re-scan" },
+  genuine: { ko: "정품", en: "GENUINE" },
+  genuineNote: { ko: "코니아랩이 생산·발급한 정품 UID입니다. 원장에 등록되어 있습니다.", en: "A genuine UID produced and issued by Conia Lab. It is registered in the ledger." },
+  fake: { ko: "위조 의심", en: "COUNTERFEIT" },
+  fakeNote: { ko: "원장에 등록되지 않은 UID입니다. 정품이 아닙니다(위조·비정상 유통).", en: "This UID is not registered in the ledger. It is not genuine (counterfeit / illicit)." },
+  product: { ko: "제품", en: "Product" },
+  lot: { ko: "LOT", en: "LOT" },
+  status: { ko: "현재 상태", en: "Current status" },
+  prompt: { ko: "UID를 스캔하면 정품 여부가 표시됩니다.", en: "Scan a UID to see whether it is genuine." },
+  stMINTED: { ko: "생산 발급", en: "Minted" },
+  stEXPORTED: { ko: "수입 완료", en: "Imported" },
+  stWHOLESALE: { ko: "총판 배분", en: "Wholesale" },
+  stRETAIL_SOLD: { ko: "소비자 판매", en: "Retail sold" },
+  stEXCHANGED: { ko: "교환됨", en: "Exchanged" },
+  stRESOLD: { ko: "중고 거래됨", en: "Resold" },
+};
+
+interface Scanned {
+  found: boolean;
+  code: string;
+  productName?: string;
+  lot?: string;
+  status?: string;
 }
 
 export default function FieldPage() {
+  const t = useT(D);
   const { user, loading: sessionLoading } = useSession(["FIELD_OFFICER", "ADMIN"]);
-  const [location, setLocation] = useState("마카티 지점 MM-014");
   const [code, setCode] = useState("");
-  const [inspection, setInspection] = useState<Inspection | null>(null);
-  const [reportNumber, setReportNumber] = useState<string | null>(null);
-  const [escalated, setEscalated] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<Scanned | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const inspect = async () => {
-    if (!code.trim()) return;
+  const scan = async () => {
+    const c = code.trim();
+    if (!c) return;
     setLoading(true);
-    setError(null);
-    setReportNumber(null);
-    setEscalated(false);
-
-    // 담당관 이름은 서버가 세션에서 채운다 — 조서의 법적 근거이므로 클라이언트가 지정하지 않는다.
-    const res = await fetch("/api/field/inspect", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ uidCode: code.trim(), location }),
-    });
-    const body = await res.json();
+    const res = await fetch(`/api/uid/${encodeURIComponent(c)}`);
     setLoading(false);
-
     if (!res.ok) {
-      setError(body.error ?? "조회에 실패했습니다.");
-      setInspection(null);
+      // 원장에 없음 = 위조/비정상 유통.
+      setResult({ found: false, code: c });
       return;
     }
-    setInspection(body.inspection);
-  };
-
-  const issueReport = async () => {
-    if (!inspection) return;
-    setError(null);
-    const res = await fetch(`/api/field/inspections/${inspection.id}/report`, { method: "POST" });
     const body = await res.json();
-    if (!res.ok) {
-      setError(body.error);
-      return;
-    }
-    setReportNumber(body.inspection.reportNumber);
+    const uid = body.uid ?? body;
+    setResult({
+      found: true,
+      code: uid.code ?? c,
+      productName: uid.lot?.productName,
+      lot: uid.lot?.code,
+      status: uid.status,
+    });
   };
-
-  const escalate = async () => {
-    if (!inspection) return;
-    setError(null);
-    const res = await fetch(`/api/field/inspections/${inspection.id}/escalate`, { method: "POST" });
-    const body = await res.json();
-    if (!res.ok) {
-      setError(body.error);
-      return;
-    }
-    setEscalated(true);
-  };
-
-  const isAlert = inspection && inspection.verdict.verdict !== "VERIFIED";
 
   if (sessionLoading || !user) {
     return (
       <p className="text-muted" style={{ padding: 32 }}>
-        불러오는 중...
+        {t("loading")}
       </p>
     );
   }
+
+  const genuine = result?.found === true;
 
   return (
     <div style={{ minHeight: "100vh" }}>
@@ -115,257 +97,116 @@ export default function FieldPage() {
             padding: "2px 8px",
           }}
         >
-          FIELD ENFORCEMENT
+          FIELD · 정품 확인
         </span>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+          <LangToggle />
           <SessionBar user={user} />
           <Link href="/" style={{ fontSize: 13 }}>
-            랜딩
+            {t("landing")}
           </Link>
         </div>
       </div>
 
-      <div
-        style={{
-          padding: "56px 32px 72px",
-          display: "flex",
-          gap: 44,
-          flexWrap: "wrap",
-          justifyContent: "center",
-          alignItems: "flex-start",
-        }}
-      >
-        <div style={{ maxWidth: 360, minWidth: 260 }}>
-          <div style={{ fontSize: 10, letterSpacing: "0.16em", color: "var(--color-accent-700)" }}>
-            FIELD ENFORCEMENT
-          </div>
-          <h2 style={{ fontSize: 32, margin: "6px 0 14px", letterSpacing: "-0.01em" }}>현장 단속 단말</h2>
-          <p style={{ fontSize: 14, lineHeight: 1.65, margin: "0 0 18px" }}>
-            경찰·단속기관이 현장에서 UID를 스캔하면 원장 판정과 압수 근거가 즉시 산출됩니다. 관제
-            콘솔과 달리 단일 제품 판정과 조서 작성에만 집중합니다.
-          </p>
+      <div style={{ maxWidth: 460, margin: "0 auto", padding: "48px 24px 72px" }}>
+        <div style={{ fontSize: 10, letterSpacing: "0.16em", color: "var(--color-accent-700)" }}>
+          FIELD ENFORCEMENT
+        </div>
+        <h2 style={{ fontSize: 30, margin: "6px 0 12px", letterSpacing: "-0.01em" }}>{t("title")}</h2>
+        <p style={{ fontSize: 14, lineHeight: 1.65, margin: "0 0 22px" }} className="text-muted">
+          {t("desc")}
+        </p>
 
-          <div className="field" style={{ marginBottom: 10 }}>
-            <label>단속 장소</label>
-            <input className="input" value={location} onChange={(e) => setLocation(e.target.value)} />
-          </div>
-          <div className="field" style={{ marginBottom: 12 }}>
-            <label>UID 코드</label>
-            <input
-              className="input"
-              placeholder="PH-2609-A-000010"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && inspect()}
-            />
-          </div>
-          <Button variant="primary" block onClick={inspect} disabled={loading}>
-            현장 조회 / SCAN
+        <div className="field" style={{ marginBottom: 12 }}>
+          <label>{t("uidCode")}</label>
+          <input
+            className="input"
+            placeholder="PH-2609-A-000010"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && scan()}
+            autoFocus
+          />
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <Button variant="primary" block onClick={scan} disabled={loading || !code.trim()}>
+            {loading ? t("checking") : t("scan")}
           </Button>
-
-          <div style={{ fontSize: 11, lineHeight: 1.6, marginTop: 18 }} className="text-muted">
-            조서에 첨부되는 원장 스냅샷은 앵커링된 Merkle Root를 포함하므로, 사후에 데이터가 변경되지
-            않았음을 제3자가 검증할 수 있습니다.
-          </div>
-
-          {error && (
-            <p style={{ fontSize: 12, marginTop: 14, color: "var(--color-accent-700)" }}>{error}</p>
+          {result && (
+            <Button
+              variant="secondary"
+              style={{ padding: "0 16px" }}
+              onClick={() => {
+                setResult(null);
+                setCode("");
+              }}
+            >
+              {t("rescan")}
+            </Button>
           )}
         </div>
 
-        <div
-          className="blueprint"
-          style={{ width: 372, flex: "none", background: "var(--color-bg)", padding: 0 }}
-        >
-          <Corners />
+        {result && (
           <div
+            className="blueprint"
             style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "10px 16px",
-              borderBottom: "1px solid var(--color-divider)",
-              fontSize: 11,
-              letterSpacing: "0.08em",
+              marginTop: 28,
+              padding: "26px 22px",
+              background: genuine ? "var(--color-accent-100)" : "var(--color-bg)",
+              borderColor: genuine ? "var(--color-accent)" : "var(--color-accent-700)",
             }}
           >
-            <span>14:26</span>
-            <span style={{ fontFamily: "var(--font-heading)", letterSpacing: "0.16em" }}>
-              LEDGERMARK FIELD
-            </span>
-            <span className="text-muted">PNP</span>
-          </div>
-
-          <div
-            style={{
-              padding: "22px 20px 26px",
-              minHeight: 560,
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <div style={{ fontSize: 10, letterSpacing: "0.14em" }} className="text-muted">
-              SCANNED UID
+            <Corners />
+            <div style={{ fontSize: 11, letterSpacing: "0.16em" }} className="text-muted">
+              {genuine ? "VERIFIED · GENUINE" : "NOT REGISTERED · COUNTERFEIT"}
             </div>
             <div
               style={{
+                fontFamily: "var(--font-heading)",
+                fontSize: 44,
+                lineHeight: 1.05,
+                margin: "8px 0 10px",
+                color: genuine ? "var(--color-accent-900)" : "var(--color-accent-700)",
+              }}
+            >
+              {genuine ? `✓ ${t("genuine")}` : `✕ ${t("fake")}`}
+            </div>
+            <p style={{ fontSize: 13, lineHeight: 1.6, margin: 0 }}>
+              {genuine ? t("genuineNote") : t("fakeNote")}
+            </p>
+
+            <div
+              style={{
+                marginTop: 18,
                 fontFamily: "ui-monospace, Menlo, monospace",
-                fontSize: 16,
-                marginTop: 6,
+                fontSize: 14,
                 wordBreak: "break-all",
               }}
             >
-              {inspection?.uidCode ?? "—"}
+              {result.code}
             </div>
 
-            {inspection ? (
-              <>
-                <div
-                  className="blueprint"
-                  style={{
-                    background: isAlert ? "var(--color-accent-100)" : "transparent",
-                    padding: 16,
-                    margin: "18px 0 20px",
-                  }}
-                >
-                  <Corners />
-                  <div style={{ fontSize: 10, letterSpacing: "0.14em", opacity: 0.7 }}>
-                    {inspection.verdict.verdictEn}
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "var(--font-heading)",
-                      fontSize: 24,
-                      lineHeight: 1.15,
-                      marginTop: 6,
-                    }}
-                  >
-                    {inspection.verdict.label.split("—").pop()?.trim() ?? inspection.verdict.label}
-                  </div>
-                  <div style={{ fontSize: 12, lineHeight: 1.55, marginTop: 8 }}>
-                    {inspection.verdict.basis}
-                  </div>
-                </div>
-
-                {inspection.rows.map((r) => (
-                  <div
-                    key={r.k}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      gap: 12,
-                      padding: "9px 0",
-                      borderTop: "1px solid var(--color-divider)",
-                      fontSize: 13,
-                    }}
-                  >
-                    <span className="text-muted">{r.k}</span>
-                    <span style={{ textAlign: "right" }}>{r.v}</span>
-                  </div>
-                ))}
-              </>
-            ) : (
-              <p className="text-muted" style={{ fontSize: 13, marginTop: 20 }}>
-                UID를 조회하면 원장 판정 결과가 표시됩니다.
-              </p>
+            {genuine && (
+              <div style={{ marginTop: 12 }}>
+                <Row k={t("product")} v={result.productName ?? "—"} />
+                <Row k={t("lot")} v={result.lot ?? "—"} />
+                <Row k={t("status")} v={result.status ? t(`st${result.status}`) : "—"} />
+              </div>
             )}
-
-            <div style={{ marginTop: "auto", paddingTop: 22, display: "flex", gap: 8 }}>
-              <Button
-                variant="primary"
-                className="blueprint"
-                style={{ flex: 1, height: 46 }}
-                disabled={!inspection || (inspection.verdict.hasReport && reportNumber !== null)}
-                onClick={inspection?.verdict.hasReport ? issueReport : undefined}
-              >
-                <Corners />
-                {inspection?.verdict.cta ?? "현장 조회"}
-              </Button>
-              <Button
-                variant="secondary"
-                style={{ height: 46, padding: "0 14px" }}
-                onClick={inspect}
-                disabled={!code.trim()}
-              >
-                재스캔
-              </Button>
-            </div>
           </div>
-        </div>
+        )}
 
-        <div className="blueprint" style={{ width: 380, flex: "none", padding: 22, background: "transparent" }}>
-          <Corners />
-          <div className="card-kicker">{inspection?.verdict.reportEn ?? "REPORT"}</div>
-          <h3 style={{ fontSize: 21, margin: "5px 0 14px" }}>
-            {inspection?.verdict.reportTitle ?? "조서"}
-          </h3>
-
-          {inspection ? (
-            <>
-              <ReportRow k="조서번호" v={reportNumber ?? (inspection.verdict.hasReport ? "미발행" : "작성 불필요")} />
-              <ReportRow k="판정" v={inspection.verdict.label} />
-              <ReportRow k="판정 규칙" v={inspection.verdict.rule === "—" ? "—" : `${inspection.verdict.rule} (플랫폼 규칙)`} />
-              <ReportRow
-                k="적용 법조"
-                v={
-                  inspection.verdict.verdict === "COUNTERFEIT_SUSPECTED"
-                    ? "상표법 · 관세법 — 확인 필요"
-                    : inspection.verdict.verdict === "SEIZURE_GROUNDS"
-                      ? "진출국 관세법 — 확인 필요"
-                      : "—"
-                }
-              />
-              <ReportRow k="대상 UID" v={inspection.uidCode} />
-              <ReportRow k="일시 · 장소" v={`${new Date(inspection.createdAt).toLocaleString("ko-KR")} · ${inspection.location}`} />
-              <ReportRow k="담당관" v={inspection.officerName} />
-              <ReportRow
-                k="원장 스냅샷"
-                v={
-                  inspection.ledgerSnapshot
-                    ? `${inspection.ledgerSnapshot.slice(0, 10)}…${inspection.ledgerSnapshot.slice(-4)}`
-                    : "앵커링 이력 없음"
-                }
-              />
-
-              <div style={{ display: "flex", gap: 8, marginTop: 20, flexWrap: "wrap" }}>
-                {inspection.verdict.hasReport && (
-                  <Button
-                    variant="primary"
-                    className="blueprint"
-                    style={{ height: 40, padding: "0 14px" }}
-                    onClick={issueReport}
-                    disabled={reportNumber !== null}
-                  >
-                    <Corners />
-                    {reportNumber ? "발행 완료" : "조서 발행"}
-                  </Button>
-                )}
-                <Button
-                  variant="secondary"
-                  style={{ height: 40, padding: "0 14px" }}
-                  onClick={escalate}
-                  disabled={!isAlert || escalated}
-                >
-                  {escalated ? "전송 완료" : "관제 콘솔 전송"}
-                </Button>
-              </div>
-
-              <div style={{ fontSize: 11, lineHeight: 1.6, marginTop: 14 }} className="text-muted">
-                {inspection.verdict.legalNote}
-              </div>
-            </>
-          ) : (
-            <p className="text-muted" style={{ fontSize: 13 }}>
-              조회 후 판정 결과에 따라 조서가 자동 구성됩니다.
-            </p>
-          )}
-        </div>
+        {!result && (
+          <p className="text-muted" style={{ fontSize: 13, marginTop: 24 }}>
+            {t("prompt")}
+          </p>
+        )}
       </div>
     </div>
   );
 }
 
-function ReportRow({ k, v }: { k: string; v: string }) {
+function Row({ k, v }: { k: string; v: string }) {
   return (
     <div
       style={{
@@ -374,11 +215,11 @@ function ReportRow({ k, v }: { k: string; v: string }) {
         gap: 12,
         padding: "8px 0",
         borderTop: "1px solid var(--color-divider)",
-        fontSize: 12,
+        fontSize: 13,
       }}
     >
       <span className="text-muted">{k}</span>
-      <span style={{ textAlign: "right", overflowWrap: "anywhere" }}>{v}</span>
+      <span style={{ textAlign: "right" }}>{v}</span>
     </div>
   );
 }

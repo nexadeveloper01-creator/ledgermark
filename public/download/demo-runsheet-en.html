@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LEDGERMARK Demo Run Sheet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,8 +14,8 @@
     --warn:#D9642A; --warn-wash:#FBE9DC;
     --danger:#C0392B; --danger-wash:#F7E1DE;
     --shadow:0 1px 2px rgba(20,30,60,.04), 0 8px 24px rgba(20,30,60,.06);
-    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
-    --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,"Apple SD Gothic Neo","Malgun Gothic",Menlo,Consolas,monospace;
+    --sans:"IBM Plex Sans","Apple SD Gothic Neo","Malgun Gothic",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   }
   @media (prefers-color-scheme:dark){
     :root:not([data-theme="light"]){
@@ -115,12 +117,12 @@
   <header class="top">
     <p class="eyebrow">Investor Demo · Run Sheet</p>
     <h1>LEDGERMARK 10-Minute Demo Run Sheet</h1>
-    <p class="lede">An anti-counterfeit distribution platform that tracks every product from factory to consumer with a single UID. A presenter run sheet for walking five role surfaces live on the production server.</p>
+    <p class="lede">An anti-counterfeit distribution platform that tracks every product from factory to consumer with a single UID. A presenter run sheet for walking six role surfaces live on the production server. (Market size, rights and business case are covered in the separate IR deck — this platform shows only the actual distribution management.)</p>
     <div class="meta">
       <span class="m"><b>10:00 total</b> · 7 stages</span>
-      <span class="m">5 roles · consumer · vending · store · police · gov/ops</span>
-      <span class="m">Env <b>live cloud</b></span>
-      <span class="m">Shared password <b>ledgermark1234</b></span>
+      <span class="m">6 roles · consumer · vending · store · distributor · police · customs/ops</span>
+      <span class="m">Env <b>live cloud</b> · stock <b>300</b></span>
+      <span class="m">Shared password <b>ledgermark2026!</b></span>
     </div>
   </header>
 
@@ -128,29 +130,28 @@
     <p class="sec-label">Pre-flight (T-10 min)</p>
     <div class="prep">
       <div class="card">
-        <h4><span class="dot"></span>4 devices</h4>
+        <h4><span class="dot"></span>3 devices</h4>
         <ul>
-          <li>Vending screen — tablet/laptop <span class="mono">/kiosk</span></li>
-          <li>Consumer phone — app (APK)</li>
-          <li>Store POS — laptop <span class="mono">/partner</span></li>
-          <li>Ops console — laptop <span class="mono">/console</span></li>
+          <li>Consumer phone — app (APK) <span class="mono">/app</span></li>
+          <li>Retail POS — laptop <span class="mono">/partner</span></li>
+          <li>Ops/Customs console <span class="mono">/console</span> · Field <span class="mono">/field</span></li>
         </ul>
       </div>
       <div class="card">
-        <h4><span class="dot"></span>Sign in ahead</h4>
+        <h4><span class="dot"></span>Sign in ahead (@ledgermark.com)</h4>
         <ul>
-          <li>Consumer <span class="mono">ramon@demo.ph</span></li>
-          <li>Store <span class="mono">staff@mm014.test</span></li>
-          <li>Police <span class="mono">officer@pnp.test</span></li>
-          <li>Ops <span class="mono">admin@ledgermark.test</span></li>
+          <li>Consumer <span class="mono">consumer@</span> · Store <span class="mono">store@</span></li>
+          <li>Distributor <span class="mono">distributor@</span></li>
+          <li>Police <span class="mono">officer@</span> · Customs <span class="mono">inspector@</span></li>
+          <li>Ops <span class="mono">admin@</span> · shared <span class="mono">ledgermark2026!</span></li>
         </ul>
       </div>
       <div class="card">
         <h4><span class="dot"></span>State check</h4>
         <ul>
-          <li>Vending stock OK (not sold out)</li>
-          <li>One genuine UID ready</li>
-          <li>An off-ledger code for the fake test</li>
+          <li>Demo stock 300 OK <span class="mono">PH-2026-DEMO-000001~300</span></li>
+          <li>Genuine UID <span class="mono">PH-2026-DEMO-000001</span></li>
+          <li>An off-ledger (arbitrary) code for the fake test</li>
           <li>Network · screen brightness</li>
         </ul>
       </div>
@@ -173,29 +174,29 @@
       <article class="seg">
         <div class="seg-time"><span class="t">00:00</span><span class="to">↓ 01:00</span><span class="dur">1 min</span></div>
         <div class="seg-body">
-          <div class="seg-head"><span class="num">01</span><h3>The problem &amp; the market</h3></div>
+          <div class="seg-head"><span class="num">01</span><h3>Intro — the distribution-trust problem</h3></div>
           <div class="surface"><span><span class="k">Screen</span> <span class="v">Landing /</span></span><span><span class="k">Lead</span> <span class="v">Presenter</span></span></div>
-          <p class="say">"The Philippine vape market is growing fast, but a third of it is illicit. We track every product from factory to consumer with one UID to stop that leakage."</p>
+          <p class="say">"You've seen the market, rights and business case in the IR deck. Now we show the <b>actual distribution-management platform</b> behind it, live — one UID from factory to consumer so only genuine product circulates."</p>
           <ol class="steps">
-            <li>Point to the market-size and illicit-loss figures on the landing page</li>
+            <li>Point to the UID ownership state machine (6 transactions) on the landing page</li>
             <li>Pivot: "Today isn't slides — it's the <b>real server and apps</b>"</li>
           </ol>
-          <div class="point"><span class="lab">Frame</span><span>Set up front that this is proven with a live product, not talk.</span></div>
+          <div class="point"><span class="lab">Frame</span><span>Market numbers belong to the IR deck. This platform proves how genuine product is issued, transferred, verified and enforced.</span></div>
         </div>
       </article>
 
       <article class="seg">
         <div class="seg-time"><span class="t">01:00</span><span class="to">↓ 03:00</span><span class="dur">2 min</span></div>
         <div class="seg-body">
-          <div class="seg-head"><span class="num">02</span><h3>Vending purchase → automatic ownership transfer</h3><span class="chip star">Highlight</span></div>
-          <div class="surface"><span><span class="k">Screen</span> <span class="v">/kiosk (vending)</span></span><span><span class="k">Phone</span> <span class="v">ramon@demo.ph</span></span></div>
-          <p class="say">"The consumer buys at the machine. It verifies authenticity and age against the ledger, dispenses, and stock drops by one in real time. Then one QR scan on the phone transfers ownership."</p>
+          <div class="seg-head"><span class="num">02</span><h3>Consumer app — verify authenticity &amp; register</h3><span class="chip star">Highlight</span></div>
+          <div class="surface"><span><span class="k">Screen</span> <span class="v">Consumer app /app</span></span><span><span class="k">Phone</span> <span class="v">consumer@</span></span></div>
+          <p class="say">"The consumer scans the product UID in the app to instantly confirm it's genuine and register it. A Conia Lab UID in the ledger is genuine; registering transfers ownership and earns points."</p>
           <ol class="steps">
-            <li>Vending: <span class="kbd">Start</span> → pick product → <b>Genuine · sellable</b> → <span class="kbd">Verify age</span> → <b>Dispensed</b> (stock −1)</li>
-            <li>Scan the <b>claim QR</b> on the done screen with the phone app</li>
-            <li>App: "Ownership transferred · +300 pts" instantly → new device appears in Products</li>
+            <li>App: <span class="kbd">Scan UID</span> <span class="mono">PH-2026-DEMO-000001</span> → "Ledger match · genuine"</li>
+            <li>Register → new device appears in Products · points earned</li>
+            <li>UID is shown <b>first-2 / last-2 only, middle XXXX</b> (e.g. <span class="mono">PHXXXX01</span>) — full code hidden</li>
           </ol>
-          <div class="point"><span class="lab">Punch</span><span>No store-clerk approval — one scan finishes ownership transfer, registration and <b>300 pts</b>. Zero paper.</span></div>
+          <div class="point"><span class="lab">Punch</span><span>Authenticity check and registration with the app alone, no store terminal. (Unmanned vending is a separate partnership — out of this demo's scope.)</span></div>
         </div>
       </article>
 
@@ -203,7 +204,7 @@
         <div class="seg-time"><span class="t">03:00</span><span class="to">↓ 04:30</span><span class="dur">1.5 min</span></div>
         <div class="seg-body">
           <div class="seg-head"><span class="num">03</span><h3>Consent-based data · points win-win</h3></div>
-          <div class="surface"><span><span class="k">Screen</span> <span class="v">App · Rewards</span></span><span><span class="k">Account</span> <span class="v">ramon@demo.ph</span></span></div>
+          <div class="surface"><span><span class="k">Screen</span> <span class="v">App · Rewards</span></span><span><span class="k">Account</span> <span class="v">consumer@</span></span></div>
           <p class="say">"Users consent to data use and get points in return. They earn more via surveys and weekly check-ins, then convert points into discount coupons and prizes. The company gets consented data; the user gets cash-like value."</p>
           <ol class="steps">
             <li>Rewards card: show <b>consent points · coupons held · discount total</b></li>
@@ -217,45 +218,45 @@
       <article class="seg">
         <div class="seg-time"><span class="t">04:30</span><span class="to">↓ 06:00</span><span class="dur">1.5 min</span></div>
         <div class="seg-body">
-          <div class="seg-head"><span class="num">04</span><h3>Store checkout — coupon QR scan &amp; redemption</h3><span class="chip star">Highlight</span></div>
-          <div class="surface"><span><span class="k">Screen</span> <span class="v">/partner · Checkout</span></span><span><span class="k">Account</span> <span class="v">staff@mm014.test</span></span></div>
-          <p class="say">"The discount coupon earned with points is used at real checkout. The app shows a QR, the store scans it, and the discount comes right off the price."</p>
+          <div class="seg-head"><span class="num">04</span><h3>Retail store — sale authentication + coupon QR</h3><span class="chip star">Highlight</span></div>
+          <div class="surface"><span><span class="k">Screen</span> <span class="v">/partner · Retail (RETAILER)</span></span><span><span class="k">Account</span> <span class="v">store@</span></span></div>
+          <p class="say">"The store authenticates the sale — ownership transfers to the consumer and one free exchange voucher is issued. Then the point-earned coupon is redeemed at checkout via QR."</p>
           <ol class="steps">
-            <li>App: Rewards → coupon <span class="kbd">Show QR</span></li>
-            <li>Store POS: enter price → <span class="kbd">Scan QR</span> → preview discount → <span class="kbd">Confirm payment</span></li>
+            <li>Retail: in the transfer queue, <b>commit the sale (RETAIL_SALE)</b> → consumer ownership + <b>1 exchange voucher (valid 3 months)</b></li>
+            <li>Checkout: enter price → scan app coupon <span class="kbd">QR</span> → preview discount → <span class="kbd">Confirm payment</span></li>
             <li>Receipt: price → discount → total, coupon marked <b>Used</b> (no reuse)</li>
           </ol>
-          <div class="point"><span class="lab">Punch</span><span>Points return as real cash value at the store — user benefit and store revenue in one flow.</span></div>
+          <div class="point"><span class="lab">Punch</span><span>Sale authentication = consumer transfer + 1 exchange voucher. Points/coupons return as store revenue.</span></div>
         </div>
       </article>
 
       <article class="seg">
         <div class="seg-time"><span class="t">06:00</span><span class="to">↓ 07:30</span><span class="dur">1.5 min</span></div>
         <div class="seg-body">
-          <div class="seg-head"><span class="num">05</span><h3>Trust tech — fake blocked · ledger integrity · field enforcement</h3><span class="chip trust">Differentiator</span></div>
-          <div class="surface"><span><span class="k">Screen</span> <span class="v">/kiosk · /console · /field</span></span><span><span class="k">Account</span> <span class="v">officer@pnp.test · admin</span></span></div>
-          <p class="say">"Products that skipped customs are blocked from sale at the machine and the store, and escalate to the console as a smuggling alert. The ledger is a hash chain — even we can't tamper with it. The police field terminal produces seizure grounds and a report in one scan."</p>
+          <div class="seg-head"><span class="num">05</span><h3>Trust tech — fake vs genuine · ledger integrity</h3><span class="chip trust">Differentiator</span></div>
+          <div class="surface"><span><span class="k">Screen</span> <span class="v">/field · /console</span></span><span><span class="k">Account</span> <span class="v">officer@ · admin@</span></span></div>
+          <p class="say">"The police field terminal scans a UID and shows <b>only genuine-or-not</b>. If it's a Conia Lab UID in the ledger it's genuine; if not, it's counterfeit. The ledger is a hash chain — even we can't tamper with it."</p>
           <ol class="steps">
-            <li>Try an <b>off-ledger UID</b> at vending/store → "Not sellable · counterfeit suspected" block</li>
-            <li>Console <span class="kbd">Ledger status</span>: "No tampering detected" integrity result</li>
-            <li>Police <span class="kbd">Field lookup</span>: verdict + report (officer · location · ledger snapshot) auto-generated</li>
+            <li>Police <span class="kbd">/field</span>: scan a genuine code → <b>✓ GENUINE</b></li>
+            <li>Scan an arbitrary off-ledger code → <b>✕ COUNTERFEIT</b> instantly</li>
+            <li>Console <span class="kbd">Ledger status</span>: "No tampering detected" integrity + anchoring</li>
           </ol>
-          <div class="point danger"><span class="lab">Core</span><span>"Blockchain trust" shown with your own eyes — a <b>blocked screen</b> and a <b>tamper-proof ledger</b>, not a claim.</span></div>
+          <div class="point danger"><span class="lab">Core</span><span>Enforcement is just <b>two outcomes — genuine / counterfeit</b>, no complex verdicts or reports. "Blockchain trust" proven by a tamper-proof ledger.</span></div>
         </div>
       </article>
 
       <article class="seg">
         <div class="seg-time"><span class="t">07:30</span><span class="to">↓ 09:00</span><span class="dur">1.5 min</span></div>
         <div class="seg-body">
-          <div class="seg-head"><span class="num">06</span><h3>Company AI market intelligence · free exchange</h3></div>
-          <div class="surface"><span><span class="k">Screen</span> <span class="v">/console · Market AI</span></span><span><span class="k">Account</span> <span class="v">admin@ledgermark.test</span></span></div>
-          <p class="say">"The ops dashboard compares our measured data against the market and auto-generates daily insights and recommended actions — where to grow and where to spend on marketing."</p>
+          <div class="seg-head"><span class="num">06</span><h3>Customs (imports · tax) · Distributor (defects · exchanges)</h3></div>
+          <div class="surface"><span><span class="k">Screen</span> <span class="v">/console · /partner</span></span><span><span class="k">Account</span> <span class="v">inspector@ · distributor@</span></span></div>
+          <p class="say">"Government and the distributor each see only what they need. Customs sees imported volume and tax paid; the distributor sees defect/exchange counts for the products it distributes."</p>
           <ol class="steps">
-            <li>Market AI tab: measured (registrations · WAU · surveys) vs market (growth · illicit · segments)</li>
-            <li>AI insights (opportunity/risk) + auto recommended-action cards</li>
-            <li>App Products: note the <b>extra free exchange</b> unlocked for fully engaged users</li>
+            <li>Customs <span class="kbd">inspector@</span>: imported units + tax paid summary (nothing else)</li>
+            <li>Distributor <span class="kbd">distributor@</span>: defect/color exchange counts by product</li>
+            <li>Ops <span class="kbd">admin@</span>: LOT issuance/labels, accounts, anchoring &amp; audit (Conia Lab ops)</li>
           </ol>
-          <div class="point"><span class="lab">Punch</span><span>Authenticity data cycles back into <b>marketing intelligence</b> that grows the market.</span></div>
+          <div class="point"><span class="lab">Punch</span><span>Each role sees <b>exactly the data it needs</b> — market/business metrics live in the IR deck, not here.</span></div>
         </div>
       </article>
 
@@ -270,7 +271,7 @@
             <li>Next integrations: payment PG · age verification (AVP) · public-chain anchoring · customs</li>
             <li>Ask: pilot scale · investment · expansion roadmap</li>
           </ol>
-          <div class="point trust"><span class="lab">Close</span><span>"Five roles, one ledger — you can scan it right now." Point to the download QR to install on the spot.</span></div>
+          <div class="point trust"><span class="lab">Close</span><span>"Six roles, one ledger — you can scan it right now." Point to the download QR to install on the spot.</span></div>
         </div>
       </article>
 
@@ -282,29 +283,29 @@
     <div class="grid2">
       <div class="card" style="padding:6px 4px">
         <table>
-          <thead><tr><th>Role</th><th>Email</th></tr></thead>
+          <thead><tr><th>Role</th><th>Email (@ledgermark.com)</th></tr></thead>
           <tbody>
-            <tr><td class="role">Active consumer</td><td><span class="mono">ramon@demo.ph</span></td></tr>
-            <tr><td class="role">Regular consumer</td><td><span class="mono">juan@demo.ph</span></td></tr>
-            <tr><td class="role">Store staff</td><td><span class="mono">staff@mm014.test</span></td></tr>
-            <tr><td class="role">Police officer</td><td><span class="mono">officer@pnp.test</span></td></tr>
-            <tr><td class="role">Customs inspector</td><td><span class="mono">inspector@boc.test</span></td></tr>
-            <tr><td class="role">Platform operator</td><td><span class="mono">admin@ledgermark.test</span></td></tr>
+            <tr><td class="role">Consumer</td><td><span class="mono">consumer@ledgermark.com</span></td></tr>
+            <tr><td class="role">Retail store</td><td><span class="mono">store@ledgermark.com</span></td></tr>
+            <tr><td class="role">Distributor</td><td><span class="mono">distributor@ledgermark.com</span></td></tr>
+            <tr><td class="role">Police officer</td><td><span class="mono">officer@ledgermark.com</span></td></tr>
+            <tr><td class="role">Customs inspector</td><td><span class="mono">inspector@ledgermark.com</span></td></tr>
+            <tr><td class="role">Platform operator</td><td><span class="mono">admin@ledgermark.com</span></td></tr>
           </tbody>
         </table>
-        <p style="font-family:var(--mono); font-size:11.5px; color:var(--faint); margin:8px 10px 4px">Shared password · ledgermark1234</p>
+        <p style="font-family:var(--mono); font-size:11.5px; color:var(--faint); margin:8px 10px 4px">Shared password · ledgermark2026!</p>
       </div>
       <div class="links">
         <a href="https://app-production-daca.up.railway.app/download"><span>Role builds · download hub</span><span class="path">/download</span></a>
-        <a href="https://app-production-daca.up.railway.app/kiosk"><span>Unmanned vending</span><span class="path">/kiosk</span></a>
-        <a href="https://app-production-daca.up.railway.app/console"><span>Console · Market AI</span><span class="path">/console</span></a>
-        <a href="https://app-production-daca.up.railway.app/partner"><span>Store checkout POS</span><span class="path">/partner</span></a>
-        <a href="https://app-production-daca.up.railway.app/field"><span>Police field terminal</span><span class="path">/field</span></a>
+        <a href="https://app-production-daca.up.railway.app/app"><span>Consumer app · verify &amp; register</span><span class="path">/app</span></a>
+        <a href="https://app-production-daca.up.railway.app/console"><span>Ops console · Customs (imports·tax)</span><span class="path">/console</span></a>
+        <a href="https://app-production-daca.up.railway.app/partner"><span>Retail checkout · Distributor defects</span><span class="path">/partner</span></a>
+        <a href="https://app-production-daca.up.railway.app/field"><span>Police field authenticity</span><span class="path">/field</span></a>
       </div>
     </div>
     <div class="note">
       <span class="lab">Contingency</span>
-      <b>If the network is flaky</b>, pre-open each screen and run the vending→app QR scan on the same Wi-Fi. If the camera won't read, fall back to manual code entry (vending done-code / coupon code). For the fake-block demo, keep an <b>off-ledger arbitrary code</b> ready.
+      <b>If the network is flaky</b>, pre-open each screen and use manual code entry for the app UID scan (genuine <span class="mono">PH-2026-DEMO-000001</span>). For the fake demo, keep an <b>off-ledger arbitrary code</b> ready. (Unmanned vending <span class="mono">/kiosk</span> is out of this demo's scope — partnership track.)
     </div>
   </section>
 

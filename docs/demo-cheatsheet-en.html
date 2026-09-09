@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Demo Cheat Sheet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,8 +13,8 @@
     --good:#2E9E5B; --good-wash:#DFF3E7;
     --danger:#C0392B; --danger-wash:#F7E1DE;
     --star-wash:#EAF0FF;
-    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
-    --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,"Apple SD Gothic Neo","Malgun Gothic",Menlo,Consolas,monospace;
+    --sans:"IBM Plex Sans","Apple SD Gothic Neo","Malgun Gothic",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   }
   @media (prefers-color-scheme:dark){
     :root:not([data-theme="light"]){
@@ -73,20 +75,20 @@
   <div class="head">
     <span class="eb">Cheat Sheet</span>
     <h1>LEDGERMARK · 10-min demo</h1>
-    <span class="tot"><b>7 stages · 10:00</b> · pw <span style="color:var(--accent-deep)">ledgermark1234</span></span>
+    <span class="tot"><b>7 stages · 10:00</b> · pw <span style="color:var(--accent-deep)">ledgermark2026!</span></span>
   </div>
 
   <div class="rows">
     <div class="row">
       <div class="time">00:00</div>
-      <div class="what"><div class="title">Problem &amp; market</div><div class="act">Landing screen · market &amp; illicit-loss figures</div></div>
-      <div class="say"><span class="q">"A third is illicit. Not slides — live proof."</span></div>
+      <div class="what"><div class="title">Intro · distribution trust</div><div class="act">Landing · UID ownership state machine (6 tx)</div></div>
+      <div class="say"><span class="q">"Market/business is the IR deck. Now the live distribution platform."</span></div>
     </div>
 
     <div class="row star">
       <div class="time">01:00</div>
-      <div class="what"><div class="title"><span class="st">★</span>Vending buy → auto transfer</div><div class="act"><span class="mono">/kiosk</span> buy→verify→dispense (stock−1), <b>scan done-QR on phone</b></div></div>
-      <div class="say"><span class="q">"One scan = ownership + 300 pts."</span></div>
+      <div class="what"><div class="title"><span class="st">★</span>Consumer app — verify &amp; register</div><div class="act"><span class="mono">/app</span> scan UID (<span class="mono">PH-2026-DEMO-000001</span>)→genuine→register·points · UID masked</div></div>
+      <div class="say"><span class="q">"Verify &amp; register with the app alone. (Vending = partnership, out of scope)"</span></div>
     </div>
 
     <div class="row">
@@ -97,20 +99,20 @@
 
     <div class="row star">
       <div class="time">04:30</div>
-      <div class="what"><div class="title"><span class="st">★</span>Store checkout — coupon</div><div class="act">App <b>Show coupon QR</b> → <span class="mono">/partner</span> enter price · <b>Scan QR</b> · confirm</div></div>
-      <div class="say"><span class="q">"Points redeemed like cash at the store."</span></div>
+      <div class="what"><div class="title"><span class="st">★</span>Retail — sale auth + coupon</div><div class="act"><span class="mono">/partner</span>(store@) commit sale→consumer=<b>1 voucher (3mo)</b> · redeem coupon QR (discount)</div></div>
+      <div class="say"><span class="q">"Sale auth = consumer transfer + 1 exchange voucher; points like cash."</span></div>
     </div>
 
     <div class="row trust">
       <div class="time">06:00</div>
-      <div class="what"><div class="title"><span class="st">★</span>Trust tech — fake block · integrity</div><div class="act"><b>Off-ledger UID</b> blocked · console "No tampering" · police <span class="mono">/field</span> report</div></div>
-      <div class="say"><span class="q">"A tamper-proof ledger. Fakes blocked on screen."</span></div>
+      <div class="what"><div class="title"><span class="st">★</span>Trust tech — genuine/fake · integrity</div><div class="act">police <span class="mono">/field</span> scan → <b>✓genuine / ✕fake</b> · console "No tampering"</div></div>
+      <div class="say"><span class="q">"Enforcement: two outcomes. A tamper-proof ledger."</span></div>
     </div>
 
     <div class="row">
       <div class="time">07:30</div>
-      <div class="what"><div class="title">Market AI · free exchange</div><div class="act"><span class="mono">/console</span> Market AI insights &amp; actions · extra free exchange</div></div>
-      <div class="say"><span class="q">"Authenticity data → marketing intelligence."</span></div>
+      <div class="what"><div class="title">Customs · Distributor</div><div class="act">Customs(inspector@) imports·tax · Distributor(distributor@) defect/exchange counts</div></div>
+      <div class="say"><span class="q">"Each role sees only its data — gov &amp; distributor."</span></div>
     </div>
 
     <div class="row">
@@ -122,16 +124,16 @@
 
   <div class="strip">
     <div class="box">
-      <div class="lab">Accounts (pw ledgermark1234)</div>
+      <div class="lab">Accounts (@ledgermark.com · pw ledgermark2026!)</div>
       <div class="kv">
-        Consumer <span class="mono">ramon@demo.ph</span> · Store <span class="mono">staff@mm014.test</span><br>
-        Police <span class="mono">officer@pnp.test</span> · Ops <span class="mono">admin@ledgermark.test</span>
+        Consumer <span class="mono">consumer@</span> · Store <span class="mono">store@</span> · Distributor <span class="mono">distributor@</span><br>
+        Police <span class="mono">officer@</span> · Customs <span class="mono">inspector@</span> · Ops <span class="mono">admin@</span>
       </div>
     </div>
     <div class="box">
       <div class="lab">Don't forget</div>
       <div class="tips">
-        <b>Fake demo</b> = keep an off-ledger code ready · <b>QR fails</b> → type code manually · vending↔phone on <b>same Wi-Fi</b> · spend time on the ★ 3 moments (vending transfer · coupon redeem · fake block)
+        <b>Fake demo</b> = keep an off-ledger code ready · <b>QR fails</b> → type code manually (genuine <span class="mono">PH-2026-DEMO-000001</span>) · ★ 3 moments (app verify · retail sale-auth/coupon · field fake) · vending <span class="mono">/kiosk</span> out of scope
       </div>
     </div>
   </div>

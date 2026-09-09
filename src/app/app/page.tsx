@@ -9,6 +9,23 @@ import { SessionBar, useSession } from "@/components/SessionBar";
 
 type Step = "scan" | "verify" | "status" | "my";
 
+// 소비자 화면에서는 UID를 앞 2자리 + XXXX + 뒤 2자리로만 노출한다(전체 값 비공개).
+// API 전송·조회에는 항상 원본 코드를 쓰고, 화면 표시에만 이 마스킹을 적용한다.
+function maskUid(code?: string | null): string {
+  if (!code) return "";
+  if (code.length <= 4) return code;
+  return `${code.slice(0, 2)}XXXX${code.slice(-2)}`;
+}
+
+// 교환권 유효기간(3개월) 표기 — "~2026-12-09까지" 형태.
+function voucherExpiryText(iso?: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  const ymd = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  return ` · ${ymd}까지`;
+}
+
 const STEPS: { key: Step; num: string; label: string }[] = [
   { key: "scan", num: "01", label: "UID 스캔" },
   { key: "verify", num: "02", label: "연령인증" },
@@ -208,7 +225,7 @@ function ScanStep({
         <>
           <PhoneFigure
             label="SCANNED UID"
-            value={scanned.code}
+            value={maskUid(scanned.code)}
             note={scanned.status === "WHOLESALE" ? "원장 일치 · 정품 확인" : "원장 일치 · 상태 확인 필요"}
           />
           <PhoneRow k="제품" v={scanned.lot?.productName} />
@@ -408,10 +425,10 @@ function StatusStep({ consumerId, requestId }: { consumerId: string; requestId: 
 
       <PhoneFigure
         label={request.status === "COMMITTED" ? "EXCHANGE VOUCHER" : "REQUEST"}
-        value={request.uid.code}
+        value={maskUid(request.uid.code)}
         note={
           request.status === "COMMITTED"
-            ? `교환권 ${request.uid.voucherState === "AVAILABLE" ? "유효 · 불량/색상 교환 1회" : request.uid.voucherState}`
+            ? `교환권 ${request.uid.voucherState === "AVAILABLE" ? `유효 · 불량/색상 교환 1회${voucherExpiryText(request.uid.voucherExpiresAt)}` : request.uid.voucherState}`
             : request.blockedReason ?? "매장 큐에서 처리 대기 중"
         }
       />
@@ -521,10 +538,10 @@ function MyProductsStep({ consumerId }: { consumerId: string }) {
           <div key={u.id} className="blueprint" style={{ padding: 14, background: "transparent" }}>
             <Corners />
             <div style={{ fontFamily: "ui-monospace, Menlo, monospace", fontSize: 12, wordBreak: "break-all" }}>
-              {u.code}
+              {maskUid(u.code)}
             </div>
             <div style={{ fontSize: 12, marginTop: 6 }} className="text-muted">
-              {u.lot?.productName} · 교환권 {u.voucherState}
+              {u.lot?.productName} · 교환권 {u.voucherState}{u.voucherState === "AVAILABLE" ? voucherExpiryText(u.voucherExpiresAt) : ""}
             </div>
             <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
               <Button

@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LEDGERMARK 시연 런시트</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,8 +14,8 @@
     --warn:#D9642A; --warn-wash:#FBE9DC;
     --danger:#C0392B; --danger-wash:#F7E1DE;
     --shadow:0 1px 2px rgba(20,30,60,.04), 0 8px 24px rgba(20,30,60,.06);
-    --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
-    --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,"Apple SD Gothic Neo","Malgun Gothic",Menlo,Consolas,monospace;
+    --sans:"IBM Plex Sans","Apple SD Gothic Neo","Malgun Gothic",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   }
   :root:not([data-theme="light"]){ }
   @media (prefers-color-scheme:dark){
@@ -192,12 +194,12 @@
   <header class="top">
     <p class="eyebrow">Investor Demo · Run Sheet</p>
     <h1>LEDGERMARK 10분 시연 런시트</h1>
-    <p class="lede">생산부터 소비자까지 UID 하나로 추적하는 정품 인증·유통 공정관리 플랫폼. 5개 역할 화면을 라이브 서버로 이어 보여주는 발표자용 진행표입니다.</p>
+    <p class="lede">생산부터 소비자까지 UID 하나로 추적하는 정품 인증·유통 공정관리 플랫폼. 6개 역할 화면을 라이브 서버로 이어 보여주는 발표자용 진행표입니다. (시장 규모·권리·사업성은 별도 IR 자료로 다룹니다 — 이 플랫폼은 실제 유통관리만 보여줍니다.)</p>
     <div class="meta">
       <span class="m"><b>총 10:00</b> · 7단계</span>
-      <span class="m">역할 <b>5</b> · 소비자·자판기·매장·경찰·정부/운영</span>
-      <span class="m">환경 <b>라이브 클라우드</b></span>
-      <span class="m">비밀번호 공통 <b>ledgermark1234</b></span>
+      <span class="m">역할 <b>6</b> · 소비자·자판기·소매점·총판·경찰·관세청/운영</span>
+      <span class="m">환경 <b>라이브 클라우드</b> · 재고 <b>300개</b></span>
+      <span class="m">비밀번호 공통 <b>ledgermark2026!</b></span>
     </div>
   </header>
 
@@ -205,29 +207,28 @@
     <p class="sec-label">시연 전 준비 (T-10분)</p>
     <div class="prep">
       <div class="card">
-        <h4><span class="dot"></span>기기 4대</h4>
+        <h4><span class="dot"></span>기기 3대</h4>
         <ul>
-          <li>자판기 화면 — 태블릿/노트북 <span class="mono">/kiosk</span></li>
-          <li>소비자 폰 — 앱 설치(APK)</li>
-          <li>매장 POS — 노트북 <span class="mono">/partner</span></li>
-          <li>관제 콘솔 — 노트북 <span class="mono">/console</span></li>
+          <li>소비자 폰 — 앱 설치(APK) <span class="mono">/app</span></li>
+          <li>소매점 POS — 노트북 <span class="mono">/partner</span></li>
+          <li>운영/관세청 콘솔 — 노트북 <span class="mono">/console</span> · 현장 <span class="mono">/field</span></li>
         </ul>
       </div>
       <div class="card">
-        <h4><span class="dot"></span>사전 로그인</h4>
+        <h4><span class="dot"></span>사전 로그인 (@ledgermark.com)</h4>
         <ul>
-          <li>소비자 <span class="mono">ramon@demo.ph</span></li>
-          <li>매장 <span class="mono">staff@mm014.test</span></li>
-          <li>경찰 <span class="mono">officer@pnp.test</span></li>
-          <li>관제 <span class="mono">admin@ledgermark.test</span></li>
+          <li>소비자 <span class="mono">consumer@</span> · 소매점 <span class="mono">store@</span></li>
+          <li>총판 <span class="mono">distributor@</span></li>
+          <li>경찰 <span class="mono">officer@</span> · 관세청 <span class="mono">inspector@</span></li>
+          <li>운영 <span class="mono">admin@</span> · 공통 <span class="mono">ledgermark2026!</span></li>
         </ul>
       </div>
       <div class="card">
         <h4><span class="dot"></span>상태 점검</h4>
         <ul>
-          <li>자판기 재고 정상(품절 아님)</li>
-          <li>정품 UID 1개 준비</li>
-          <li>위조 시연용 미등록 코드</li>
+          <li>데모 재고 300개 정상 <span class="mono">PH-2026-DEMO-000001~300</span></li>
+          <li>정품 UID <span class="mono">PH-2026-DEMO-000001</span></li>
+          <li>위조 시연용 미등록 코드(임의)</li>
           <li>네트워크·화면 밝기</li>
         </ul>
       </div>
@@ -250,29 +251,29 @@
       <article class="seg">
         <div class="seg-time"><span class="t">00:00</span><span class="to">↓ 01:00</span><span class="dur">1분</span></div>
         <div class="seg-body">
-          <div class="seg-head"><span class="num">01</span><h3>문제와 시장</h3></div>
+          <div class="seg-head"><span class="num">01</span><h3>도입 — 유통 신뢰 문제</h3></div>
           <div class="surface"><span><span class="k">화면</span> <span class="v">랜딩 /</span></span><span><span class="k">발표자</span> <span class="v">진행자</span></span></div>
-          <p class="say">"필리핀 전자담배 시장은 빠르게 크지만 3분의 1이 무허가·밀수입니다. 저희는 생산부터 소비자까지 UID 하나로 추적해 이 손실을 막습니다."</p>
+          <p class="say">"시장 규모·권리·사업성은 IR 자료로 이미 보셨습니다. 지금부터는 그 사업을 뒷받침하는 <b>실제 유통관리 플랫폼</b>을 라이브로 보여드립니다. 생산부터 소비자까지 UID 하나로 추적해 정품만 유통되게 만듭니다."</p>
           <ol class="steps">
-            <li>랜딩의 시장 규모·밀수 손실 수치를 짚는다</li>
+            <li>랜딩의 UID 소유권 상태머신(6종 트랜잭션)을 짚는다</li>
             <li>"오늘은 슬라이드가 아니라 <b>실제 서버·앱</b>으로 보여드립니다"로 전환</li>
           </ol>
-          <div class="point"><span class="lab">강조</span><span>말이 아니라 라이브 제품으로 증명한다는 프레임을 먼저 심는다.</span></div>
+          <div class="point"><span class="lab">강조</span><span>시장 수치는 IR 몫. 이 플랫폼은 "정품이 어떻게 발급·이전·인증·단속되는가"를 증명한다.</span></div>
         </div>
       </article>
 
       <article class="seg">
         <div class="seg-time"><span class="t">01:00</span><span class="to">↓ 03:00</span><span class="dur">2분</span></div>
         <div class="seg-body">
-          <div class="seg-head"><span class="num">02</span><h3>무인 자판기 구매 → 앱 자동 소유권 이전</h3><span class="chip star">하이라이트</span></div>
-          <div class="surface"><span><span class="k">화면</span> <span class="v">/kiosk (자판기)</span></span><span><span class="k">폰</span> <span class="v">ramon@demo.ph</span></span></div>
-          <p class="say">"소비자가 자판기에서 직접 삽니다. 원장으로 정품·연령을 확인하고 배출하면 재고가 실시간으로 하나 줄어듭니다. 그리고 폰으로 QR 한 번이면 소유권이 바로 넘어옵니다."</p>
+          <div class="seg-head"><span class="num">02</span><h3>소비자 앱 — 정품 확인 · 등록</h3><span class="chip star">하이라이트</span></div>
+          <div class="surface"><span><span class="k">화면</span> <span class="v">소비자 앱 /app</span></span><span><span class="k">폰</span> <span class="v">consumer@</span></span></div>
+          <p class="say">"소비자는 제품의 UID를 앱으로 스캔해 정품인지 즉시 확인하고 등록합니다. 원장에 있는 코니아랩 생산분이면 정품, 등록하면 소유권이 넘어오고 포인트가 쌓입니다."</p>
           <ol class="steps">
-            <li>자판기: <span class="kbd">구매 시작</span> → 제품 선택 → <b>정품·판매 가능</b> 확인 → <span class="kbd">성인 인증</span> → <b>배출 완료</b> (재고 −1)</li>
-            <li>완료 화면의 <b>등록 QR</b>을 폰 앱으로 스캔</li>
-            <li>앱: "소유권 이전 · +300P" 즉시 표시 → 제품 탭에 신규 기기 등장</li>
+            <li>앱: <span class="kbd">UID 스캔</span> <span class="mono">PH-2026-DEMO-000001</span> → "원장 일치 · 정품 확인"</li>
+            <li>등록 진행 → 제품 탭에 신규 기기 등장 · 포인트 적립</li>
+            <li>표시되는 UID는 <b>앞2·뒤2만, 가운데 XXXX</b>로 마스킹(예: <span class="mono">PHXXXX01</span>) — 전체 코드 비노출</li>
           </ol>
-          <div class="point"><span class="lab">강조</span><span>매장 직원 승인 없이 스캔 한 번으로 소유권 이전·정품 등록·<b>300P 적립</b>이 끝난다. 종이·수기 제로.</span></div>
+          <div class="point"><span class="lab">강조</span><span>매장 단말 없이 앱만으로 정품 확인·등록이 끝난다. (무인 자판기는 별도 협업 사업 — 이번 시연 범위 밖)</span></div>
         </div>
       </article>
 
@@ -280,7 +281,7 @@
         <div class="seg-time"><span class="t">03:00</span><span class="to">↓ 04:30</span><span class="dur">1.5분</span></div>
         <div class="seg-body">
           <div class="seg-head"><span class="num">03</span><h3>동의 기반 데이터 · 포인트 상부상조</h3></div>
-          <div class="surface"><span><span class="k">화면</span> <span class="v">앱 · 혜택 탭</span></span><span><span class="k">계정</span> <span class="v">ramon@demo.ph</span></span></div>
+          <div class="surface"><span><span class="k">화면</span> <span class="v">앱 · 혜택 탭</span></span><span><span class="k">계정</span> <span class="v">consumer@</span></span></div>
           <p class="say">"유저는 개인정보 이용에 동의하고 그 대가로 포인트를 받습니다. 설문·주간 출석으로 더 쌓고, 포인트를 할인 쿠폰·경품으로 바꿉니다. 회사는 동의된 데이터를 얻고 유저는 현금성 혜택을 받는 상부상조 구조입니다."</p>
           <ol class="steps">
             <li>혜택 카드: <b>동의로 받은 포인트 · 보유 쿠폰 · 할인 누계</b>를 보여준다</li>
@@ -294,45 +295,45 @@
       <article class="seg">
         <div class="seg-time"><span class="t">04:30</span><span class="to">↓ 06:00</span><span class="dur">1.5분</span></div>
         <div class="seg-body">
-          <div class="seg-head"><span class="num">04</span><h3>매장 결제 — 쿠폰 QR 스캔·차감</h3><span class="chip star">하이라이트</span></div>
-          <div class="surface"><span><span class="k">화면</span> <span class="v">/partner · 매장 결제</span></span><span><span class="k">계정</span> <span class="v">staff@mm014.test</span></span></div>
-          <p class="say">"포인트로 받은 할인 쿠폰을 실제 결제에 씁니다. 앱이 QR을 띄우면 매장이 스캔하고, 정가에서 할인이 바로 차감됩니다."</p>
+          <div class="seg-head"><span class="num">04</span><h3>소매점 — 판매 인증 + 쿠폰 QR 결제</h3><span class="chip star">하이라이트</span></div>
+          <div class="surface"><span><span class="k">화면</span> <span class="v">/partner · 소매점(RETAILER)</span></span><span><span class="k">계정</span> <span class="v">store@</span></span></div>
+          <p class="say">"소매점은 판매를 인증합니다 — 소비자에게 소유권이 이전되면서 무상 교환권 1회가 발급됩니다. 그리고 포인트로 받은 할인 쿠폰을 실제 결제에서 QR로 차감합니다."</p>
           <ol class="steps">
-            <li>앱: 혜택 탭 → 쿠폰 <span class="kbd">QR 제시</span></li>
-            <li>매장 POS: 정가 입력 → <span class="kbd">QR 스캔</span> → 할인 미리보기 → <span class="kbd">결제 확정</span></li>
+            <li>소매점: 소유권 이전 큐에서 <b>판매 인증(RETAIL_SALE) 커밋</b> → 소비자 소유권 이전 + <b>교환권 1회(3개월 유효)</b> 발급</li>
+            <li>매장 결제: 정가 입력 → 앱 쿠폰 <span class="kbd">QR 스캔</span> → 할인 미리보기 → <span class="kbd">결제 확정</span></li>
             <li>영수증: 정가 → 할인 → 결제액, 쿠폰은 <b>사용 완료</b>로 차감(재사용 불가)</li>
           </ol>
-          <div class="point"><span class="lab">강조</span><span>포인트가 진짜 현금성 가치로 매장에서 회수된다 — 유저 혜택과 매장 매출이 한 흐름으로 연결.</span></div>
+          <div class="point"><span class="lab">강조</span><span>판매 인증 = 소비자 이전 + 교환권 1회. 포인트·쿠폰이 매장 매출로 회수된다.</span></div>
         </div>
       </article>
 
       <article class="seg">
         <div class="seg-time"><span class="t">06:00</span><span class="to">↓ 07:30</span><span class="dur">1.5분</span></div>
         <div class="seg-body">
-          <div class="seg-head"><span class="num">05</span><h3>신뢰 기술 — 위조 차단 · 원장 무결성 · 현장 단속</h3><span class="chip trust">차별화</span></div>
-          <div class="surface"><span><span class="k">화면</span> <span class="v">/kiosk · /console · /field</span></span><span><span class="k">계정</span> <span class="v">officer@pnp.test · admin</span></span></div>
-          <p class="say">"통관을 거치지 않은 제품은 자판기·매장에서 판매가 막히고, 관제 콘솔로 밀수 의심 알림이 올라갑니다. 원장은 해시체인이라 당사도 조작할 수 없습니다. 경찰 현장 단말은 스캔 한 번으로 압수 근거와 조서를 만듭니다."</p>
+          <div class="seg-head"><span class="num">05</span><h3>신뢰 기술 — 위조 차단 · 원장 무결성 · 현장 정품 확인</h3><span class="chip trust">차별화</span></div>
+          <div class="surface"><span><span class="k">화면</span> <span class="v">/field · /console</span></span><span><span class="k">계정</span> <span class="v">officer@ · admin@</span></span></div>
+          <p class="say">"경찰 현장 단말은 UID를 스캔해 <b>정품인지 아닌지만</b> 즉시 보여줍니다. 원장에 있는 코니아랩 생산분이면 정품, 없으면 위조입니다. 원장은 해시체인이라 당사도 조작할 수 없습니다."</p>
           <ol class="steps">
-            <li>자판기/매장에서 <b>미등록 UID</b> 시도 → "판매 불가 · 위조 의심" 차단</li>
-            <li>콘솔 <span class="kbd">원장 상태</span>: "조작 흔적 없음" 무결성 검증 결과</li>
-            <li>경찰 <span class="kbd">현장 조회</span>: 정품 판정 + 조서(담당관·장소·원장 스냅샷) 자동 생성</li>
+            <li>경찰 <span class="kbd">/field</span>: 정품 코드 스캔 → <b>✓ 정품(GENUINE)</b></li>
+            <li>임의 미등록 코드 스캔 → <b>✕ 위조(COUNTERFEIT)</b> 즉시 판정</li>
+            <li>콘솔 <span class="kbd">원장 상태</span>: "조작 흔적 없음" 무결성 검증 + 앵커링</li>
           </ol>
-          <div class="point danger"><span class="lab">핵심</span><span>"블록체인 신뢰"를 말이 아니라 <b>차단되는 화면</b>과 <b>조작 불가 원장</b>으로 눈앞에 보여주는 순간.</span></div>
+          <div class="point danger"><span class="lab">핵심</span><span>단속은 복잡한 판정·조서 없이 <b>정품/위조 단 두 결과</b>. "블록체인 신뢰"를 조작 불가 원장으로 증명.</span></div>
         </div>
       </article>
 
       <article class="seg">
         <div class="seg-time"><span class="t">07:30</span><span class="to">↓ 09:00</span><span class="dur">1.5분</span></div>
         <div class="seg-body">
-          <div class="seg-head"><span class="num">06</span><h3>회사 AI 시장분석 · 무상 교환 혜택</h3></div>
-          <div class="surface"><span><span class="k">화면</span> <span class="v">/console · 시장분석(AI)</span></span><span><span class="k">계정</span> <span class="v">admin@ledgermark.test</span></span></div>
-          <p class="say">"운영 대시보드는 우리 실측 데이터와 시장을 비교해 매일 자동으로 인사이트와 추천 액션을 뽑아냅니다. 어디가 성장하고 어디에 광고를 태울지 데이터가 짚어줍니다."</p>
+          <div class="seg-head"><span class="num">06</span><h3>관세청(수입·세금) · 총판(하자·교환)</h3></div>
+          <div class="surface"><span><span class="k">화면</span> <span class="v">/console · /partner</span></span><span><span class="k">계정</span> <span class="v">inspector@ · distributor@</span></span></div>
+          <p class="say">"정부와 유통사가 각자 필요한 것만 봅니다. 관세청은 수입 수량과 납부 세금을, 총판은 자기가 유통하는 제품의 하자·교환 건수를 확인합니다."</p>
           <ol class="steps">
-            <li>시장분석(AI) 탭: 실측(등록·WAU·설문) vs 시장(성장·밀수·세그먼트) 비교</li>
-            <li>AI 인사이트(기회/리스크) + 자동 추천 솔루션 카드</li>
-            <li>앱 제품 탭: 전체 참여 유저에게 <b>추가 무상 교환</b> 열리는 것 짚기</li>
+            <li>관세청 <span class="kbd">inspector@</span>: 수입 상품 수량 + 납부 세금 요약 (그 외 기능 없음)</li>
+            <li>총판 <span class="kbd">distributor@</span>: 제품별 하자·교환(불량/색상) 건수 현황</li>
+            <li>운영 <span class="kbd">admin@</span>: LOT 발급·라벨, 계정, 앵커링·감사 (코니아랩 운영)</li>
           </ol>
-          <div class="point"><span class="lab">강조</span><span>정품 인증 데이터가 곧 <b>시장 확대용 마케팅 인텔리전스</b>로 순환된다.</span></div>
+          <div class="point"><span class="lab">강조</span><span>역할별로 <b>딱 필요한 데이터만</b> 분리 노출 — 시장분석 등 사업성 지표는 IR 자료 몫.</span></div>
         </div>
       </article>
 
@@ -347,7 +348,7 @@
             <li>다음 실연동: 결제 PG · AVP 연령인증 · 퍼블릭체인 앵커링 · 관세청 연동</li>
             <li>Ask: 파일럿 규모·투자 요청·확장 로드맵</li>
           </ol>
-          <div class="point trust"><span class="lab">마무리</span><span>"5개 역할, 하나의 원장 — 지금 스캔할 수 있습니다." 다운로드 QR로 직접 설치 유도.</span></div>
+          <div class="point trust"><span class="lab">마무리</span><span>"6개 역할, 하나의 원장 — 지금 스캔할 수 있습니다." 다운로드 QR로 직접 설치 유도.</span></div>
         </div>
       </article>
 
@@ -359,29 +360,29 @@
     <div class="grid2">
       <div class="card" style="padding:6px 4px">
         <table>
-          <thead><tr><th>역할</th><th>이메일</th></tr></thead>
+          <thead><tr><th>역할</th><th>이메일 (@ledgermark.com)</th></tr></thead>
           <tbody>
-            <tr><td class="role">활발한 소비자</td><td><span class="mono">ramon@demo.ph</span></td></tr>
-            <tr><td class="role">일반 소비자</td><td><span class="mono">juan@demo.ph</span></td></tr>
-            <tr><td class="role">매장 직원</td><td><span class="mono">staff@mm014.test</span></td></tr>
-            <tr><td class="role">경찰 단속관</td><td><span class="mono">officer@pnp.test</span></td></tr>
-            <tr><td class="role">관세청 심사관</td><td><span class="mono">inspector@boc.test</span></td></tr>
-            <tr><td class="role">플랫폼 운영자</td><td><span class="mono">admin@ledgermark.test</span></td></tr>
+            <tr><td class="role">소비자</td><td><span class="mono">consumer@ledgermark.com</span></td></tr>
+            <tr><td class="role">소매점</td><td><span class="mono">store@ledgermark.com</span></td></tr>
+            <tr><td class="role">총판</td><td><span class="mono">distributor@ledgermark.com</span></td></tr>
+            <tr><td class="role">경찰 단속관</td><td><span class="mono">officer@ledgermark.com</span></td></tr>
+            <tr><td class="role">관세청 심사관</td><td><span class="mono">inspector@ledgermark.com</span></td></tr>
+            <tr><td class="role">플랫폼 운영자</td><td><span class="mono">admin@ledgermark.com</span></td></tr>
           </tbody>
         </table>
-        <p style="font-family:var(--mono); font-size:11.5px; color:var(--faint); margin:8px 10px 4px">비밀번호 공통 · ledgermark1234</p>
+        <p style="font-family:var(--mono); font-size:11.5px; color:var(--faint); margin:8px 10px 4px">비밀번호 공통 · ledgermark2026!</p>
       </div>
       <div class="links">
         <a href="https://app-production-daca.up.railway.app/download"><span>역할별 설치 · 다운로드 허브</span><span class="path">/download</span></a>
-        <a href="https://app-production-daca.up.railway.app/kiosk"><span>무인 자판기</span><span class="path">/kiosk</span></a>
-        <a href="https://app-production-daca.up.railway.app/console"><span>관제 · AI 시장분석</span><span class="path">/console</span></a>
-        <a href="https://app-production-daca.up.railway.app/partner"><span>매장 결제 POS</span><span class="path">/partner</span></a>
-        <a href="https://app-production-daca.up.railway.app/field"><span>경찰 현장 단말</span><span class="path">/field</span></a>
+        <a href="https://app-production-daca.up.railway.app/app"><span>소비자 앱 · 정품 확인·등록</span><span class="path">/app</span></a>
+        <a href="https://app-production-daca.up.railway.app/console"><span>운영 콘솔 · 관세청(수입·세금)</span><span class="path">/console</span></a>
+        <a href="https://app-production-daca.up.railway.app/partner"><span>소매점 결제 · 총판 하자·교환</span><span class="path">/partner</span></a>
+        <a href="https://app-production-daca.up.railway.app/field"><span>경찰 현장 정품 확인</span><span class="path">/field</span></a>
       </div>
     </div>
     <div class="note">
       <span class="lab">컨틴전시</span>
-      <b>네트워크가 불안하면</b> 각 화면을 미리 열어 두고, 자판기→앱 QR 스캔은 같은 Wi-Fi에서 진행합니다. 카메라 인식이 안 되면 코드 직접 입력(자판기 완료 코드 / 쿠폰 코드)으로 대체하세요. 위조 차단 시연은 <b>원장에 없는 임의 코드</b>를 준비해 두면 확실합니다.
+      <b>네트워크가 불안하면</b> 각 화면을 미리 열어 두고, 앱 UID 스캔은 코드 직접 입력으로 대체하세요(정품 <span class="mono">PH-2026-DEMO-000001</span>). 위조 시연은 <b>원장에 없는 임의 코드</b>를 준비해 두면 확실합니다. (무인 자판기 <span class="mono">/kiosk</span>는 이번 시연 범위 밖 — 협업 사업)
     </div>
   </section>
 

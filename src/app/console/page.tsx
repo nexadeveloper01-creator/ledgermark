@@ -8,7 +8,7 @@ import { Tag } from "@/components/ui/Tag";
 import { SessionBar, useSession } from "@/components/SessionBar";
 import { Accounts } from "@/components/console/Accounts";
 import { Production } from "@/components/console/Production";
-import { MarketIntel } from "@/components/console/MarketIntel";
+import { CustomsView } from "@/components/console/CustomsView";
 import { useT, LangToggle, type Dict } from "@/lib/i18n/web";
 
 type Module =
@@ -18,11 +18,10 @@ type Module =
   | "ledger"
   | "audit"
   | "accounts"
-  | "production"
-  | "market";
+  | "production";
 
 const MODULE_ORDER: Module[] = ["dashboard", "lookup", "alerts", "ledger", "audit"];
-const ADMIN_ORDER: Module[] = ["market", "production", "accounts"];
+const ADMIN_ORDER: Module[] = ["production", "accounts"];
 
 interface Kpis {
   totalUids: number;
@@ -33,7 +32,8 @@ interface Kpis {
 }
 
 const C: Dict = {
-  "console.badge": { ko: "관세청 · DTI 콘솔", en: "BOC · DTI Console" },
+  "console.badgeAdmin": { ko: "코니아랩 운영 콘솔", en: "Conia Lab Operations" },
+  "console.badgeCustoms": { ko: "관세청 · 수입 통관", en: "Customs · Imports" },
   "console.landing": { ko: "랜딩 페이지", en: "Landing" },
   "common.loading": { ko: "불러오는 중...", en: "Loading..." },
 
@@ -42,7 +42,6 @@ const C: Dict = {
   "mod.alerts": { ko: "밀수 알림", en: "Smuggling alerts" },
   "mod.ledger": { ko: "원장 상태", en: "Ledger" },
   "mod.audit": { ko: "감사 로그", en: "Audit log" },
-  "mod.market": { ko: "시장분석 (AI)", en: "Market AI" },
   "mod.production": { ko: "생산·라벨", en: "Production" },
   "mod.accounts": { ko: "계정 관리", en: "Accounts" },
 
@@ -159,7 +158,10 @@ export default function ConsolePage() {
     );
   }
 
-  const modules = [...MODULE_ORDER, ...(user.role === "ADMIN" ? ADMIN_ORDER : [])];
+  // 관세청(심사관)은 모듈형 운영 콘솔이 아니라 "수입 수량 + 세금" 전용 화면만 본다.
+  const isCustoms = user.role === "GOV_INSPECTOR";
+  const modules = isCustoms ? [] : [...MODULE_ORDER, ...ADMIN_ORDER];
+  const badge = isCustoms ? t("console.badgeCustoms") : t("console.badgeAdmin");
 
   return (
     <div style={{ minHeight: "100vh" }}>
@@ -179,16 +181,18 @@ export default function ConsolePage() {
             padding: "2px 8px",
           }}
         >
-          {t("console.badge")}
+          {badge}
         </span>
-        <div className="seg" style={{ marginLeft: 12 }}>
-          {modules.map((m) => (
-            <label key={m} className="seg-opt">
-              <input type="radio" name="module" checked={module === m} onChange={() => setModule(m)} />
-              {t(`mod.${m}`)}
-            </label>
-          ))}
-        </div>
+        {!isCustoms && (
+          <div className="seg" style={{ marginLeft: 12 }}>
+            {modules.map((m) => (
+              <label key={m} className="seg-opt">
+                <input type="radio" name="module" checked={module === m} onChange={() => setModule(m)} />
+                {t(`mod.${m}`)}
+              </label>
+            ))}
+          </div>
+        )}
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
           <LangToggle />
           <SessionBar user={user} />
@@ -199,14 +203,14 @@ export default function ConsolePage() {
       </div>
 
       <div style={{ padding: "28px 32px 40px" }}>
-        {module === "dashboard" && <Dashboard canAnchor={user.role === "ADMIN"} />}
+        {isCustoms && <CustomsView />}
+        {!isCustoms && module === "dashboard" && <Dashboard canAnchor={user.role === "ADMIN"} />}
         {module === "lookup" && <UidLookup />}
         {module === "alerts" && <Alerts />}
         {module === "ledger" && <LedgerStatus canAnchor={user.role === "ADMIN"} />}
         {module === "audit" && <AuditLog />}
         {module === "accounts" && user.role === "ADMIN" && <Accounts currentUserId={user.id} />}
         {module === "production" && <Production canMint={user.role === "ADMIN"} />}
-        {module === "market" && user.role === "ADMIN" && <MarketIntel />}
       </div>
     </div>
   );

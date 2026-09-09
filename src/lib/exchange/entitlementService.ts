@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { LedgerError } from "@/lib/ledger/stateMachine";
+import { voucherExpiryFrom } from "@/lib/ledger/ledgerService";
 
 // 무상 교환 자격.
 //  - 기본: 기기당 구매 시 교환권 1장(AVAILABLE) → 1회 무상 교환.
@@ -74,7 +75,11 @@ export async function applyExchangeBonus(consumerId: string, uidCode: string): P
       throw new LedgerError("이미 사용 가능한 교환권이 있는 기기입니다.");
     }
 
-    await tx.uid.update({ where: { id: uid.id }, data: { voucherState: "AVAILABLE" } });
+    // 추가 교환권도 3개월 유효기간을 부여한다.
+    await tx.uid.update({
+      where: { id: uid.id },
+      data: { voucherState: "AVAILABLE", voucherExpiresAt: voucherExpiryFrom() },
+    });
     await tx.exchangeBonus.upsert({
       where: { consumerId },
       update: { usedAt: new Date(), usedUidId: uid.id },

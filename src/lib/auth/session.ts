@@ -37,6 +37,7 @@ export interface SessionUser {
   role: "ADMIN" | "GOV_INSPECTOR" | "FIELD_OFFICER" | "PARTNER_STAFF" | "CONSUMER";
   organizationId: string | null;
   organizationName: string | null;
+  organizationType: string | null;
   consumerId: string | null;
   isOrgManager: boolean;
   emailVerified: boolean;
@@ -60,7 +61,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
 
   const session = await prisma.session.findUnique({
     where: { tokenHash: hashToken(token) },
-    include: { user: { include: { organization: { select: { name: true } } } } },
+    include: { user: { include: { organization: { select: { name: true, type: true } } } } },
   });
 
   if (!session) return null;
@@ -84,6 +85,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     role: user.role,
     organizationId: user.organizationId,
     organizationName: user.organization?.name ?? null,
+    organizationType: user.organization?.type ?? null,
     consumerId: user.consumerId,
     isOrgManager: user.isOrgManager,
     emailVerified: user.emailVerifiedAt !== null,

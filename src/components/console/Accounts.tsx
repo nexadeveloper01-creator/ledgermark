@@ -4,13 +4,41 @@ import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Corners } from "@/components/ui/Corners";
 import { Tag } from "@/components/ui/Tag";
+import { useT, type Dict } from "@/lib/i18n/web";
 
-const ROLE_LABEL: Record<string, string> = {
-  ADMIN: "운영자",
-  GOV_INSPECTOR: "심사관",
-  FIELD_OFFICER: "단속관",
-  PARTNER_STAFF: "매장·총판",
-  CONSUMER: "소비자",
+const ROLE_KEYS = ["ADMIN", "GOV_INSPECTOR", "FIELD_OFFICER", "PARTNER_STAFF", "CONSUMER"];
+
+const D: Dict = {
+  roleADMIN: { ko: "운영자", en: "Admin" },
+  roleGOV_INSPECTOR: { ko: "심사관", en: "Inspector" },
+  roleFIELD_OFFICER: { ko: "단속관", en: "Officer" },
+  rolePARTNER_STAFF: { ko: "매장·총판", en: "Store staff" },
+  roleCONSUMER: { ko: "소비자", en: "Consumer" },
+  reqFail: { ko: "요청에 실패했습니다.", en: "Request failed." },
+  createStaff: { ko: "직원 계정 생성", en: "Create staff account" },
+  createAccount: { ko: "계정 생성", en: "Create account" },
+  email: { ko: "이메일", en: "Email" },
+  displayName: { ko: "표시 이름", en: "Display name" },
+  roleOrg: { ko: "역할 · 소속", en: "Role · Org" },
+  role: { ko: "역할", en: "Role" },
+  memberOrg: { ko: "소속 기관", en: "Organization" },
+  grantManager: { ko: "기관 관리자 권한 부여", en: "Grant org-manager rights" },
+  pwNote: { ko: "비밀번호는 시스템이 생성하며 생성 직후 한 번만 표시됩니다. 저장되지 않으므로 즉시 전달하세요.", en: "The password is system-generated and shown only once right after creation. It is not stored — hand it over immediately." },
+  tempPwTitle: { ko: "임시 비밀번호 — 이 화면을 벗어나면 다시 볼 수 없습니다", en: "Temporary password — you cannot see it again after leaving this screen" },
+  confirmed: { ko: "확인했습니다", en: "Got it" },
+  name: { ko: "이름", en: "Name" },
+  org: { ko: "소속", en: "Org" },
+  session: { ko: "세션", en: "Sessions" },
+  status: { ko: "상태", en: "Status" },
+  manage: { ko: "관리", en: "Manage" },
+  orgManager: { ko: "기관 관리자", en: "Org manager" },
+  inactive: { ko: "비활성", en: "Inactive" },
+  activeLabel: { ko: "활성", en: "Active" },
+  adminOnly: { ko: "운영자만 관리", en: "Admin only" },
+  resetPw: { ko: "비밀번호 재발급", en: "Reset password" },
+  endSessions: { ko: "세션 종료", en: "End sessions" },
+  enable: { ko: "활성화", en: "Enable" },
+  disable: { ko: "비활성화", en: "Disable" },
 };
 
 export function Accounts({
@@ -21,6 +49,7 @@ export function Accounts({
   /** 기관 관리자 화면 — 역할·소속이 본인과 동일하게 고정된다. */
   scoped?: { role: string; organizationId: string; organizationName: string };
 }) {
+  const t = useT(D);
   const [users, setUsers] = useState<any[]>([]);
   const [orgs, setOrgs] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +84,7 @@ export function Accounts({
     });
     const data = await res.json();
     if (!res.ok) {
-      setError(data.error ?? "요청에 실패했습니다.");
+      setError(data.error ?? t("reqFail"));
       return null;
     }
     await load();
@@ -68,12 +97,12 @@ export function Accounts({
     <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
       <div className="blueprint" style={{ padding: 18, background: "transparent" }}>
         <Corners />
-        <div className="card-kicker">{scoped ? "직원 계정 생성" : "계정 생성"}</div>
+        <div className="card-kicker">{scoped ? t("createStaff") : t("createAccount")}</div>
         <div
           style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "flex-end", marginTop: 10 }}
         >
           <div className="field" style={{ minWidth: 200 }}>
-            <label>이메일</label>
+            <label>{t("email")}</label>
             <input
               className="input"
               type="email"
@@ -82,7 +111,7 @@ export function Accounts({
             />
           </div>
           <div className="field" style={{ minWidth: 150 }}>
-            <label>표시 이름</label>
+            <label>{t("displayName")}</label>
             <input
               className="input"
               value={displayName}
@@ -91,18 +120,18 @@ export function Accounts({
           </div>
           {scoped ? (
             <div className="field" style={{ minWidth: 180 }}>
-              <label>역할 · 소속</label>
+              <label>{t("roleOrg")}</label>
               <div className="input" style={{ display: "flex", alignItems: "center" }}>
-                {ROLE_LABEL[role] ?? role} · {scoped.organizationName}
+                {t(`role${role}`)} · {scoped.organizationName}
               </div>
             </div>
           ) : (
             <div className="field" style={{ minWidth: 140 }}>
-              <label>역할</label>
+              <label>{t("role")}</label>
               <select className="input" value={role} onChange={(e) => setRole(e.target.value)}>
-                {Object.entries(ROLE_LABEL).map(([k, v]) => (
+                {ROLE_KEYS.map((k) => (
                   <option key={k} value={k}>
-                    {v}
+                    {t(`role${k}`)}
                   </option>
                 ))}
               </select>
@@ -110,7 +139,7 @@ export function Accounts({
           )}
           {!scoped && !isConsumer && (
             <div className="field" style={{ minWidth: 200 }}>
-              <label>소속 기관</label>
+              <label>{t("memberOrg")}</label>
               <select
                 className="input"
                 value={organizationId}
@@ -139,7 +168,7 @@ export function Accounts({
                   borderColor: grantManager ? "var(--color-accent)" : undefined,
                 }}
               />
-              기관 관리자 권한 부여
+              {t("grantManager")}
             </label>
           )}
           <Button
@@ -160,12 +189,11 @@ export function Accounts({
               }
             }}
           >
-            계정 생성
+            {t("createAccount")}
           </Button>
         </div>
         <div style={{ fontSize: 11, marginTop: 10 }} className="text-muted">
-          비밀번호는 시스템이 생성하며 생성 직후 한 번만 표시됩니다. 저장되지 않으므로 즉시
-          전달하세요.
+          {t("pwNote")}
         </div>
       </div>
 
@@ -179,7 +207,7 @@ export function Accounts({
           }}
         >
           <Corners />
-          <div className="card-kicker">임시 비밀번호 — 이 화면을 벗어나면 다시 볼 수 없습니다</div>
+          <div className="card-kicker">{t("tempPwTitle")}</div>
           <div style={{ marginTop: 8, fontSize: 14 }}>
             <strong>{issued.email}</strong>
           </div>
@@ -194,7 +222,7 @@ export function Accounts({
             {issued.password}
           </div>
           <Button variant="secondary" style={{ marginTop: 12 }} onClick={() => setIssued(null)}>
-            확인했습니다
+            {t("confirmed")}
           </Button>
         </div>
       )}
@@ -204,13 +232,13 @@ export function Accounts({
       <table className="table">
         <thead>
           <tr>
-            <th>이메일</th>
-            <th>이름</th>
-            <th>역할</th>
-            <th>소속</th>
-            <th>세션</th>
-            <th>상태</th>
-            <th>관리</th>
+            <th>{t("email")}</th>
+            <th>{t("name")}</th>
+            <th>{t("role")}</th>
+            <th>{t("org")}</th>
+            <th>{t("session")}</th>
+            <th>{t("status")}</th>
+            <th>{t("manage")}</th>
           </tr>
         </thead>
         <tbody>
@@ -222,10 +250,10 @@ export function Accounts({
               <td style={{ fontSize: 12 }}>{u.email}</td>
               <td style={{ fontSize: 12 }}>{u.displayName}</td>
               <td style={{ fontSize: 12 }}>
-                {ROLE_LABEL[u.role] ?? u.role}
+                {t(`role${u.role}`)}
                 {u.isOrgManager && (
                   <span className="text-muted" style={{ marginLeft: 6, fontSize: 10 }}>
-                    기관 관리자
+                    {t("orgManager")}
                   </span>
                 )}
               </td>
@@ -233,14 +261,14 @@ export function Accounts({
               <td style={{ fontSize: 12 }}>{u._count.sessions}</td>
               <td>
                 <Tag variant={u.disabledAt ? "neutral" : "accent"}>
-                  {u.disabledAt ? "비활성" : "활성"}
+                  {u.disabledAt ? t("inactive") : t("activeLabel")}
                 </Tag>
               </td>
               <td>
                 <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
                   {!manageable && (
                     <span className="text-muted" style={{ fontSize: 11 }}>
-                      운영자만 관리
+                      {t("adminOnly")}
                     </span>
                   )}
                   {manageable && <Button
@@ -251,7 +279,7 @@ export function Accounts({
                       if (data) setIssued({ email: u.email, password: data.tempPassword });
                     }}
                   >
-                    비밀번호 재발급
+                    {t("resetPw")}
                   </Button>}
                   {manageable && u._count.sessions > 0 && (
                     <Button
@@ -259,7 +287,7 @@ export function Accounts({
                       style={{ fontSize: 11 }}
                       onClick={() => act(`/api/admin/users/${u.id}/revoke-sessions`)}
                     >
-                      세션 종료
+                      {t("endSessions")}
                     </Button>
                   )}
                   {manageable && u.id !== currentUserId && (
@@ -270,7 +298,7 @@ export function Accounts({
                         act(`/api/admin/users/${u.id}/status`, { disabled: !u.disabledAt })
                       }
                     >
-                      {u.disabledAt ? "활성화" : "비활성화"}
+                      {u.disabledAt ? t("enable") : t("disable")}
                     </Button>
                   )}
                 </div>

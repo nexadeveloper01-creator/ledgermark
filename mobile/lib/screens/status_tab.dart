@@ -113,7 +113,7 @@ class _StatusTabState extends State<StatusTab> {
             ],
           ),
           const SizedBox(height: 10),
-          Text(uid?['code']?.toString() ?? '',
+          Text(maskUid(uid?['code']?.toString()),
               style: const TextStyle(fontFamily: 'monospace', fontSize: 13)),
           KvRow(tr('scan.product'), uid?['lot']?['productName']?.toString() ?? '—'),
           KvRow(
@@ -126,7 +126,8 @@ class _StatusTabState extends State<StatusTab> {
             KvRow(
               tr('products.voucher'),
               uid?['voucherState'] == 'AVAILABLE'
-                  ? (i18n.code == 'ko' ? '유효 · 교환 1회' : 'Valid · 1 exchange')
+                  ? (i18n.code == 'ko' ? '유효 · 교환 1회' : 'Valid · 1 exchange') +
+                      voucherExpiryText(uid?['voucherExpiresAt'] as String?)
                   : (uid?['voucherState']?.toString() ?? '—'),
             ),
           if (status == 'BLOCKED' && r['blockedReason'] != null) ...[

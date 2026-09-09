@@ -3,14 +3,44 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import QRCode from "qrcode";
+import { useT, LangToggle, type Dict } from "@/lib/i18n/web";
 
 // 무인 자판기(키오스크) 셀프 구매 화면 — 공개. 정품 확인은 실제 원장 기준,
 // 결제·배출은 데모 시뮬레이션. 원장은 변경하지 않으며, 구매자는 배출된 제품의
 // 정품 등록 코드를 소비자 앱에서 등록한다.
+const K: Dict = {
+  badge: { ko: "무인 정품 자판기 · SELF-SERVICE", en: "Unmanned authenticity vending · SELF-SERVICE" },
+  staff: { ko: "직원 모드", en: "Staff mode" },
+  heroT: { ko: "정품 전자담배 자판기", en: "Genuine vape vending machine" },
+  heroSub: { ko: "블록체인 원장으로 정품을 확인하고 구매하세요.", en: "Verify authenticity on the blockchain ledger and buy." },
+  start: { ko: "구매 시작", en: "Start" },
+  ageNote: { ko: "만 20세 미만 구매 불가 · 신분 확인이 진행됩니다", en: "No sales under 20 · ID verification required" },
+  selectT: { ko: "제품 선택", en: "Choose a product" },
+  soldOutLabel: { ko: "품절 · SOLD OUT", en: "SOLD OUT" },
+  stockN: { ko: "재고 {n}개", en: "{n} in stock" },
+  soldOut: { ko: "품절", en: "Sold out" },
+  buy: { ko: "구매", en: "Buy" },
+  noStock: { ko: "현재 판매 가능한 재고가 없습니다.", en: "No stock available right now." },
+  cancel: { ko: "취소", en: "Cancel" },
+  verifying: { ko: "정품 확인 중…", en: "Verifying authenticity…" },
+  ledgerCheck: { ko: "원장 대조", en: "ledger check" },
+  notSellable: { ko: "판매 불가", en: "Not for sale" },
+  toStart: { ko: "처음으로", en: "Start over" },
+  ageT: { ko: "연령 확인", en: "Age check" },
+  ageAsk: { ko: "만 20세 이상입니까? 신분증을 리더기에 대주세요.", en: "Are you 20 or older? Please tap your ID on the reader." },
+  ageConfirm: { ko: "성인 인증 완료 (데모)", en: "Adult verified (demo)" },
+  paying: { ko: "결제 승인 중…", en: "Approving payment…" },
+  dispensing: { ko: "배출을 준비하고 있습니다", en: "Preparing to dispense" },
+  dispensed: { ko: "배출 완료", en: "Dispensed" },
+  claimHint: { ko: "소비자 앱으로 아래 QR을 스캔하면 소유권이 자동 이전되고 300P가 적립됩니다.", en: "Scan the QR below in the consumer app to auto-transfer ownership and earn 300 pts." },
+  qrAlt: { ko: "정품 등록 QR", en: "Registration QR" },
+};
+
 type Step = "idle" | "select" | "verify" | "age" | "pay" | "done" | "reject";
 type Item = { code: string | null; productName: string; lotCode: string; available: number; soldOut: boolean };
 
 export default function KioskPage() {
+  const t = useT(K);
   const [step, setStep] = useState<Step>("idle");
   const [items, setItems] = useState<Item[]>([]);
   const [picked, setPicked] = useState<Item | null>(null);
@@ -88,27 +118,28 @@ export default function KioskPage() {
       <style>{"@keyframes lmspin{to{transform:rotate(360deg)}}"}</style>
       <div style={sx.top}>
         <span style={sx.brand}>LEDGERMARK</span>
-        <span style={sx.badge}>무인 정품 자판기 · SELF-SERVICE</span>
+        <span style={sx.badge}>{t("badge")}</span>
+        <div style={{ marginLeft: "auto" }}><LangToggle /></div>
         <Link href="/partner" style={sx.staff}>
-          직원 모드
+          {t("staff")}
         </Link>
       </div>
 
       <div style={sx.stage}>
         {step === "idle" && (
           <div style={sx.center}>
-            <div style={sx.big}>정품 전자담배 자판기</div>
-            <p style={sx.sub}>블록체인 원장으로 정품을 확인하고 구매하세요.</p>
+            <div style={sx.big}>{t("heroT")}</div>
+            <p style={sx.sub}>{t("heroSub")}</p>
             <button style={sx.cta} onClick={startShopping}>
-              구매 시작
+              {t("start")}
             </button>
-            <p style={sx.note}>만 20세 미만 구매 불가 · 신분 확인이 진행됩니다</p>
+            <p style={sx.note}>{t("ageNote")}</p>
           </div>
         )}
 
         {step === "select" && (
           <div style={{ width: "100%", maxWidth: 720 }}>
-            <div style={sx.h}>제품 선택</div>
+            <div style={sx.h}>{t("selectT")}</div>
             <div style={sx.grid}>
               {items.map((it) => (
                 <button
@@ -122,19 +153,19 @@ export default function KioskPage() {
                   </div>
                   <div style={sx.mono}>{it.lotCode}</div>
                   <div style={{ fontSize: 12, color: it.soldOut ? "#FF8A5B" : "rgba(255,255,255,0.5)", marginTop: 6 }}>
-                    {it.soldOut ? "품절 · SOLD OUT" : `재고 ${it.available}개`}
+                    {it.soldOut ? t("soldOutLabel") : t("stockN", { n: String(it.available) })}
                   </div>
                   {it.soldOut ? (
-                    <div style={{ ...sx.buy, background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.55)" }}>품절</div>
+                    <div style={{ ...sx.buy, background: "rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.55)" }}>{t("soldOut")}</div>
                   ) : (
-                    <div style={sx.buy}>구매</div>
+                    <div style={sx.buy}>{t("buy")}</div>
                   )}
                 </button>
               ))}
-              {items.length === 0 && <p style={sx.sub}>현재 판매 가능한 재고가 없습니다.</p>}
+              {items.length === 0 && <p style={sx.sub}>{t("noStock")}</p>}
             </div>
             <button style={sx.ghost} onClick={reset}>
-              취소
+              {t("cancel")}
             </button>
           </div>
         )}
@@ -142,17 +173,17 @@ export default function KioskPage() {
         {step === "verify" && (
           <div style={sx.center}>
             <Spinner />
-            <div style={sx.big2}>정품 확인 중…</div>
-            <p style={sx.sub}>{picked?.productName} · 원장 대조</p>
+            <div style={sx.big2}>{t("verifying")}</div>
+            <p style={sx.sub}>{picked?.productName} · {t("ledgerCheck")}</p>
           </div>
         )}
 
         {step === "reject" && (
           <div style={sx.center}>
-            <div style={{ ...sx.big2, color: "#FF8A5B" }}>판매 불가</div>
+            <div style={{ ...sx.big2, color: "#FF8A5B" }}>{t("notSellable")}</div>
             <p style={sx.sub}>{verdict?.label}</p>
             <button style={sx.cta} onClick={reset}>
-              처음으로
+              {t("toStart")}
             </button>
           </div>
         )}
@@ -160,14 +191,14 @@ export default function KioskPage() {
         {step === "age" && (
           <div style={sx.center}>
             <div style={sx.check}>✓ {verdict?.label}</div>
-            <div style={sx.big2}>연령 확인</div>
-            <p style={sx.sub}>만 20세 이상입니까? 신분증을 리더기에 대주세요.</p>
+            <div style={sx.big2}>{t("ageT")}</div>
+            <p style={sx.sub}>{t("ageAsk")}</p>
             <div style={{ display: "flex", gap: 14, marginTop: 10 }}>
               <button style={sx.cta} onClick={confirmAge}>
-                성인 인증 완료 (데모)
+                {t("ageConfirm")}
               </button>
               <button style={sx.ghost} onClick={reset}>
-                취소
+                {t("cancel")}
               </button>
             </div>
           </div>
@@ -176,20 +207,20 @@ export default function KioskPage() {
         {step === "pay" && (
           <div style={sx.center}>
             <Spinner />
-            <div style={sx.big2}>결제 승인 중…</div>
-            <p style={sx.sub}>배출을 준비하고 있습니다</p>
+            <div style={sx.big2}>{t("paying")}</div>
+            <p style={sx.sub}>{t("dispensing")}</p>
           </div>
         )}
 
         {step === "done" && (
           <div style={sx.center}>
-            <div style={sx.check}>배출 완료</div>
+            <div style={sx.check}>{t("dispensed")}</div>
             <div style={sx.big2}>{picked?.productName}</div>
-            <p style={sx.sub}>소비자 앱으로 아래 QR을 스캔하면 소유권이 자동 이전되고 300P가 적립됩니다.</p>
-            {qr && <img src={qr} alt="정품 등록 QR" style={sx.qr} />}
+            <p style={sx.sub}>{t("claimHint")}</p>
+            {qr && <img src={qr} alt={t("qrAlt")} style={sx.qr} />}
             <div style={sx.mono}>{claimCode || picked?.code}</div>
             <button style={{ ...sx.cta, marginTop: 18 }} onClick={reset}>
-              처음으로
+              {t("toStart")}
             </button>
           </div>
         )}

@@ -3,9 +3,46 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Corners } from "@/components/ui/Corners";
+import { useT, type Dict } from "@/lib/i18n/web";
+
+const D: Dict = {
+  title: { ko: "매장 결제 · 쿠폰 차감", en: "Checkout · coupon redemption" },
+  sub: { ko: "소비자 앱의 쿠폰 코드를 입력해 조회하고, 정가에서 할인을 차감해 결제합니다.", en: "Look up the consumer's coupon and deduct the discount at checkout." },
+  price: { ko: "정가 (₱)", en: "Price (₱)" },
+  pricePh: { ko: "예: 1200", en: "e.g. 1200" },
+  payMethod: { ko: "결제 수단", en: "Payment method" },
+  cash: { ko: "현금", en: "Cash" },
+  card: { ko: "카드", en: "Card" },
+  other: { ko: "기타", en: "Other" },
+  refPh: { ko: "승인번호·참조 (선택)", en: "Approval / reference (optional)" },
+  couponLabel: { ko: "쿠폰 (앱 QR 스캔 또는 코드 입력)", en: "Coupon (scan app QR or enter code)" },
+  scan: { ko: "QR 스캔", en: "Scan QR" },
+  stop: { ko: "중지", en: "Stop" },
+  lookup: { ko: "조회", en: "Look up" },
+  scanHint: { ko: "소비자 앱의 쿠폰 QR을 카메라에 비춰주세요.", en: "Point the camera at the consumer app's coupon QR." },
+  usable: { ko: "사용 가능", en: "Available" },
+  unusable: { ko: "사용 불가", en: "Not usable" },
+  owner: { ko: "님", en: "" },
+  rowPrice: { ko: "정가", en: "Price" },
+  rowDiscount: { ko: "할인", en: "Discount" },
+  rowTotal: { ko: "결제 금액", en: "Total" },
+  rowMethod: { ko: "결제 수단", en: "Method" },
+  rowRef: { ko: "참조", en: "Reference" },
+  pay: { ko: "결제 확정", en: "Confirm payment" },
+  paying: { ko: "처리 중...", en: "Processing..." },
+  needAmount: { ko: "결제 금액을 입력해주세요.", en: "Enter the amount." },
+  lookupFail: { ko: "조회 실패", en: "Lookup failed" },
+  notFound: { ko: "존재하지 않는 쿠폰 코드입니다.", en: "Coupon code not found." },
+  camFail: { ko: "카메라를 열 수 없습니다. 코드 직접 입력을 사용하세요.", en: "Cannot open camera. Enter the code manually." },
+  payFail: { ko: "결제 실패", en: "Payment failed" },
+  receipt: { ko: "RECEIPT · 결제 완료", en: "RECEIPT · paid" },
+  couponWord: { ko: "쿠폰", en: "Coupon" },
+  used: { ko: "쿠폰은 사용 완료 처리되어 재사용할 수 없습니다.", en: "The coupon is marked used and cannot be reused." },
+};
 
 // 매장 결제(POS): 정가 입력 + 소비자 쿠폰 QR 스캔(또는 코드 입력) → 할인 차감 → 결제 확정.
 export function Checkout() {
+  const t = useT(D);
   const [amount, setAmount] = useState("");
   const [code, setCode] = useState("");
   const [lookup, setLookup] = useState<any>(null);
@@ -35,11 +72,11 @@ export function Checkout() {
     const res = await fetch(`/api/store/coupon?code=${encodeURIComponent(q)}`);
     const body = await res.json();
     if (!res.ok) {
-      setError(body.error ?? "조회 실패");
+      setError(body.error ?? t("lookupFail"));
       return;
     }
     setLookup(body);
-    if (!body.found) setError("존재하지 않는 쿠폰 코드입니다.");
+    if (!body.found) setError(t("notFound"));
   };
 
   const stopScan = async () => {
@@ -78,7 +115,7 @@ export function Checkout() {
         () => {}
       );
     } catch (e) {
-      setError("카메라를 열 수 없습니다. 코드 직접 입력을 사용하세요.");
+      setError(t("camFail"));
       await stopScan();
     }
   };
@@ -94,7 +131,7 @@ export function Checkout() {
   const pay = async () => {
     setError(null);
     if (amountNum <= 0) {
-      setError("결제 금액을 입력해주세요.");
+      setError(t("needAmount"));
       return;
     }
     setBusy(true);
@@ -111,7 +148,7 @@ export function Checkout() {
       });
       const body = await res.json();
       if (!res.ok) {
-        setError(body.error ?? "결제 실패");
+        setError(body.error ?? t("payFail"));
         return;
       }
       setReceipt(body);
@@ -127,27 +164,27 @@ export function Checkout() {
   return (
     <div style={{ maxWidth: 720, display: "flex", flexDirection: "column", gap: 24 }}>
       <div>
-        <h3 style={{ fontSize: 17, margin: "0 0 4px" }}>매장 결제 · 쿠폰 차감</h3>
+        <h3 style={{ fontSize: 17, margin: "0 0 4px" }}>{t("title")}</h3>
         <p className="text-muted" style={{ fontSize: 12 }}>
-          소비자 앱의 쿠폰 코드를 입력해 조회하고, 정가에서 할인을 차감해 결제합니다.
+          {t("sub")}
         </p>
       </div>
 
       <div className="blueprint" style={{ padding: 22, background: "transparent" }}>
         <Corners />
         <div className="field" style={{ marginBottom: 16 }}>
-          <label>정가 (₱)</label>
+          <label>{t("price")}</label>
           <input
             className="input"
             inputMode="numeric"
-            placeholder="예: 1200"
+            placeholder={t("pricePh")}
             value={amount}
             onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ""))}
           />
         </div>
 
         <div className="field" style={{ marginBottom: 16 }}>
-          <label>결제 수단</label>
+          <label>{t("payMethod")}</label>
           <div style={{ display: "flex", gap: 8 }}>
             {(["CASH", "CARD", "OTHER"] as const).map((m) => (
               <button
@@ -164,14 +201,14 @@ export function Checkout() {
                   color: method === m ? "var(--color-accent-900)" : "var(--color-muted)",
                 }}
               >
-                {m === "CASH" ? "현금" : m === "CARD" ? "카드" : "기타"}
+                {m === "CASH" ? t("cash") : m === "CARD" ? t("card") : t("other")}
               </button>
             ))}
           </div>
           {method !== "CASH" && (
             <input
               className="input"
-              placeholder="승인번호·참조 (선택)"
+              placeholder={t("refPh")}
               value={reference}
               onChange={(e) => setReference(e.target.value)}
               style={{ marginTop: 8 }}
@@ -180,21 +217,21 @@ export function Checkout() {
         </div>
 
         <div className="field" style={{ marginBottom: 8 }}>
-          <label>쿠폰 (앱 QR 스캔 또는 코드 입력)</label>
+          <label>{t("couponLabel")}</label>
           <div style={{ display: "flex", gap: 8 }}>
             <input
               className="input"
-              placeholder="예: LM-XXXX-XXXX"
+              placeholder="LM-XXXX-XXXX"
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               onKeyDown={(e) => e.key === "Enter" && doLookup()}
               style={{ flex: 1, fontFamily: "ui-monospace, Menlo, monospace" }}
             />
             <Button variant="primary" onClick={scanning ? stopScan : startScan}>
-              {scanning ? "중지" : "QR 스캔"}
+              {scanning ? t("stop") : t("scan")}
             </Button>
             <Button variant="secondary" onClick={() => doLookup()}>
-              조회
+              {t("lookup")}
             </Button>
           </div>
         </div>
@@ -206,7 +243,7 @@ export function Checkout() {
               style={{ width: "100%", maxWidth: 320, margin: "0 auto", border: "1px solid var(--color-divider)" }}
             />
             <p className="text-muted" style={{ fontSize: 11, textAlign: "center", marginTop: 6 }}>
-              소비자 앱의 쿠폰 QR을 카메라에 비춰주세요.
+              {t("scanHint")}
             </p>
           </div>
         )}
@@ -222,15 +259,15 @@ export function Checkout() {
               background: lookup.usable ? "var(--color-accent-100)" : "transparent",
             }}
           >
-            {lookup.label} · {lookup.ownerName ?? "-"} 님
-            {lookup.usable ? " · 사용 가능" : ` · 사용 불가(${lookup.reason ?? lookup.status})`}
+            {lookup.label} · {lookup.ownerName ?? "-"}{t("owner") ? " " + t("owner") : ""}
+            {lookup.usable ? ` · ${t("usable")}` : ` · ${t("unusable")}(${lookup.reason ?? lookup.status})`}
           </div>
         )}
 
         <div style={{ marginTop: 18, borderTop: "1px solid var(--color-divider)", paddingTop: 14 }}>
-          <Row k="정가" v={`₱${amountNum.toLocaleString()}`} />
-          <Row k="할인" v={previewDiscount > 0 ? `- ₱${previewDiscount.toLocaleString()}` : "₱0"} accent={previewDiscount > 0} />
-          <Row k="결제 금액" v={`₱${previewTotal.toLocaleString()}`} strong />
+          <Row k={t("rowPrice")} v={`₱${amountNum.toLocaleString()}`} />
+          <Row k={t("rowDiscount")} v={previewDiscount > 0 ? `- ₱${previewDiscount.toLocaleString()}` : "₱0"} accent={previewDiscount > 0} />
+          <Row k={t("rowTotal")} v={`₱${previewTotal.toLocaleString()}`} strong />
         </div>
 
         <Button
@@ -240,7 +277,7 @@ export function Checkout() {
           disabled={busy || amountNum <= 0}
           onClick={pay}
         >
-          {busy ? "처리 중..." : "결제 확정"}
+          {busy ? t("paying") : t("pay")}
         </Button>
 
         {error && <p style={{ fontSize: 12, marginTop: 12, color: "var(--color-accent-700)" }}>{error}</p>}
@@ -249,15 +286,15 @@ export function Checkout() {
       {receipt && (
         <div className="blueprint" style={{ padding: 22, background: "transparent" }}>
           <Corners />
-          <div className="card-kicker">RECEIPT · 결제 완료</div>
-          <Row k="정가" v={`₱${receipt.amount.toLocaleString()}`} />
-          {receipt.coupon && <Row k={`쿠폰 (${receipt.coupon.code})`} v={receipt.coupon.label} />}
-          <Row k="할인" v={receipt.discount > 0 ? `- ₱${receipt.discount.toLocaleString()}` : "₱0"} accent={receipt.discount > 0} />
-          <Row k="결제 수단" v={receipt.method === "CASH" ? "현금" : receipt.method === "CARD" ? "카드" : "기타"} />
-          {receipt.reference && <Row k="참조" v={receipt.reference} />}
-          <Row k="결제 금액" v={`₱${receipt.total.toLocaleString()}`} strong />
+          <div className="card-kicker">{t("receipt")}</div>
+          <Row k={t("rowPrice")} v={`₱${receipt.amount.toLocaleString()}`} />
+          {receipt.coupon && <Row k={`${t("couponWord")} (${receipt.coupon.code})`} v={receipt.coupon.label} />}
+          <Row k={t("rowDiscount")} v={receipt.discount > 0 ? `- ₱${receipt.discount.toLocaleString()}` : "₱0"} accent={receipt.discount > 0} />
+          <Row k={t("rowMethod")} v={receipt.method === "CASH" ? t("cash") : receipt.method === "CARD" ? t("card") : t("other")} />
+          {receipt.reference && <Row k={t("rowRef")} v={receipt.reference} />}
+          <Row k={t("rowTotal")} v={`₱${receipt.total.toLocaleString()}`} strong />
           <p className="text-muted" style={{ fontSize: 11, marginTop: 10 }}>
-            쿠폰은 사용 완료 처리되어 재사용할 수 없습니다.
+            {t("used")}
           </p>
         </div>
       )}
