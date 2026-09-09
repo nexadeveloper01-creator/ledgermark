@@ -61,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('LEDGERMARK · CONSUMER',
+                  const Text('CONIAMARK · CONSUMER',
                       style: TextStyle(fontSize: 10, letterSpacing: 2.2, color: Lm.accent700)),
                   const SizedBox(height: 8),
                   Text(_signupMode ? tr('login.signupSubmit') : tr('login.title'),

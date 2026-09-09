@@ -14,7 +14,7 @@ const D: Dict = {
   apkSection: { ko: "앱 설치 (Android APK)", en: "App install (Android APK)" },
   webSection: { ko: "웹 콘솔 (설치 불필요)", en: "Web console (no install)" },
   demoSection: { ko: "시연 자료", en: "Demo materials" },
-  appConsumerT: { ko: "일반 사용자 앱", en: "Consumer app" },
+  appConsumerT: { ko: "ConiaMark · 소비자 앱", en: "ConiaMark · Consumer app" },
   appConsumerD: { ko: "QR 정품 인증 · 등록 · 포인트/쿠폰 · 무상 교환", en: "QR authentication · registration · points/coupons · free exchange" },
   appKioskT: { ko: "매장 자판기 단말", en: "Store vending terminal" },
   appKioskD: { ko: "무인 셀프 구매(정품·연령 확인) + 직원 POS(쿠폰 QR 스캔·결제)", en: "Unmanned self-purchase (authenticity + age check) + staff POS (coupon QR scan · payment)" },

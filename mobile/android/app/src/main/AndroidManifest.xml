@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <application
-        android:label="ledgermark_app"
+        android:label="ConiaMark"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:usesCleartextTraffic="false"><!-- 운영: 클라우드 https만 사용(스토어 보안 요건). 로컬 http 개발이 필요하면 debug 매니페스트에서만 허용할 것 -->
