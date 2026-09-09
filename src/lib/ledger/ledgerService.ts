@@ -147,21 +147,45 @@ function toSnapshot(uid: {
   return { status: uid.status, owner, voucherState: uid.voucherState };
 }
 
+// 교환권 유효기간(3개월). 발급 시 만료 시각을 계산한다.
+export const VOUCHER_VALID_MONTHS = 3;
+export function voucherExpiryFrom(now = new Date()): Date {
+  const d = new Date(now);
+  d.setMonth(d.getMonth() + VOUCHER_VALID_MONTHS);
+  return d;
+}
+
 export async function transferUid(uidCode: string, input: TransitionInput, metadata?: unknown) {
   return prisma.$transaction(async (tx) => {
     const uid = await tx.uid.findUnique({ where: { code: uidCode } });
     if (!uid) throw new LedgerError(`UID를 찾을 수 없습니다: ${uidCode}`);
 
+    // 교환권 만료 검증: 사용 가능(AVAILABLE) 상태라도 유효기간(3개월)이 지났으면 교환 불가.
+    if (
+      input.txType === "EXCHANGE_TRANSFER" &&
+      uid.voucherState === "AVAILABLE" &&
+      uid.voucherExpiresAt &&
+      uid.voucherExpiresAt.getTime() < Date.now()
+    ) {
+      throw new LedgerError("교환권이 만료되었습니다 (유효기간 3개월 경과).");
+    }
+
     const current = toSnapshot(uid);
     const result = applyTransition(current, input);
 
     if (result.kind === "single") {
+      // RETAIL_SALE 등으로 교환권이 새로 AVAILABLE이 되면 발급일 + 3개월을 만료일로 설정.
+      const nextExpiry =
+        result.next.voucherState === "AVAILABLE"
+          ? voucherExpiryFrom()
+          : null;
       const updated = await tx.uid.update({
         where: { id: uid.id },
         data: {
           status: result.next.status,
           ...ownerFields(result.next.owner),
           voucherState: result.next.voucherState,
+          voucherExpiresAt: nextExpiry,
         },
       });
 
@@ -184,6 +208,7 @@ export async function transferUid(uidCode: string, input: TransitionInput, metad
       data: {
         status: result.retiredCurrent.status,
         voucherState: result.retiredCurrent.voucherState,
+        voucherExpiresAt: null, // 교환권 소진(USED) — 만료일 제거
       },
     });
 

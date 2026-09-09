@@ -210,9 +210,9 @@ class _ProductsTabState extends State<ProductsTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(code, style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
+          Text(maskUid(code), style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
           const SizedBox(height: 6),
-          Text('${u['lot']?['productName'] ?? ''} · ${tr('products.voucher')} $voucher',
+          Text('${u['lot']?['productName'] ?? ''} · ${tr('products.voucher')} $voucher${voucher == 'AVAILABLE' ? voucherExpiryText(u['voucherExpiresAt'] as String?) : ''}',
               style: const TextStyle(fontSize: 12, color: Lm.muted)),
           const SizedBox(height: 12),
           Row(

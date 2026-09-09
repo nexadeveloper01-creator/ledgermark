@@ -249,6 +249,23 @@ class _AdSlotState extends State<AdSlot> {
   }
 }
 
+// 소비자 화면에서는 UID를 앞 2자리 + XXXX + 뒤 2자리로만 노출한다(전체 값 비공개).
+// API 호출에는 항상 원본 코드를 쓰고, 화면 표시에만 이 마스킹을 적용한다.
+String maskUid(String? code) {
+  if (code == null || code.isEmpty) return '';
+  if (code.length <= 4) return code;
+  return '${code.substring(0, 2)}XXXX${code.substring(code.length - 2)}';
+}
+
+// 교환권 유효기간(3개월) 표기 — " · ~2026-12-09" 형태(언어 공통).
+String voucherExpiryText(String? iso) {
+  if (iso == null || iso.isEmpty) return '';
+  final d = DateTime.tryParse(iso);
+  if (d == null) return '';
+  String two(int n) => n.toString().padLeft(2, '0');
+  return ' · ~${d.year}-${two(d.month)}-${two(d.day)}';
+}
+
 String statusLabel(String s) {
   const m = {
     'MINTED': '발급됨',

@@ -187,7 +187,7 @@ class _ScanTabState extends State<ScanTab> {
           const SizedBox(height: 20),
           Figure(
             label: 'SCANNED UID',
-            value: uid['code'] as String,
+            value: maskUid(uid['code'] as String?),
             note: uid['status'] == 'WHOLESALE' ? tr('scan.genuine') : tr('scan.checkStatus'),
           ),
           const SizedBox(height: 12),

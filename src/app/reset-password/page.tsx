@@ -5,8 +5,24 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Corners } from "@/components/ui/Corners";
+import { useT, type Dict } from "@/lib/i18n/web";
+
+const D: Dict = {
+  doneT: { ko: "재설정 완료", en: "Password reset" },
+  doneBody: { ko: "비밀번호가 변경되었습니다. 기존에 로그인된 기기에서는 모두 로그아웃되었습니다.", en: "Your password has been changed. All existing sessions were signed out." },
+  loginCta: { ko: "로그인하기", en: "Sign in" },
+  t: { ko: "새 비밀번호 설정", en: "Set a new password" },
+  pw: { ko: "새 비밀번호 (10자 이상)", en: "New password (10+ chars)" },
+  confirm: { ko: "비밀번호 확인", en: "Confirm password" },
+  mismatch: { ko: "비밀번호가 일치하지 않습니다.", en: "Passwords do not match." },
+  fail: { ko: "재설정에 실패했습니다.", en: "Reset failed." },
+  loading: { ko: "변경 중...", en: "Changing..." },
+  submit: { ko: "비밀번호 변경", en: "Change password" },
+  expired: { ko: "링크가 만료되었나요?", en: "Link expired?" },
+};
 
 function ResetPassword() {
+  const t = useT(D);
   const router = useRouter();
   const token = useSearchParams().get("token") ?? "";
 
@@ -21,7 +37,7 @@ function ResetPassword() {
     setError(null);
 
     if (password !== confirm) {
-      setError("비밀번호가 일치하지 않습니다.");
+      setError(t("mismatch"));
       return;
     }
 
@@ -35,7 +51,7 @@ function ResetPassword() {
     setLoading(false);
 
     if (!res.ok) {
-      setError(body.error ?? "재설정에 실패했습니다.");
+      setError(body.error ?? t("fail"));
       return;
     }
     setDone(true);
@@ -49,12 +65,12 @@ function ResetPassword() {
           style={{ width: "min(420px, 100%)", padding: 28, background: "transparent" }}
         >
           <Corners />
-          <h1 style={{ fontSize: 26, margin: "0 0 10px" }}>재설정 완료</h1>
+          <h1 style={{ fontSize: 26, margin: "0 0 10px" }}>{t("doneT")}</h1>
           <p style={{ fontSize: 14, lineHeight: 1.6, marginBottom: 20 }}>
-            비밀번호가 변경되었습니다. 기존에 로그인된 기기에서는 모두 로그아웃되었습니다.
+            {t("doneBody")}
           </p>
           <Button variant="primary" block style={{ height: 44 }} onClick={() => router.replace("/login")}>
-            로그인하기
+            {t("loginCta")}
           </Button>
         </div>
       </div>
@@ -72,10 +88,10 @@ function ResetPassword() {
         <div style={{ fontSize: 10, letterSpacing: "0.16em", color: "var(--color-accent-700)" }}>
           LEDGERMARK
         </div>
-        <h1 style={{ fontSize: 26, margin: "8px 0 16px" }}>새 비밀번호 설정</h1>
+        <h1 style={{ fontSize: 26, margin: "8px 0 16px" }}>{t("t")}</h1>
 
         <div className="field" style={{ marginBottom: 12 }}>
-          <label htmlFor="password">새 비밀번호 (10자 이상)</label>
+          <label htmlFor="password">{t("pw")}</label>
           <input
             id="password"
             className="input"
@@ -87,7 +103,7 @@ function ResetPassword() {
           />
         </div>
         <div className="field" style={{ marginBottom: 20 }}>
-          <label htmlFor="confirm">비밀번호 확인</label>
+          <label htmlFor="confirm">{t("confirm")}</label>
           <input
             id="confirm"
             className="input"
@@ -115,11 +131,11 @@ function ResetPassword() {
         )}
 
         <Button type="submit" variant="primary" block style={{ height: 44 }} disabled={loading}>
-          {loading ? "변경 중..." : "비밀번호 변경"}
+          {loading ? t("loading") : t("submit")}
         </Button>
 
         <div style={{ fontSize: 12, marginTop: 16, textAlign: "center" }}>
-          <Link href="/forgot-password">링크가 만료되었나요?</Link>
+          <Link href="/forgot-password">{t("expired")}</Link>
         </div>
       </form>
     </div>

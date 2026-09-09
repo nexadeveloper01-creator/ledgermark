@@ -5,8 +5,30 @@ import { Button } from "@/components/ui/Button";
 import { Corners } from "@/components/ui/Corners";
 import { Tag } from "@/components/ui/Tag";
 
+import { useT, type Dict } from "@/lib/i18n/web";
+
+const D: Dict = {
+  fail: { ko: "LOT 발급에 실패했습니다.", en: "Lot minting failed." },
+  minted: { ko: "LOT {code} 발급 완료 — UID {n}개 생성.", en: "Lot {code} minted — {n} UIDs created." },
+  mintTitle: { ko: "LOT 발급 (UID 일괄 MINT)", en: "Mint lot (batch UID)" },
+  lotCode: { ko: "LOT 코드", en: "Lot code" },
+  product: { ko: "제품명", en: "Product name" },
+  qty: { ko: "수량", en: "Quantity" },
+  producer: { ko: "생산 법인", en: "Producer" },
+  mint: { ko: "발급", en: "Mint" },
+  mintNote: { ko: "발급 시 각 UID가 생산 법인 소유로 MINT되고 원장에 기록됩니다. 이후 라벨 인쇄로 QR을 출력합니다.", en: "On mint, each UID is created under the producer and recorded on the ledger. Print QR labels afterward." },
+  thProduct: { ko: "제품", en: "Product" },
+  thQty: { ko: "수량", en: "Qty" },
+  thProducer: { ko: "생산 법인", en: "Producer" },
+  thMinted: { ko: "발급 시각", en: "Minted" },
+  thLabel: { ko: "라벨", en: "Label" },
+  printLabels: { ko: "QR 라벨 인쇄", en: "Print QR labels" },
+  noLots: { ko: "발급된 LOT이 없습니다.", en: "No lots minted yet." },
+};
+
 // 생산 단계: LOT을 발급(UID 일괄 MINT)하고, 각 LOT의 UID QR 라벨 시트를 인쇄한다.
 export function Production({ canMint }: { canMint: boolean }) {
+  const t = useT(D);
   const [lots, setLots] = useState<any[]>([]);
   const [orgs, setOrgs] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -47,10 +69,10 @@ export function Production({ canMint }: { canMint: boolean }) {
     });
     const body = await res.json();
     if (!res.ok) {
-      setError(body.error ?? "LOT 발급에 실패했습니다.");
+      setError(body.error ?? t("fail"));
       return;
     }
-    setMessage(`LOT ${code} 발급 완료 — UID ${body.uidCount.toLocaleString()}개 생성.`);
+    setMessage(t("minted", { code, n: body.uidCount.toLocaleString() }));
     setCode("");
     setProductName("");
     load();
@@ -65,22 +87,22 @@ export function Production({ canMint }: { canMint: boolean }) {
       {canMint && (
         <div className="blueprint" style={{ padding: 18, background: "transparent" }}>
           <Corners />
-          <div className="card-kicker">LOT 발급 (UID 일괄 MINT)</div>
+          <div className="card-kicker">{t("mintTitle")}</div>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "flex-end", marginTop: 10 }}>
             <div className="field" style={{ minWidth: 160 }}>
-              <label>LOT 코드</label>
+              <label>{t("lotCode")}</label>
               <input className="input" placeholder="PH-2610-A" value={code} onChange={(e) => setCode(e.target.value)} />
             </div>
             <div className="field" style={{ minWidth: 180 }}>
-              <label>제품명</label>
+              <label>{t("product")}</label>
               <input className="input" placeholder="Series V · Graphite" value={productName} onChange={(e) => setProductName(e.target.value)} />
             </div>
             <div className="field" style={{ width: 110 }}>
-              <label>수량</label>
+              <label>{t("qty")}</label>
               <input className="input" type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} />
             </div>
             <div className="field" style={{ minWidth: 200 }}>
-              <label>생산 법인</label>
+              <label>{t("producer")}</label>
               <select className="input" value={producerOrgId} onChange={(e) => setProducerOrgId(e.target.value)}>
                 {orgs.map((o) => (
                   <option key={o.id} value={o.id}>
@@ -90,11 +112,11 @@ export function Production({ canMint }: { canMint: boolean }) {
               </select>
             </div>
             <Button variant="primary" onClick={mint}>
-              발급
+              {t("mint")}
             </Button>
           </div>
           <div style={{ fontSize: 11, marginTop: 10 }} className="text-muted">
-            발급 시 각 UID가 생산 법인 소유로 MINT되고 원장에 기록됩니다. 이후 라벨 인쇄로 QR을 출력합니다.
+            {t("mintNote")}
           </div>
         </div>
       )}
@@ -106,11 +128,11 @@ export function Production({ canMint }: { canMint: boolean }) {
         <thead>
           <tr>
             <th>LOT</th>
-            <th>제품</th>
-            <th>수량</th>
-            <th>생산 법인</th>
-            <th>발급 시각</th>
-            <th>라벨</th>
+            <th>{t("thProduct")}</th>
+            <th>{t("thQty")}</th>
+            <th>{t("thProducer")}</th>
+            <th>{t("thMinted")}</th>
+            <th>{t("thLabel")}</th>
           </tr>
         </thead>
         <tbody>
@@ -125,7 +147,7 @@ export function Production({ canMint }: { canMint: boolean }) {
               <td style={{ fontSize: 12 }}>{new Date(l.producedAt).toLocaleString("ko-KR")}</td>
               <td>
                 <Button variant="ghost" style={{ fontSize: 12 }} onClick={() => openLabels(l.id)}>
-                  QR 라벨 인쇄
+                  {t("printLabels")}
                 </Button>
               </td>
             </tr>
@@ -133,7 +155,7 @@ export function Production({ canMint }: { canMint: boolean }) {
           {lots.length === 0 && (
             <tr>
               <td colSpan={6} className="text-muted">
-                발급된 LOT이 없습니다.
+                {t("noLots")}
               </td>
             </tr>
           )}

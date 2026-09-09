@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LEDGERMARK 접속 계정 안내</title>
+<style>
+  :root {
+    --bg: #f4f5f3;
+    --surface: #ffffff;
+    --text: #14181d;
+    --muted: #5c6577;
+    --divider: #d9dcd6;
+    --accent: #35516f;
+    --accent-strong: #21324a;
+    --accent-soft: #e7ecf1;
+    --good: #2f7d5b;
+    --mono: ui-monospace, "SFMono-Regular", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, "Malgun Gothic", sans-serif;
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {}
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0e1116;
+      --surface: #161b22;
+      --text: #e8ebf0;
+      --muted: #8a93a6;
+      --divider: #2a3038;
+      --accent: #6f97c2;
+      --accent-strong: #9fbede;
+      --accent-soft: #1b2430;
+      --good: #4fae82;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e1116;
+    --surface: #161b22;
+    --text: #e8ebf0;
+    --muted: #8a93a6;
+    --divider: #2a3038;
+    --accent: #6f97c2;
+    --accent-strong: #9fbede;
+    --accent-soft: #1b2430;
+    --good: #4fae82;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 40px 24px 64px; }
+
+  header {
+    display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--divider); padding-bottom: 16px;
+  }
+  .brand { font-size: 20px; letter-spacing: 0.14em; font-weight: 700; }
+  .badge {
+    font-size: 10px; letter-spacing: 0.16em; color: var(--accent);
+    border: 1px solid var(--divider); padding: 3px 8px;
+  }
+  h1 { font-size: 26px; margin: 26px 0 6px; letter-spacing: -0.01em; }
+  .sub { color: var(--muted); font-size: 13.5px; margin: 0 0 26px; }
+
+  /* 공통 정보 배너 */
+  .keybar {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px; margin-bottom: 30px;
+  }
+  .keycard {
+    position: relative; background: var(--surface); border: 1px solid var(--divider);
+    padding: 14px 16px;
+  }
+  .keycard .k { font-size: 10px; letter-spacing: 0.14em; color: var(--accent); text-transform: uppercase; }
+  .keycard .v { font-family: var(--mono); font-size: 15px; margin-top: 6px; word-break: break-all; display: flex; align-items: center; gap: 8px; }
+
+  .corner { position: absolute; width: 7px; height: 7px; border: 1px solid var(--accent); opacity: 0.55; }
+  .corner.tl { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+  .corner.tr { top: -1px; right: -1px; border-left: 0; border-bottom: 0; }
+  .corner.bl { bottom: -1px; left: -1px; border-right: 0; border-top: 0; }
+  .corner.br { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+
+  /* 역할 카드 */
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(390px, 1fr)); gap: 16px; }
+  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    position: relative; background: var(--surface); border: 1px solid var(--divider);
+    padding: 18px 18px 16px;
+  }
+  .card .role { font-size: 10px; letter-spacing: 0.16em; color: var(--accent); text-transform: uppercase; }
+  .card h2 { font-size: 18px; margin: 5px 0 2px; }
+  .card .screen { font-size: 12.5px; color: var(--muted); margin-bottom: 14px; }
+  .row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .row .lab { font-size: 11px; color: var(--muted); width: 58px; flex-shrink: 0; letter-spacing: 0.06em; }
+  .row .val { font-family: var(--mono); font-size: 13.5px; word-break: break-all; }
+  .pill {
+    display: inline-block; font-size: 10.5px; letter-spacing: 0.08em; padding: 2px 8px;
+    border: 1px solid var(--divider); color: var(--muted); border-radius: 2px;
+  }
+  .copy {
+    margin-left: auto; font-family: var(--sans); font-size: 11px; cursor: pointer;
+    background: var(--accent-soft); color: var(--accent-strong); border: 1px solid var(--divider);
+    padding: 3px 9px; border-radius: 3px; white-space: nowrap;
+  }
+  .copy:hover { border-color: var(--accent); }
+  .copy.done { color: var(--good); border-color: var(--good); }
+
+  .ok { color: var(--good); font-weight: 600; }
+  .notes {
+    margin-top: 30px; background: var(--surface); border: 1px solid var(--divider);
+    padding: 18px 20px; position: relative;
+  }
+  .notes h3 { font-size: 14px; margin: 0 0 10px; letter-spacing: 0.02em; }
+  .notes ul { margin: 0; padding-left: 18px; }
+  .notes li { font-size: 13px; margin: 6px 0; }
+  .notes code { font-family: var(--mono); background: var(--accent-soft); padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+  footer { margin-top: 26px; font-size: 11.5px; color: var(--muted); }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <span class="brand">LEDGERMARK</span>
+      <span class="badge">ACCESS ACCOUNTS · 접속 계정</span>
+    </header>
+
+    <h1>업무별 접속 계정 안내</h1>
+    <p class="sub">역할별 테스트 로그인 계정입니다. 로그인하면 역할에 따라 해당 화면으로 자동 이동합니다. 아래 5개 계정 모두 <span class="ok">로그인 검증 완료(200)</span>.</p>
+
+    <div class="keybar">
+      <div class="keycard">
+        <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+        <div class="k">로그인 주소 (웹)</div>
+        <div class="v">
+          <span id="loginUrl">https://app-production-daca.up.railway.app/login</span>
+          <button class="copy" data-copy="https://app-production-daca.up.railway.app/login">복사</button>
+        </div>
+      </div>
+      <div class="keycard">
+        <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+        <div class="k">공통 비밀번호 (5개 계정 동일)</div>
+        <div class="v">
+          <span>ledgermark2026!</span>
+          <button class="copy" data-copy="ledgermark2026!">복사</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <div class="notes">
+      <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+      <h3>참고</h3>
+      <ul>
+        <li><b>APK 설치</b>: <a href="https://app-production-daca.up.railway.app/download">/download</a> 페이지에서 QR 스캔 또는 다운로드</li>
+        <li><b>자판기 무인 구매 화면</b>은 로그인 불필요 (직원 POS 모드만 <code>store@ledgermark.com</code> 로그인)</li>
+        <li>처음 로그인 시 <b>“로그인 정보 저장”</b> 체크 → 다음부터 자동 로그인 (로그아웃하면 해제)</li>
+        <li>기존 데모 계정(<code>admin@ledgermark.test</code> 등, 비밀번호 <code>ledgermark1234</code>)도 그대로 사용 가능</li>
+        <li>이 계정들은 서버 부팅 시마다 자동 보장되어 재배포 후에도 항상 유효합니다.</li>
+      </ul>
+    </div>
+
+    <footer>LEDGERMARK · 파일럿/테스트 계정 시트 · 대외 공유 시 취급 주의</footer>
+  </div>
+
+<script>
+  const BASE = "https://app-production-daca.up.railway.app";
+  const ACCOUNTS = [
+    { role: "플랫폼 운영자 · ADMIN", email: "admin@ledgermark.com", screen: "운영 콘솔 /console — LOT 발급·계정·앵커링·감사", type: "웹", link: BASE + "/login?next=/console&switch=1&email=" + encodeURIComponent("admin@ledgermark.com") },
+    { role: "관세청 심사관 · GOV_INSPECTOR", email: "inspector@ledgermark.com", screen: "관세청 화면 /console — 수입 수량·납부 세금", type: "웹", link: BASE + "/login?next=/console&switch=1&email=" + encodeURIComponent("inspector@ledgermark.com") },
+    { role: "경찰 현장 단속 · FIELD_OFFICER", email: "officer@ledgermark.com", screen: "현장 단말 /field — UID 스캔 → 정품 여부만", type: "APK / 웹", link: BASE + "/login?next=/field&switch=1&email=" + encodeURIComponent("officer@ledgermark.com") },
+    { role: "소매점 직원 · PARTNER_STAFF (RETAILER)", email: "store@ledgermark.com", screen: "소매점 /partner — 판매 인증→소비자 이전=교환권 1회 · 자판기 /kiosk", type: "APK / 웹", link: BASE + "/login?next=/partner&switch=1&email=" + encodeURIComponent("store@ledgermark.com") },
+    { role: "총판 담당 · PARTNER_STAFF (DISTRIBUTOR)", email: "distributor@ledgermark.com", screen: "총판 /partner — 제품 하자·교환 건수 현황", type: "웹", link: BASE + "/login?next=/partner&switch=1&email=" + encodeURIComponent("distributor@ledgermark.com") },
+    { role: "일반 소비자 · CONSUMER", email: "consumer@ledgermark.com", screen: "소비자 앱 /app — 정품 인증·포인트·교환", type: "APK / 웹", link: BASE + "/login?next=/app&switch=1&email=" + encodeURIComponent("consumer@ledgermark.com") },
+  ];
+  const PW = "ledgermark2026!";
+
+  const grid = document.getElementById("grid");
+  for (const a of ACCOUNTS) {
+    const el = document.createElement("div");
+    el.className = "card";
+    el.innerHTML = `
+      <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+      <div class="role">${a.role}</div>
+      <h2>${a.email.split("@")[0]}<span style="color:var(--muted);font-weight:400">@ledgermark.com</span></h2>
+      <div class="screen">${a.screen}</div>
+      <div class="row"><span class="lab">이메일</span><span class="val">${a.email}</span><button class="copy" data-copy="${a.email}">복사</button></div>
+      <div class="row"><span class="lab">비밀번호</span><span class="val">${PW}</span><button class="copy" data-copy="${PW}">복사</button></div>
+      <div class="row"><span class="lab">형태</span><span class="pill">${a.type}</span></div>
+      <div class="row"><span class="lab">바로가기</span><a class="val" href="${a.link}" target="_blank" rel="noopener" style="color:var(--accent)">${a.link.replace(BASE,"").split("&")[0]}</a><button class="copy" data-copy="${a.link}">복사</button></div>
+    `;
+    grid.appendChild(el);
+  }
+
+  document.addEventListener("click", async (e) => {
+    const btn = e.target.closest(".copy");
+    if (!btn) return;
+    const text = btn.getAttribute("data-copy");
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); } catch {}
+      ta.remove();
+    }
+    const old = btn.textContent;
+    btn.textContent = "복사됨"; btn.classList.add("done");
+    setTimeout(() => { btn.textContent = old; btn.classList.remove("done"); }, 1400);
+  });
+</script>
+</body>
+</html>

@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useT, type Dict } from "@/lib/i18n/web";
+
+const SB: Dict = { "sb.logout": { ko: "로그아웃", en: "Sign out" } };
 
 export interface SessionUser {
   id: string;
@@ -10,6 +13,7 @@ export interface SessionUser {
   role: "ADMIN" | "GOV_INSPECTOR" | "FIELD_OFFICER" | "PARTNER_STAFF" | "CONSUMER";
   organizationId: string | null;
   organizationName: string | null;
+  organizationType: string | null;
   consumerId: string | null;
   isOrgManager: boolean;
   emailVerified: boolean;
@@ -35,13 +39,16 @@ export function useSession(allowedRoles?: SessionUser["role"][]) {
     fetch("/api/auth/me")
       .then((r) => (r.ok ? r.json() : { user: null }))
       .then((body: { user: SessionUser | null }) => {
+        const path = typeof window !== "undefined" ? window.location.pathname : "/";
         if (!body.user) {
           setLoading(false);
-          router.replace("/login");
+          router.replace(`/login?next=${encodeURIComponent(path)}`);
           return;
         }
         if (allowedRoles && !allowedRoles.includes(body.user.role)) {
-          router.replace(HOME_BY_ROLE[body.user.role]);
+          // 권한이 다른 화면이면 "다른 앱"으로 보내지 않는다(예: admin이 소비자 앱을 열면
+          // 콘솔로 튕기던 문제). 대신 이 화면에 맞는 계정으로 갈아탈 수 있는 전환 로그인으로 보낸다.
+          router.replace(`/login?next=${encodeURIComponent(path)}&switch=1`);
           return;
         }
         setUser(body.user);
@@ -56,9 +63,16 @@ export function useSession(allowedRoles?: SessionUser["role"][]) {
 
 export function SessionBar({ user }: { user: SessionUser | null }) {
   const router = useRouter();
+  const t = useT(SB);
 
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
+    // 명시적 로그아웃 시에는 저장된 자동 로그인 정보를 지워 계정 전환을 허용한다.
+    try {
+      window.localStorage.removeItem("lm_saved_login");
+    } catch {
+      /* localStorage 접근 불가 환경 무시 */
+    }
     router.replace("/login");
     router.refresh();
   };
@@ -67,7 +81,7 @@ export function SessionBar({ user }: { user: SessionUser | null }) {
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 12 }}>
-      <span className="text-muted">
+      <span className="text-muted" style={{ whiteSpace: "nowrap" }}>
         {user.organizationName ? `${user.organizationName} · ` : ""}
         {user.displayName}
       </span>
@@ -77,7 +91,7 @@ export function SessionBar({ user }: { user: SessionUser | null }) {
         className="btn btn-ghost"
         style={{ fontSize: 12, padding: "2px 8px" }}
       >
-        로그아웃
+        {t("sb.logout")}
       </button>
     </div>
   );

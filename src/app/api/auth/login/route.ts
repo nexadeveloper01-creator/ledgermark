@@ -97,6 +97,7 @@ export async function POST(req: NextRequest) {
       role: user.role,
       organizationId: user.organizationId,
       organizationName: null,
+      organizationType: null,
       consumerId: user.consumerId,
       isOrgManager: user.isOrgManager,
       emailVerified: user.emailVerifiedAt !== null,

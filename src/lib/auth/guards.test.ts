@@ -10,6 +10,7 @@ function user(overrides: Partial<SessionUser>): SessionUser {
     role: "PARTNER_STAFF",
     organizationId: "org-1",
     organizationName: "매장 1",
+    organizationType: "RETAILER",
     consumerId: null,
     isOrgManager: false,
     emailVerified: true,

@@ -14,9 +14,10 @@ class ApiException implements Exception {
 // LEDGERMARK REST API 클라이언트.
 // 웹과 달리 쿠키를 쓰지 않고 로그인 시 받은 세션 토큰을 Authorization: Bearer로 보낸다.
 class Api {
-  // 기본값은 로컬 Next.js 서버. 다른 호스트를 쓰려면 --dart-define=API_BASE=... 로 주입한다.
+  // 기본값은 프로덕션 서버. 로컬 개발 시에만 --dart-define=API_BASE=http://10.0.2.2:3000 등으로 주입한다.
+  // (기본값이 localhost:3000이면 실제 폰에서 자기 자신에 붙어 로그인 실패 + cleartext 차단됨)
   static const String baseUrl =
-      String.fromEnvironment('API_BASE', defaultValue: 'http://localhost:3000');
+      String.fromEnvironment('API_BASE', defaultValue: 'https://app-production-daca.up.railway.app');
 
   static const _tokenKey = 'lm_token';
   String? _token;

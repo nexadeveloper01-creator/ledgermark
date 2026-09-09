@@ -4,8 +4,20 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Corners } from "@/components/ui/Corners";
+import { useT, LangToggle, type Dict } from "@/lib/i18n/web";
+
+const D: Dict = {
+  t: { ko: "비밀번호 재설정", en: "Reset password" },
+  sub: { ko: "가입한 이메일 주소를 입력하시면 재설정 링크를 보내드립니다.", en: "Enter your account email and we'll send a reset link." },
+  email: { ko: "이메일", en: "Email" },
+  loading: { ko: "전송 중...", en: "Sending..." },
+  submit: { ko: "재설정 링크 받기", en: "Send reset link" },
+  back: { ko: "로그인으로 돌아가기", en: "Back to sign in" },
+  fail: { ko: "요청에 실패했습니다.", en: "Request failed." },
+};
 
 export default function ForgotPasswordPage() {
+  const t = useT(D);
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +38,7 @@ export default function ForgotPasswordPage() {
     setLoading(false);
 
     if (!res.ok) {
-      setError(body.error ?? "요청에 실패했습니다.");
+      setError(body.error ?? t("fail"));
       return;
     }
     setMessage(body.message);
@@ -40,16 +52,19 @@ export default function ForgotPasswordPage() {
         style={{ width: "min(420px, 100%)", padding: 28, background: "transparent" }}
       >
         <Corners />
-        <div style={{ fontSize: 10, letterSpacing: "0.16em", color: "var(--color-accent-700)" }}>
-          LEDGERMARK
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ fontSize: 10, letterSpacing: "0.16em", color: "var(--color-accent-700)" }}>
+            LEDGERMARK
+          </div>
+          <LangToggle />
         </div>
-        <h1 style={{ fontSize: 26, margin: "8px 0 6px" }}>비밀번호 재설정</h1>
+        <h1 style={{ fontSize: 26, margin: "8px 0 6px" }}>{t("t")}</h1>
         <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 20 }} className="text-muted">
-          가입한 이메일 주소를 입력하시면 재설정 링크를 보내드립니다.
+          {t("sub")}
         </p>
 
         <div className="field" style={{ marginBottom: 20 }}>
-          <label htmlFor="email">이메일</label>
+          <label htmlFor="email">{t("email")}</label>
           <input
             id="email"
             className="input"
@@ -90,11 +105,11 @@ export default function ForgotPasswordPage() {
         )}
 
         <Button type="submit" variant="primary" block style={{ height: 44 }} disabled={loading}>
-          {loading ? "전송 중..." : "재설정 링크 받기"}
+          {loading ? t("loading") : t("submit")}
         </Button>
 
         <div style={{ fontSize: 12, marginTop: 16, textAlign: "center" }}>
-          <Link href="/login">로그인으로 돌아가기</Link>
+          <Link href="/login">{t("back")}</Link>
         </div>
       </form>
     </div>

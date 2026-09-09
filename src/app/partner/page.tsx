@@ -7,36 +7,60 @@ import { Corners } from "@/components/ui/Corners";
 import { SessionBar, useSession } from "@/components/SessionBar";
 import { Accounts } from "@/components/console/Accounts";
 import { Checkout } from "@/components/partner/Checkout";
+import { ExchangeStats } from "@/components/console/ExchangeStats";
+import { useT, LangToggle, type Dict } from "@/lib/i18n/web";
 
-const TYPE_LABEL: Record<string, { en: string; ko: string; cta: string; note: string }> = {
-  RETAIL_SALE: {
-    en: "RETAIL SALE",
-    ko: "소매 판매 처리",
-    cta: "소유권 이전 / COMMIT",
-    note: "커밋 시 RETAIL_SALE 트랜잭션이 원장에 기록되고 다음 앵커링에 포함됩니다.",
-  },
-  EXCHANGE_TRANSFER: {
-    en: "EXCHANGE",
-    ko: "불량 교환 처리",
-    cta: "교환 승인 / COMMIT",
-    note: "기존 교환권은 소진되고 신규 UID는 동일 소유자에게 귀속됩니다.",
-  },
-  WHOLESALE_TRANSFER: {
-    en: "WHOLESALE",
-    ko: "총판 배분",
-    cta: "일괄 이전 / COMMIT",
-    note: "LOT 단위 배분도 UID별 소유권 이전 트랜잭션으로 원장에 기록됩니다.",
-  },
+const D: Dict = {
+  loading: { ko: "불러오는 중...", en: "Loading..." },
+  tabQueue: { ko: "소유권 이전 큐", en: "Transfer queue" },
+  tabCheckout: { ko: "매장 결제", en: "Checkout" },
+  tabStaff: { ko: "직원 관리", en: "Staff" },
+  tabExchanges: { ko: "하자·교환", en: "Defects & exchanges" },
+  landing: { ko: "랜딩", en: "Landing" },
+  orgFallback: { ko: "소속 기관", en: "Your organization" },
+  queueTitle: { ko: "소유권 이전 대기 큐", en: "Transfer queue" },
+  thRequest: { ko: "요청", en: "Request" },
+  thApplicant: { ko: "신청자", en: "Requester" },
+  thStatus: { ko: "상태", en: "Status" },
+  noRequests: { ko: "대기 중인 요청이 없습니다.", en: "No pending requests." },
+  blocked: { ko: "판매 차단", en: "Sale blocked" },
+  jProduct: { ko: "제품", en: "Product" },
+  jCurStatus: { ko: "현재 상태", en: "Current status" },
+  jPrevOwner: { ko: "이전 소유자", en: "Previous owner" },
+  jNewOwner: { ko: "신규 소유자", en: "New owner" },
+  jAge: { ko: "연령인증", en: "Age check" },
+  ageDone: { ko: "앱 인증 완료", en: "Verified in app" },
+  ageNone: { ko: "미완료", en: "Not verified" },
+  jVoucher: { ko: "교환권", en: "Voucher" },
+  voucherSpend: { ko: "소진 예정", en: "will be spent" },
+  commit: { ko: "커밋", en: "Commit" },
+  hold: { ko: "보류", en: "Hold" },
+  blockedNote: { ko: "관제 콘솔로 밀수 의심 알림이 전송되었습니다.", en: "A smuggling alert was escalated to the console." },
+  msgCommitted: { ko: "원장에 소유권 이전 트랜잭션이 기록되었습니다.", en: "Ownership transfer recorded on the ledger." },
+  msgRejected: { ko: "요청을 반려했습니다.", en: "Request rejected." },
+  ptype_RETAIL_SALE: { ko: "소매 판매 처리", en: "Retail sale" },
+  ptype_EXCHANGE_TRANSFER: { ko: "불량 교환 처리", en: "Defect exchange" },
+  ptype_WHOLESALE_TRANSFER: { ko: "총판 배분", en: "Wholesale allocation" },
+  pcta_RETAIL_SALE: { ko: "소유권 이전 / COMMIT", en: "Commit transfer" },
+  pcta_EXCHANGE_TRANSFER: { ko: "교환 승인 / COMMIT", en: "Approve exchange" },
+  pcta_WHOLESALE_TRANSFER: { ko: "일괄 이전 / COMMIT", en: "Commit batch" },
+  pnote_RETAIL_SALE: { ko: "커밋 시 RETAIL_SALE 트랜잭션이 원장에 기록되고 다음 앵커링에 포함됩니다.", en: "On commit, a RETAIL_SALE transaction is recorded and included in the next anchor." },
+  pnote_EXCHANGE_TRANSFER: { ko: "기존 교환권은 소진되고 신규 UID는 동일 소유자에게 귀속됩니다.", en: "The existing voucher is spent and a new UID is issued to the same owner." },
+  pnote_WHOLESALE_TRANSFER: { ko: "LOT 단위 배분도 UID별 소유권 이전 트랜잭션으로 원장에 기록됩니다.", en: "Batch allocation is recorded as per-UID ownership transfers." },
+  pstate_PENDING: { ko: "처리 대기", en: "Pending" },
+  pstate_COMMITTED: { ko: "이전 완료", en: "Committed" },
+  pstate_BLOCKED: { ko: "판매 차단", en: "Blocked" },
+  pstate_REJECTED: { ko: "반려됨", en: "Rejected" },
 };
 
-const STATE_LABEL: Record<string, string> = {
-  PENDING: "처리 대기",
-  COMMITTED: "이전 완료",
-  BLOCKED: "판매 차단",
-  REJECTED: "반려됨",
+const TYPE_EN: Record<string, string> = {
+  RETAIL_SALE: "RETAIL SALE",
+  EXCHANGE_TRANSFER: "EXCHANGE",
+  WHOLESALE_TRANSFER: "WHOLESALE",
 };
 
 export default function PartnerPage() {
+  const t = useT(D);
   const { user, loading } = useSession(["PARTNER_STAFF", "ADMIN"]);
   const [tab, setTab] = useState<"queue" | "checkout" | "staff">("queue");
   const [requests, setRequests] = useState<any[]>([]);
@@ -61,8 +85,79 @@ export default function PartnerPage() {
   if (loading || !user) {
     return (
       <p className="text-muted" style={{ padding: 32 }}>
-        불러오는 중...
+        {t("loading")}
       </p>
+    );
+  }
+
+  // 총판(코니아랩 제품 독점판매 유통사)은 하자·교환 현황을 본다. 소매점과 화면이 다르다.
+  if (user.organizationType === "DISTRIBUTOR") {
+    return (
+      <div style={{ minHeight: "100vh" }}>
+        <div
+          className="nav"
+          style={{ borderBottom: "1px solid var(--color-divider)", padding: "0 32px", height: 64, gap: 18 }}
+        >
+          <span className="nav-brand" style={{ fontSize: 17, letterSpacing: "0.12em" }}>
+            LEDGERMARK
+          </span>
+          <span
+            style={{
+              fontSize: 11,
+              letterSpacing: "0.14em",
+              color: "var(--color-accent-700)",
+              border: "1px solid var(--color-divider)",
+              padding: "2px 8px",
+            }}
+          >
+            DISTRIBUTOR · 총판
+          </span>
+          <div className="seg" style={{ marginLeft: 12 }}>
+            <label className="seg-opt">
+              <input
+                type="radio"
+                name="dist-tab"
+                checked={tab !== "staff"}
+                onChange={() => setTab("queue")}
+              />
+              {t("tabExchanges")}
+            </label>
+            {user.isOrgManager && (
+              <label className="seg-opt">
+                <input
+                  type="radio"
+                  name="dist-tab"
+                  checked={tab === "staff"}
+                  onChange={() => setTab("staff")}
+                />
+                {t("tabStaff")}
+              </label>
+            )}
+          </div>
+          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+            <LangToggle />
+            <SessionBar user={user} />
+            <Link href="/" style={{ fontSize: 13 }}>
+              {t("landing")}
+            </Link>
+          </div>
+        </div>
+
+        <div style={{ padding: 32, maxWidth: 1200, margin: "0 auto" }}>
+          {tab === "staff" && user.isOrgManager && user.organizationId ? (
+            <Accounts
+              currentUserId={user.id}
+              scoped={{
+                role: user.role,
+                organizationId: user.organizationId,
+                organizationName: user.organizationName ?? t("orgFallback"),
+              }}
+            />
+          ) : (
+            <ExchangeStats />
+          )}
+        </div>
+      </div>
     );
   }
 
@@ -76,7 +171,7 @@ export default function PartnerPage() {
       setError(body.error);
       return;
     }
-    setMessage("원장에 소유권 이전 트랜잭션이 기록되었습니다.");
+    setMessage(t("msgCommitted"));
     load();
   };
 
@@ -85,7 +180,7 @@ export default function PartnerPage() {
     setError(null);
     setMessage(null);
     await fetch(`/api/requests/${selected.id}/reject`, { method: "POST" });
-    setMessage("요청을 반려했습니다.");
+    setMessage(t("msgRejected"));
     load();
   };
 
@@ -107,7 +202,7 @@ export default function PartnerPage() {
             padding: "2px 8px",
           }}
         >
-          DISTRIBUTOR · RETAIL
+          RETAIL · 소매점
         </span>
         <div className="seg" style={{ marginLeft: 12 }}>
           <label className="seg-opt">
@@ -117,7 +212,7 @@ export default function PartnerPage() {
               checked={tab === "queue"}
               onChange={() => setTab("queue")}
             />
-            소유권 이전 큐
+            {t("tabQueue")}
           </label>
           <label className="seg-opt">
             <input
@@ -126,7 +221,7 @@ export default function PartnerPage() {
               checked={tab === "checkout"}
               onChange={() => setTab("checkout")}
             />
-            매장 결제
+            {t("tabCheckout")}
           </label>
           {user.isOrgManager && (
             <label className="seg-opt">
@@ -136,18 +231,20 @@ export default function PartnerPage() {
                 checked={tab === "staff"}
                 onChange={() => setTab("staff")}
               />
-              직원 관리
+              {t("tabStaff")}
             </label>
           )}
         </div>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+          <LangToggle />
           <SessionBar user={user} />
           <Link href="/" style={{ fontSize: 13 }}>
-            랜딩
+            {t("landing")}
           </Link>
         </div>
       </div>
 
+      {/* 소매점 화면: 판매 인증 → 소비자 이전 = 교환권 1회 부여 흐름 */}
       {tab === "staff" && user.isOrgManager && user.organizationId && (
         <div style={{ padding: 32, maxWidth: 1200, margin: "0 auto" }}>
           <Accounts
@@ -155,7 +252,7 @@ export default function PartnerPage() {
             scoped={{
               role: user.role,
               organizationId: user.organizationId,
-              organizationName: user.organizationName ?? "소속 기관",
+              organizationName: user.organizationName ?? t("orgFallback"),
             }}
           />
         </div>
@@ -180,7 +277,7 @@ export default function PartnerPage() {
       >
         <div>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14 }}>
-            <h3 style={{ margin: 0, fontSize: 17 }}>소유권 이전 대기 큐</h3>
+            <h3 style={{ margin: 0, fontSize: 17 }}>{t("queueTitle")}</h3>
             <span style={{ fontSize: 10, letterSpacing: "0.14em" }} className="text-muted">
               TRANSFER QUEUE
             </span>
@@ -190,9 +287,9 @@ export default function PartnerPage() {
             <thead>
               <tr>
                 <th>UID</th>
-                <th>요청 / REQUEST</th>
-                <th>신청자</th>
-                <th>상태</th>
+                <th>{t("thRequest")}</th>
+                <th>{t("thApplicant")}</th>
+                <th>{t("thStatus")}</th>
               </tr>
             </thead>
             <tbody>
@@ -215,7 +312,7 @@ export default function PartnerPage() {
                   <td style={{ fontSize: 12 }}>{r.requestedConsumer?.displayName ?? r.toOrg?.name ?? "—"}</td>
                   <td>
                     <span className="tag tag-outline" style={{ fontSize: 10, whiteSpace: "nowrap" }}>
-                      {STATE_LABEL[r.status] ?? r.status}
+                      {t(`pstate_${r.status}`)}
                     </span>
                   </td>
                 </tr>
@@ -223,7 +320,7 @@ export default function PartnerPage() {
               {requests.length === 0 && (
                 <tr>
                   <td colSpan={4} className="text-muted">
-                    대기 중인 요청이 없습니다.
+                    {t("noRequests")}
                   </td>
                 </tr>
               )}
@@ -235,10 +332,10 @@ export default function PartnerPage() {
           <div className="blueprint" style={{ padding: 22, background: "transparent" }}>
             <Corners />
             <div className="card-kicker">
-              {selected.status === "BLOCKED" ? "BLOCKED" : TYPE_LABEL[selected.type]?.en}
+              {selected.status === "BLOCKED" ? "BLOCKED" : TYPE_EN[selected.type]}
             </div>
             <h3 style={{ fontSize: 21, margin: "5px 0 4px" }}>
-              {selected.status === "BLOCKED" ? "판매 차단" : TYPE_LABEL[selected.type]?.ko}
+              {selected.status === "BLOCKED" ? t("blocked") : t(`ptype_${selected.type}`)}
             </h3>
             <div
               style={{
@@ -252,18 +349,18 @@ export default function PartnerPage() {
               {selected.uid.code}
             </div>
 
-            <JobRow k="제품" v={selected.uid.lot?.productName ?? "—"} />
-            <JobRow k="현재 상태" v={selected.uid.status} />
-            <JobRow k="이전 소유자" v={selected.fromOrg?.name ?? "—"} />
+            <JobRow k={t("jProduct")} v={selected.uid.lot?.productName ?? "—"} />
+            <JobRow k={t("jCurStatus")} v={selected.uid.status} />
+            <JobRow k={t("jPrevOwner")} v={selected.fromOrg?.name ?? "—"} />
             <JobRow
-              k="신규 소유자"
+              k={t("jNewOwner")}
               v={selected.requestedConsumer?.displayName ?? selected.toOrg?.name ?? "—"}
             />
             {selected.type === "RETAIL_SALE" && (
-              <JobRow k="연령인증" v={selected.ageVerified ? "앱 인증 완료" : "미완료"} />
+              <JobRow k={t("jAge")} v={selected.ageVerified ? t("ageDone") : t("ageNone")} />
             )}
             {selected.type === "EXCHANGE_TRANSFER" && (
-              <JobRow k="교환권" v={`${selected.uid.voucherState} · 소진 예정`} />
+              <JobRow k={t("jVoucher")} v={`${selected.uid.voucherState} · ${t("voucherSpend")}`} />
             )}
 
             <div style={{ display: "flex", gap: 10, marginTop: 22 }}>
@@ -275,7 +372,7 @@ export default function PartnerPage() {
                 onClick={commit}
               >
                 <Corners />
-                {TYPE_LABEL[selected.type]?.cta ?? "커밋"}
+                {selected.type ? t(`pcta_${selected.type}`) : t("commit")}
               </Button>
               <Button
                 variant="secondary"
@@ -283,7 +380,7 @@ export default function PartnerPage() {
                 disabled={selected.status !== "PENDING"}
                 onClick={reject}
               >
-                보류
+                {t("hold")}
               </Button>
             </div>
 
@@ -299,7 +396,7 @@ export default function PartnerPage() {
                   marginTop: 14,
                 }}
               >
-                {selected.blockedReason} 관제 콘솔로 밀수 의심 알림이 전송되었습니다.
+                {selected.blockedReason} {t("blockedNote")}
               </div>
             )}
 
@@ -307,7 +404,7 @@ export default function PartnerPage() {
             {message && <p style={{ fontSize: 12, marginTop: 14 }}>{message}</p>}
 
             <div style={{ fontSize: 12, lineHeight: 1.55, marginTop: 14 }} className="text-muted">
-              {TYPE_LABEL[selected.type]?.note}
+              {selected.type ? t(`pnote_${selected.type}`) : ""}
             </div>
           </div>
         )}

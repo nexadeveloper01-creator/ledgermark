@@ -24,3 +24,49 @@ a:hover {
     opacity: 0.25;
   }
 }
+
+/* ── 반응형: 노트북·태블릿·아이패드 최적화 ────────────────────────────
+   디자인 시스템에는 미디어 쿼리가 없어 좁은 폭에서 상단 네비게이션이 넘쳐
+   탭이 잘리고 세션 이름이 여러 줄로 깨졌다. 여기서 앱 레벨로 보정한다.
+
+   아이패드는 세로(768~1024)·가로(1024~1366) 폭이 제각각이라 특정
+   브레이크포인트로 잡기보다, 상단 바가 "어떤 폭에서도" 넘치지 않고
+   자연스럽게 줄바꿈되도록 만든다. 각 화면이 인라인으로 height:64를
+   고정하므로 !important로 덮어써 높이 자동 + 줄바꿈을 허용한다.
+   데스크톱(넓은 폭)에서는 한 줄에 다 들어가 줄바꿈이 일어나지 않으므로
+   min-height:64로 기존 모습과 동일하게 유지된다. */
+.nav {
+  height: auto !important;
+  min-height: 64px;
+  flex-wrap: wrap;
+  row-gap: 10px;
+}
+
+/* 아이패드 가로까지 포함(≤1366px): 좌우 여백을 줄여 콘텐츠 폭을 확보하고
+   줄바꿈된 상단 바에 상하 여백을 준다. */
+@media (max-width: 1366px) {
+  .nav {
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    gap: 14px;
+  }
+}
+
+/* 아이패드 전체(세로·가로) 및 소형 노트북(≤1200px):
+   콘솔 모듈 세그먼트는 가로 스크롤로 한 줄 유지, 넓은 표는 컨테이너 안에서
+   가로 스크롤(본문 자체가 옆으로 밀리지 않도록). */
+@media (max-width: 1200px) {
+  .seg {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+}

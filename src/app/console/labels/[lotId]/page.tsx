@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import QRCode from "qrcode";
 import { useSession } from "@/components/SessionBar";
 import { Button } from "@/components/ui/Button";
+import { useT, type Dict } from "@/lib/i18n/web";
 
 // 인쇄용 QR 라벨 시트. 콘솔 크롬 없이 라벨만 렌더링해 브라우저 인쇄로 출력한다.
 // QR에는 UID 코드 문자열을 그대로 담아 Flutter 스캐너가 바로 조회할 수 있게 한다.
@@ -13,7 +14,21 @@ interface Label {
   dataUrl: string;
 }
 
+const D: Dict = {
+  loadFail: { ko: "라벨 데이터를 불러오지 못했습니다.", en: "Failed to load label data." },
+  loading: { ko: "불러오는 중...", en: "Loading..." },
+  labels: { ko: "라벨", en: "labels" },
+  close: { ko: "닫기", en: "Close" },
+  print: { ko: "인쇄 / PRINT", en: "Print" },
+  building: { ko: "QR 라벨 생성 중...", en: "Generating QR labels..." },
+  partial: {
+    ko: "이 LOT은 {total}개 UID 중 처음 {shown}개만 표시됩니다. 나머지는 `?skip=` 파라미터로 이어서 인쇄하세요.",
+    en: "This LOT shows only the first {shown} of {total} UIDs. Print the rest by continuing with the `?skip=` parameter.",
+  },
+};
+
 export default function LabelSheetPage() {
+  const t = useT(D);
   const { user, loading } = useSession(["ADMIN", "GOV_INSPECTOR"]);
   const lotId = useParams().lotId as string;
 
@@ -29,7 +44,7 @@ export default function LabelSheetPage() {
     const res = await fetch(`/api/lots/${lotId}/uids`);
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      setError(body.error ?? "라벨 데이터를 불러오지 못했습니다.");
+      setError(body.error ?? t("loadFail"));
       setBuilding(false);
       return;
     }
@@ -52,7 +67,7 @@ export default function LabelSheetPage() {
   }, [user, load]);
 
   if (loading || !user) {
-    return <p style={{ padding: 32, color: "var(--color-neutral-600)" }}>불러오는 중...</p>;
+    return <p style={{ padding: 32, color: "var(--color-neutral-600)" }}>{t("loading")}</p>;
   }
 
   return (
@@ -85,28 +100,27 @@ export default function LabelSheetPage() {
             LOT {lot.code} · {lot.productName}
             {meta && (
               <span style={{ color: "var(--color-neutral-600)", marginLeft: 8 }}>
-                {meta.shown.toLocaleString()} / {meta.total.toLocaleString()} 라벨
+                {meta.shown.toLocaleString()} / {meta.total.toLocaleString()} {t("labels")}
               </span>
             )}
           </span>
         )}
         <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
           <Button variant="secondary" onClick={() => window.close()}>
-            닫기
+            {t("close")}
           </Button>
           <Button variant="primary" onClick={() => window.print()} disabled={building || labels.length === 0}>
-            인쇄 / PRINT
+            {t("print")}
           </Button>
         </div>
       </div>
 
       {error && <p style={{ padding: 24, color: "var(--color-accent-700)" }}>{error}</p>}
-      {building && <p style={{ padding: 24, color: "var(--color-neutral-600)" }}>QR 라벨 생성 중...</p>}
+      {building && <p style={{ padding: 24, color: "var(--color-neutral-600)" }}>{t("building")}</p>}
 
       {meta && meta.total > meta.shown && !building && (
         <p className="no-print" style={{ padding: "12px 24px 0", fontSize: 12, color: "var(--color-neutral-600)" }}>
-          이 LOT은 {meta.total.toLocaleString()}개 UID 중 처음 {meta.shown.toLocaleString()}개만
-          표시됩니다. 나머지는 `?skip=` 파라미터로 이어서 인쇄하세요.
+          {t("partial", { total: meta.total.toLocaleString(), shown: meta.shown.toLocaleString() })}
         </p>
       )}
 
