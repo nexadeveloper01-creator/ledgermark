@@ -18,7 +18,7 @@ const D: Dict = {
   appConsumerD: { ko: "QR 정품 인증 · 등록 · 포인트/쿠폰 · 무상 교환", en: "QR authentication · registration · points/coupons · free exchange" },
   appKioskT: { ko: "매장 자판기 단말", en: "Store vending terminal" },
   appKioskD: { ko: "무인 셀프 구매(정품·연령 확인) + 직원 POS(쿠폰 QR 스캔·결제)", en: "Unmanned self-purchase (authenticity + age check) + staff POS (coupon QR scan · payment)" },
-  appKioskLogin: { ko: "직원 모드: staff@mm014.test", en: "Staff mode: staff@mm014.test" },
+  appKioskLogin: { ko: "직원 모드: store@ledgermark.com / ledgermark2026!", en: "Staff mode: store@ledgermark.com / ledgermark2026!" },
   appFieldT: { ko: "경찰 현장 단말", en: "Police field terminal" },
   appFieldD: { ko: "현장 UID 조회 · 압수 근거 판정 · 조서 발행", en: "On-site UID lookup · seizure verdict · report issuance" },
   webBocT: { ko: "관세청 · DTI 콘솔", en: "Customs · DTI console" },
@@ -94,7 +94,7 @@ export function DownloadClient({
             desc={t("appConsumerD")}
             apk="/download/ledgermark-consumer.apk"
             qrSvg={qConsumer}
-            login="ramon@demo.ph / ledgermark1234"
+            login="consumer@ledgermark.com / ledgermark2026!"
             t={t}
           />
           <AppCard
@@ -110,7 +110,7 @@ export function DownloadClient({
             desc={t("appFieldD")}
             apk="/download/ledgermark-field.apk"
             qrSvg={qField}
-            login="officer@pnp.test / ledgermark1234"
+            login="officer@ledgermark.com / ledgermark2026!"
             t={t}
           />
         </div>
@@ -122,7 +122,7 @@ export function DownloadClient({
             desc={t("webBocD")}
             href="/console"
             qrSvg={qConsole}
-            login="inspector@boc.test / ledgermark1234"
+            login="inspector@ledgermark.com / ledgermark2026!"
             t={t}
           />
           <WebCard
@@ -130,7 +130,7 @@ export function DownloadClient({
             desc={t("webAdminD")}
             href="/console"
             qrSvg={qConsole}
-            login="admin@ledgermark.test / ledgermark1234"
+            login="admin@ledgermark.com / ledgermark2026!"
             t={t}
           />
         </div>
