@@ -117,10 +117,10 @@
   <header class="top">
     <p class="eyebrow">Investor Demo · Run Sheet</p>
     <h1>LEDGERMARK 10-Minute Demo Run Sheet</h1>
-    <p class="lede">An anti-counterfeit distribution platform that tracks every product from factory to consumer with a single UID. A presenter run sheet for walking six role surfaces live on the production server. (Market size, rights and business case are covered in the separate IR deck — this platform shows only the actual distribution management.)</p>
+    <p class="lede">An anti-counterfeit distribution platform that tracks every product from factory to consumer with a single UID. The app consumers hold is <b>ConiaMark</b>; the ledger and control platform behind it is LEDGERMARK. A presenter run sheet for walking six role surfaces live on the production server. (Market size, rights and business case are covered in the separate IR deck — this platform shows only the actual distribution management.)</p>
     <div class="meta">
       <span class="m"><b>10:00 total</b> · 7 stages</span>
-      <span class="m">6 roles · consumer · vending · store · distributor · police · customs/ops</span>
+      <span class="m">6 roles · consumer · store · distributor · police · customs · ops</span>
       <span class="m">Env <b>live cloud</b> · stock <b>300</b></span>
       <span class="m">Shared password <b>ledgermark2026!</b></span>
     </div>
@@ -188,9 +188,9 @@
       <article class="seg">
         <div class="seg-time"><span class="t">01:00</span><span class="to">↓ 03:00</span><span class="dur">2 min</span></div>
         <div class="seg-body">
-          <div class="seg-head"><span class="num">02</span><h3>Consumer app — verify authenticity &amp; register</h3><span class="chip star">Highlight</span></div>
-          <div class="surface"><span><span class="k">Screen</span> <span class="v">Consumer app /app</span></span><span><span class="k">Phone</span> <span class="v">consumer@</span></span></div>
-          <p class="say">"The consumer scans the product UID in the app to instantly confirm it's genuine and register it. A Conia Lab UID in the ledger is genuine; registering transfers ownership and earns points."</p>
+          <div class="seg-head"><span class="num">02</span><h3>ConiaMark consumer app — verify authenticity &amp; register</h3><span class="chip star">Highlight</span></div>
+          <div class="surface"><span><span class="k">Screen</span> <span class="v">ConiaMark /app</span></span><span><span class="k">Phone</span> <span class="v">consumer@</span></span></div>
+          <p class="say">"What the consumer holds is a single app — <b>ConiaMark</b>. Scan the product UID and it confirms authenticity instantly, then registers it on the spot. A Conia Lab UID in the ledger is genuine; the moment it's registered, ownership moves to the consumer and points are earned."</p>
           <ol class="steps">
             <li>App: <span class="kbd">Scan UID</span> <span class="mono">PH-2026-DEMO-000001</span> → "Ledger match · genuine"</li>
             <li>Register → new device appears in Products · points earned</li>
@@ -204,8 +204,8 @@
         <div class="seg-time"><span class="t">03:00</span><span class="to">↓ 04:30</span><span class="dur">1.5 min</span></div>
         <div class="seg-body">
           <div class="seg-head"><span class="num">03</span><h3>Consent-based data · points win-win</h3></div>
-          <div class="surface"><span><span class="k">Screen</span> <span class="v">App · Rewards</span></span><span><span class="k">Account</span> <span class="v">consumer@</span></span></div>
-          <p class="say">"Users consent to data use and get points in return. They earn more via surveys and weekly check-ins, then convert points into discount coupons and prizes. The company gets consented data; the user gets cash-like value."</p>
+          <div class="surface"><span><span class="k">Screen</span> <span class="v">ConiaMark · Rewards</span></span><span><span class="k">Account</span> <span class="v">consumer@</span></span></div>
+          <p class="say">"This is where ConiaMark parts ways with a plain authentication app. Users consent to data use and <b>get points in return.</b> They earn more via surveys and weekly check-ins, and those points convert into discount coupons and prizes. The company gets consented data; the user gets cash-like value."</p>
           <ol class="steps">
             <li>Rewards card: show <b>consent points · coupons held · discount total</b></li>
             <li>Optionally answer one survey to bump points live</li>
@@ -220,7 +220,7 @@
         <div class="seg-body">
           <div class="seg-head"><span class="num">04</span><h3>Retail store — sale authentication + coupon QR</h3><span class="chip star">Highlight</span></div>
           <div class="surface"><span><span class="k">Screen</span> <span class="v">/partner · Retail (RETAILER)</span></span><span><span class="k">Account</span> <span class="v">store@</span></span></div>
-          <p class="say">"The store authenticates the sale — ownership transfers to the consumer and one free exchange voucher is issued. Then the point-earned coupon is redeemed at checkout via QR."</p>
+          <p class="say">"When the store authenticates the sale, two things happen at once. <b>Ownership transfers</b> to the consumer, and one <b>free exchange voucher — valid 3 months</b> — is issued. Then the coupon you just saw in the app is redeemed at checkout via QR: this is where points come back as store revenue."</p>
           <ol class="steps">
             <li>Retail: in the transfer queue, <b>commit the sale (RETAIL_SALE)</b> → consumer ownership + <b>1 exchange voucher (valid 3 months)</b></li>
             <li>Checkout: enter price → scan app coupon <span class="kbd">QR</span> → preview discount → <span class="kbd">Confirm payment</span></li>
@@ -235,7 +235,7 @@
         <div class="seg-body">
           <div class="seg-head"><span class="num">05</span><h3>Trust tech — fake vs genuine · ledger integrity</h3><span class="chip trust">Differentiator</span></div>
           <div class="surface"><span><span class="k">Screen</span> <span class="v">/field · /console</span></span><span><span class="k">Account</span> <span class="v">officer@ · admin@</span></span></div>
-          <p class="say">"The police field terminal scans a UID and shows <b>only genuine-or-not</b>. If it's a Conia Lab UID in the ledger it's genuine; if not, it's counterfeit. The ledger is a hash chain — even we can't tamper with it."</p>
+          <p class="say">"The police field terminal scans a UID and shows <b>only genuine-or-not</b> — in the field that is the one thing that matters. If it's a Conia Lab UID in the ledger it's genuine; if not, it's counterfeit. And the ledger is a hash chain, which means <b>not even we can go back and change it.</b>"</p>
           <ol class="steps">
             <li>Police <span class="kbd">/field</span>: scan a genuine code → <b>✓ GENUINE</b></li>
             <li>Scan an arbitrary off-ledger code → <b>✕ COUNTERFEIT</b> instantly</li>
@@ -271,7 +271,7 @@
             <li>Next integrations: payment PG · age verification (AVP) · public-chain anchoring · customs</li>
             <li>Ask: pilot scale · investment · expansion roadmap</li>
           </ol>
-          <div class="point trust"><span class="lab">Close</span><span>"Six roles, one ledger — you can scan it right now." Point to the download QR to install on the spot.</span></div>
+          <div class="point trust"><span class="lab">Close</span><span>"Six roles, one ledger — you can scan it right now. ConiaMark installs on your phone today." Point to the download QR to install on the spot.</span></div>
         </div>
       </article>
 
@@ -297,7 +297,8 @@
       </div>
       <div class="links">
         <a href="https://app-production-daca.up.railway.app/download"><span>Role builds · download hub</span><span class="path">/download</span></a>
-        <a href="https://app-production-daca.up.railway.app/app"><span>Consumer app · verify &amp; register</span><span class="path">/app</span></a>
+        <a href="https://app-production-daca.up.railway.app/download/coniamark-setup.html"><span>Device setup sheet · install QR &amp; prep</span><span class="path">/download/coniamark-setup.html</span></a>
+        <a href="https://app-production-daca.up.railway.app/app"><span>ConiaMark consumer app · verify &amp; register</span><span class="path">/app</span></a>
         <a href="https://app-production-daca.up.railway.app/console"><span>Ops console · Customs (imports·tax)</span><span class="path">/console</span></a>
         <a href="https://app-production-daca.up.railway.app/partner"><span>Retail checkout · Distributor defects</span><span class="path">/partner</span></a>
         <a href="https://app-production-daca.up.railway.app/field"><span>Police field authenticity</span><span class="path">/field</span></a>
