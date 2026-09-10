@@ -29,6 +29,8 @@ const D: Dict = {
   docRunsheetD: { ko: "7단계 진행표 · 멘트 · 클릭 순서 · 계정 (리허설·준비용)", en: "7-step schedule · script · click order · accounts (for rehearsal/prep)" },
   docCheatT: { ko: "시연 치트시트 (1장)", en: "Demo cheat sheet (1 page)" },
   docCheatD: { ko: "시간·핵심 클릭·킬러 멘트 한눈 요약 (발표 당일용)", en: "Timing, key clicks, and killer lines at a glance (for presentation day)" },
+  docSetupT: { ko: "기기 세팅 시트", en: "Device setup sheet" },
+  docSetupD: { ko: "역할별 APK 설치 QR · 콘솔 주소 · 설치 전 준비 · 세팅 후 확인 목록", en: "Per-role APK install QR, console address, pre-install steps, post-setup checklist" },
   acctSection: { ko: "접속 계정", en: "Access accounts" },
   acctT: { ko: "업무별 접속 계정 안내", en: "Access accounts by role" },
   acctD: { ko: "역할별 로그인 이메일·공통 비밀번호·이동 화면 (이메일/비번 복사 버튼 포함)", en: "Login email, shared password, and destination screen per role (with copy buttons)" },
@@ -176,6 +178,21 @@ export function DownloadClient({
               {" · "}
               <a href="/download/demo-cheatsheet-en.html" download>Download</a>
             </p>
+          </div>
+          <div className="blueprint" style={{ padding: 18, background: "transparent" }}>
+            <div className="card-kicker">DOC</div>
+            <h3 style={{ fontSize: 16, margin: "4px 0 6px" }}>{t("docSetupT")}</h3>
+            <p className="text-muted" style={{ fontSize: 12.5, lineHeight: 1.55, margin: "0 0 12px" }}>
+              {t("docSetupD")}
+            </p>
+            <div style={{ display: "flex", gap: 8 }}>
+              <a href="/download/coniamark-setup.html" target="_blank" className="btn btn-secondary" style={{ height: 38, display: "inline-flex", alignItems: "center", padding: "0 14px", fontSize: 13 }}>
+                {t("open")}
+              </a>
+              <a href="/download/coniamark-setup.html" download className="btn btn-primary" style={{ height: 38, display: "inline-flex", alignItems: "center", padding: "0 14px", fontSize: 13 }}>
+                {t("download")}
+              </a>
+            </div>
           </div>
         </div>
 
