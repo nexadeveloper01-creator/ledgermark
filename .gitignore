@@ -11,3 +11,6 @@ coverage
 .pgdata
 tsconfig.tsbuildinfo
 next-env.d.ts
+
+# APK는 저장소에 두지 않고 GitHub Releases에서 배포한다(next.config.mjs 리다이렉트 참고)
+*.apk
