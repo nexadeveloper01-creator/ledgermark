@@ -228,6 +228,8 @@
         <ul>
           <li>데모 재고 300개 정상 <span class="mono">PH-2026-DEMO-000001~300</span></li>
           <li>정품 UID <span class="mono">PH-2026-DEMO-000001</span></li>
+          <li>소매 판매 큐 <b>대기 3건 미리 준비</b> <span class="mono">PH-2026-STORE-000001~3</span> (store@ 로그인 시 바로 보임)</li>
+          <li>블록체인 앵커 1건 게시됨(콘솔 원장 상태 → 앵커링 이력)</li>
           <li>위조 시연용 미등록 코드(임의)</li>
           <li>네트워크·화면 밝기</li>
         </ul>
@@ -299,7 +301,7 @@
           <div class="surface"><span><span class="k">화면</span> <span class="v">/partner · 소매점(RETAILER)</span></span><span><span class="k">계정</span> <span class="v">store@</span></span></div>
           <p class="say">"소매점이 판매를 인증하면 두 가지가 동시에 일어납니다. 소비자에게 <b>소유권이 이전되고</b>, 3개월짜리 <b>무상 교환권 1회</b>가 발급됩니다. 그리고 방금 앱에서 보신 할인 쿠폰이 실제 결제에서 QR로 차감됩니다 — 포인트가 매장 매출로 돌아오는 지점입니다."</p>
           <ol class="steps">
-            <li>소매점: 소유권 이전 큐에서 <b>판매 인증(RETAIL_SALE) 커밋</b> → 소비자 소유권 이전 + <b>교환권 1회(3개월 유효)</b> 발급</li>
+            <li>소매점: 소유권 이전 큐에 <b>대기 요청 3건</b>(Maria/Juan/Andrea · <span class="mono">PH-2026-STORE-000001~3</span>)이 미리 있음 → 하나를 <b>판매 인증(RETAIL_SALE) 커밋</b> → 소비자 소유권 이전 + <b>교환권 1회(3개월 유효)</b> 발급</li>
             <li>매장 결제: 정가 입력 → 앱 쿠폰 <span class="kbd">QR 스캔</span> → 할인 미리보기 → <span class="kbd">결제 확정</span></li>
             <li>영수증: 정가 → 할인 → 결제액, 쿠폰은 <b>사용 완료</b>로 차감(재사용 불가)</li>
           </ol>

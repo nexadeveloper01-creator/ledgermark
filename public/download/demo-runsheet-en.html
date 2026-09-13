@@ -151,6 +151,8 @@
         <ul>
           <li>Demo stock 300 OK <span class="mono">PH-2026-DEMO-000001~300</span></li>
           <li>Genuine UID <span class="mono">PH-2026-DEMO-000001</span></li>
+          <li>Retail sale queue <b>pre-seeded with 3 pending</b> <span class="mono">PH-2026-STORE-000001~3</span> (visible right after store@ login)</li>
+          <li>One blockchain anchor published (Console → Ledger status → anchor history)</li>
           <li>An off-ledger (arbitrary) code for the fake test</li>
           <li>Network · screen brightness</li>
         </ul>
@@ -222,7 +224,7 @@
           <div class="surface"><span><span class="k">Screen</span> <span class="v">/partner · Retail (RETAILER)</span></span><span><span class="k">Account</span> <span class="v">store@</span></span></div>
           <p class="say">"When the store authenticates the sale, two things happen at once. <b>Ownership transfers</b> to the consumer, and one <b>free exchange voucher — valid 3 months</b> — is issued. Then the coupon you just saw in the app is redeemed at checkout via QR: this is where points come back as store revenue."</p>
           <ol class="steps">
-            <li>Retail: in the transfer queue, <b>commit the sale (RETAIL_SALE)</b> → consumer ownership + <b>1 exchange voucher (valid 3 months)</b></li>
+            <li>Retail: the transfer queue already holds <b>3 pending requests</b> (Maria/Juan/Andrea · <span class="mono">PH-2026-STORE-000001~3</span>) → <b>commit one sale (RETAIL_SALE)</b> → consumer ownership + <b>1 exchange voucher (valid 3 months)</b></li>
             <li>Checkout: enter price → scan app coupon <span class="kbd">QR</span> → preview discount → <span class="kbd">Confirm payment</span></li>
             <li>Receipt: price → discount → total, coupon marked <b>Used</b> (no reuse)</li>
           </ol>
