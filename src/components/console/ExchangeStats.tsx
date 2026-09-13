@@ -12,17 +12,17 @@ interface ExchangeData {
 }
 
 const D: Dict = {
-  loading: { ko: "하자·교환 집계 중...", en: "Aggregating defects & exchanges..." },
-  title: { ko: "하자·교환 현황", en: "Defect & exchange status" },
-  sub: { ko: "코니아랩 제품을 독점 판매하는 총판이 제품의 불량/색상 교환(하자) 건수를 확인합니다. 교환 1건 = 하자 1건입니다.", en: "The exclusive distributor of Conia Lab's products tracks defect/color exchange counts. One exchange = one defect." },
-  totalExchanges: { ko: "총 교환(하자) 건수", en: "Total exchanges (defects)" },
-  rate: { ko: "발급 UID 대비 하자율", en: "Defect rate vs issued UIDs" },
-  byProduct: { ko: "제품별 하자·교환 건수", en: "Exchanges by product" },
-  product: { ko: "제품", en: "Product" },
-  count: { ko: "교환(하자) 건수", en: "Exchanges (defects)" },
-  none: { ko: "아직 교환(하자) 이력이 없습니다.", en: "No exchanges (defects) yet." },
-  recent: { ko: "최근 교환 이력", en: "Recent exchanges" },
-  when: { ko: "일시", en: "When" },
+  loading: { ko: "하자·교환 집계 중...", en: "Aggregating defects & exchanges...", fil: "Kinukuwenta ang depekto at palitan..." },
+  title: { ko: "하자·교환 현황", en: "Defect & exchange status", fil: "Katayuan ng depekto at palitan" },
+  sub: { ko: "코니아랩 제품을 독점 판매하는 총판이 제품의 불량/색상 교환(하자) 건수를 확인합니다. 교환 1건 = 하자 1건입니다.", en: "The exclusive distributor of Conia Lab's products tracks defect/color exchange counts. One exchange = one defect.", fil: "Sinusubaybayan ng eksklusibong distributor ng Conia Lab ang bilang ng palitan dahil sa depekto/kulay. Isang palitan = isang depekto." },
+  totalExchanges: { ko: "총 교환(하자) 건수", en: "Total exchanges (defects)", fil: "Kabuuang palitan (depekto)" },
+  rate: { ko: "발급 UID 대비 하자율", en: "Defect rate vs issued UIDs", fil: "Rate ng depekto vs. inilabas na UID" },
+  byProduct: { ko: "제품별 하자·교환 건수", en: "Exchanges by product", fil: "Palitan ayon sa produkto" },
+  product: { ko: "제품", en: "Product", fil: "Produkto" },
+  count: { ko: "교환(하자) 건수", en: "Exchanges (defects)", fil: "Palitan (depekto)" },
+  none: { ko: "아직 교환(하자) 이력이 없습니다.", en: "No exchanges (defects) yet.", fil: "Wala pang palitan (depekto)." },
+  recent: { ko: "최근 교환 이력", en: "Recent exchanges", fil: "Mga kamakailang palitan" },
+  when: { ko: "일시", en: "When", fil: "Kailan" },
 };
 
 export function ExchangeStats() {
