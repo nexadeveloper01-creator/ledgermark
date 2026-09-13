@@ -285,6 +285,7 @@ export default function PartnerPage() {
             </span>
           </div>
 
+          <div style={{ overflowX: "auto" }}>
           <table className="table">
             <thead>
               <tr>
@@ -328,6 +329,7 @@ export default function PartnerPage() {
               )}
             </tbody>
           </table>
+          </div>
         </div>
 
         {selected && (
