@@ -70,3 +70,11 @@ a:hover {
     white-space: nowrap;
   }
 }
+
+/* 폰(≤640px): 큐+상세 2열 레이아웃을 한 열로 쌓아 본문이 옆으로 밀리지 않게 한다.
+   인라인 grid-template-columns를 덮어써야 하므로 !important를 쓴다. */
+@media (max-width: 640px) {
+  .split-2col {
+    grid-template-columns: 1fr !important;
+  }
+}

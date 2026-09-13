@@ -267,6 +267,7 @@ export default function PartnerPage() {
       )}
 
       <div
+        className="split-2col"
         style={{
           display: tab === "queue" ? "grid" : "none",
           padding: 32,
