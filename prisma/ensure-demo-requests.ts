@@ -1,6 +1,6 @@
 import { prisma } from "../src/lib/prisma";
 import { mintLot, transferUid } from "../src/lib/ledger/ledgerService";
-import { createRetailSaleRequest } from "../src/lib/requests/transferRequestService";
+import { commitRequest, createRetailSaleRequest } from "../src/lib/requests/transferRequestService";
 
 // 시연용 소매 판매 큐 채우기.
 //
@@ -124,8 +124,55 @@ async function ensurePendingQueue(buyerIds: string[]): Promise<void> {
   console.log(`[ensure-demo-requests] 대기 판매요청 ${created}건 신규 생성 (기존 ${pending}건)`);
 }
 
+// 시연용 소비자 앱은 로그인 직후 "내 제품"에 등록된 기기가 보여야 한다(교환권·만료 시연).
+// consumer@ledgermark.com 계정이 아직 아무 UID도 보유하지 않을 때만, 소매점 재고 2개를
+// 실제 소매 판매 흐름(요청 생성 → 커밋)으로 태워 소유권을 넘긴다. 교환권 AVAILABLE 2건이
+// 생긴다(하나는 교환 시연에 소진해도 하나는 남음).
+async function ensureConsumerProducts(): Promise<void> {
+  const account = await prisma.user.findUnique({ where: { email: "consumer@ledgermark.com" } });
+  if (!account?.consumerId) {
+    console.log("[ensure-demo-requests] consumer@ 계정/consumerId 없음 — 소비자 보유 시드 건너뜀");
+    return;
+  }
+  const owned = await prisma.uid.count({ where: { ownerConsumerId: account.consumerId } });
+  if (owned > 0) {
+    console.log(`[ensure-demo-requests] consumer@ 이미 ${owned}개 보유 — 건너뜀`);
+    return;
+  }
+
+  const retailer = await orgByType("RETAILER");
+  if (!retailer) return;
+
+  const candidates = await prisma.uid.findMany({
+    where: {
+      ownerOrgId: retailer.id,
+      status: "WHOLESALE",
+      requests: { none: { status: "PENDING" } },
+    },
+    take: 2,
+  });
+
+  let done = 0;
+  for (const uid of candidates) {
+    try {
+      const req = await createRetailSaleRequest({
+        uidCode: uid.code,
+        consumerId: account.consumerId,
+        ageVerified: true,
+        requireVerifiedEmail: false,
+      });
+      await commitRequest(req.id);
+      done++;
+    } catch (e) {
+      console.warn(`[ensure-demo-requests] 소비자 보유 시드 실패(${uid.code}):`, (e as Error).message);
+    }
+  }
+  console.log(`[ensure-demo-requests] consumer@ 보유 제품 ${done}건 등록(교환권 AVAILABLE)`);
+}
+
 export async function ensureDemoRequests(): Promise<void> {
   await ensureStoreInventory();
   const buyerIds = await ensureDemoBuyers();
   await ensurePendingQueue(buyerIds);
+  await ensureConsumerProducts();
 }
