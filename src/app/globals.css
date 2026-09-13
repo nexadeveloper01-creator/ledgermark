@@ -71,6 +71,13 @@ a:hover {
   }
 }
 
+/* grid/flex 자식은 기본 min-width:auto라 내용(nowrap 표 등)의 min-content보다
+   못 줄어들어 트랙이 팽창한다. min-width:0으로 트랙 축소를 허용하면 표는 자신의
+   overflow-x:auto 안에서 스크롤된다(본문은 밀리지 않음). */
+.split-2col > * {
+  min-width: 0;
+}
+
 /* 폰(≤640px): 큐+상세 2열 레이아웃을 한 열로 쌓아 본문이 옆으로 밀리지 않게 한다.
    인라인 grid-template-columns를 덮어써야 하므로 !important를 쓴다. */
 @media (max-width: 640px) {
