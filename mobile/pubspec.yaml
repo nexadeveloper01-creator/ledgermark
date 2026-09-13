@@ -30,6 +30,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # 한국어 등 비영어 로케일에서 Material 위젯(TextField 등)이 필요로 하는
+  # MaterialLocalizations 제공. 없으면 한국어 기기에서 TextField가 null-check 크래시.
+  flutter_localizations:
+    sdk: flutter
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

@@ -36,6 +36,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _langTile(tr('settings.langSystem'), AppLang.system),
                 _langTile(tr('settings.langKo'), AppLang.ko),
                 _langTile(tr('settings.langEn'), AppLang.en),
+                _langTile(tr('settings.langFil'), AppLang.fil),
               ],
             ),
           ),

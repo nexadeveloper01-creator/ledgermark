@@ -1,15 +1,64 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'api.dart';
 import 'i18n.dart';
 import 'theme.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/onboarding_screen.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await i18n.load();
-  runApp(const LedgermarkApp());
+  // 위젯 빌드 중 예외가 나도 회색/빈 화면 대신 읽을 수 있는 메시지를 보여준다.
+  ErrorWidget.builder = (FlutterErrorDetails details) => Directionality(
+        textDirection: TextDirection.ltr,
+        child: Container(
+          color: const Color(0xFF7A1220),
+          alignment: Alignment.center,
+          padding: const EdgeInsets.all(24),
+          child: SingleChildScrollView(
+            child: Text(
+              'APP ERROR\n\n${details.exceptionAsString()}',
+              style: const TextStyle(color: Colors.white, fontSize: 13, height: 1.5),
+            ),
+          ),
+        ),
+      );
+
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    try {
+      await i18n.load();
+    } catch (_) {
+      // 언어 로드 실패는 무시하고 계속 (기본 언어로 뜨게 한다).
+    }
+    runApp(const LedgermarkApp());
+  }, (error, stack) {
+    // 시작 단계에서 잡히지 않은 오류도 최소한 앱이 뜨도록 화면에 표시.
+    runApp(_FatalError(message: '$error'));
+  });
+}
+
+class _FatalError extends StatelessWidget {
+  final String message;
+  const _FatalError({required this.message});
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          backgroundColor: const Color(0xFF7A1220),
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: SingleChildScrollView(
+                child: Text('START ERROR\n\n$message',
+                    style: const TextStyle(color: Colors.white, fontSize: 13, height: 1.5)),
+              ),
+            ),
+          ),
+        ),
+      );
 }
 
 class LedgermarkApp extends StatelessWidget {
@@ -25,7 +74,12 @@ class LedgermarkApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: buildTheme(),
         locale: i18n.localeOverride,
-        supportedLocales: const [Locale('en'), Locale('ko')],
+        supportedLocales: const [Locale('en'), Locale('ko'), Locale('fil')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         home: const AuthGate(),
       ),
     );
@@ -43,6 +97,7 @@ class _AuthGateState extends State<AuthGate> {
   Map<String, dynamic>? _user;
   bool _loading = true;
   bool _ageOk = false;
+  bool _onboarded = false;
 
   @override
   void initState() {
@@ -53,6 +108,7 @@ class _AuthGateState extends State<AuthGate> {
   Future<void> _restore() async {
     final prefs = await SharedPreferences.getInstance();
     _ageOk = prefs.getBool('lm_age_ok') ?? false;
+    _onboarded = prefs.getBool('lm_onboarded') ?? false;
     await api.loadToken();
     Map<String, dynamic>? user;
     if (api.isAuthenticated) {
@@ -75,6 +131,12 @@ class _AuthGateState extends State<AuthGate> {
     if (mounted) setState(() => _ageOk = true);
   }
 
+  Future<void> _finishOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('lm_onboarded', true);
+    if (mounted) setState(() => _onboarded = true);
+  }
+
   void _onLoggedIn(Map<String, dynamic> user) => setState(() => _user = user);
 
   Future<void> _onLogout() async {
@@ -91,6 +153,11 @@ class _AuthGateState extends State<AuthGate> {
     // 스토어 정책: 니코틴 관련 서비스는 성인 확인이 선행돼야 한다.
     if (!_ageOk) {
       return _AgeGate(onConfirm: _confirmAge);
+    }
+
+    // 첫 실행 온보딩(정품 확인 → 등록·교환권 → 포인트/혜택).
+    if (!_onboarded) {
+      return OnboardingScreen(onDone: _finishOnboarding);
     }
 
     final user = _user;

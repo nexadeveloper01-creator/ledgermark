@@ -266,6 +266,14 @@ String voucherExpiryText(String? iso) {
   return ' · ~${d.year}-${two(d.month)}-${two(d.day)}';
 }
 
+// 교환권 만료까지 남은 일수(이미 만료면 음수, 값 없으면 null).
+int? voucherDaysLeft(String? iso) {
+  if (iso == null || iso.isEmpty) return null;
+  final d = DateTime.tryParse(iso);
+  if (d == null) return null;
+  return d.difference(DateTime.now()).inDays;
+}
+
 String statusLabel(String s) {
   const m = {
     'MINTED': '발급됨',

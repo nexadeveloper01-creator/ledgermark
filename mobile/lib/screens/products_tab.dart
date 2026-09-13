@@ -214,6 +214,27 @@ class _ProductsTabState extends State<ProductsTab> {
           const SizedBox(height: 6),
           Text('${u['lot']?['productName'] ?? ''} · ${tr('products.voucher')} $voucher${voucher == 'AVAILABLE' ? voucherExpiryText(u['voucherExpiresAt'] as String?) : ''}',
               style: const TextStyle(fontSize: 12, color: Lm.muted)),
+          if (canExchange) ...[
+            Builder(builder: (_) {
+              final days = voucherDaysLeft(u['voucherExpiresAt'] as String?);
+              if (days == null || days > 30) return const SizedBox.shrink();
+              final expired = days < 0;
+              return Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Lm.warnBg,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    expired ? tr('voucher.expiredLabel') : trp('voucher.expiringSoon', {'n': '$days'}),
+                    style: const TextStyle(fontSize: 11, color: Lm.warnFg, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              );
+            }),
+          ],
           const SizedBox(height: 12),
           Row(
             children: [

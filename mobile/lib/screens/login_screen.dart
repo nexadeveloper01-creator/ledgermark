@@ -13,9 +13,9 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _signupMode = false;
-  final _email = TextEditingController(text: 'a@consumer.test');
+  final _email = TextEditingController();
   final _name = TextEditingController();
-  final _password = TextEditingController(text: 'ledgermark1234');
+  final _password = TextEditingController();
   String? _error;
   bool _loading = false;
 
