@@ -4,7 +4,7 @@ import { useSyncExternalStore } from "react";
 
 // 웹(콘솔) 경량 다국어. 브라우저 언어에 종속되며 localStorage 오버라이드로 전환한다.
 // useSyncExternalStore로 언어 변경 시 이 훅을 쓰는 모든 컴포넌트가 리렌더된다(Provider 불필요).
-export type Lang = "ko" | "en";
+export type Lang = "ko" | "en" | "fil";
 const KEY = "lm_web_lang";
 
 let override: Lang | null = null;
@@ -15,12 +15,15 @@ function loadOnce() {
   if (loaded || typeof window === "undefined") return;
   loaded = true;
   const v = window.localStorage.getItem(KEY);
-  if (v === "ko" || v === "en") override = v;
+  if (v === "ko" || v === "en" || v === "fil") override = v;
 }
 
 function detect(): Lang {
   if (typeof navigator === "undefined") return "ko";
-  return navigator.language?.toLowerCase().startsWith("ko") ? "ko" : "en";
+  const l = navigator.language?.toLowerCase() ?? "";
+  if (l.startsWith("ko")) return "ko";
+  if (l.startsWith("fil") || l.startsWith("tl")) return "fil"; // Filipino/Tagalog
+  return "en";
 }
 
 export function currentLang(): Lang {
@@ -63,7 +66,7 @@ export function useT(dict: Dict) {
   };
 }
 
-export type Dict = Record<string, { ko: string; en: string }>;
+export type Dict = Record<string, { ko: string; en: string; fil?: string }>;
 
 // 콘솔 상단에 놓는 언어 토글(KO / EN).
 export function LangToggle() {
@@ -91,6 +94,7 @@ export function LangToggle() {
     <div style={{ display: "inline-flex", borderRadius: 6, overflow: "hidden" }}>
       {btn("ko", "KO")}
       {btn("en", "EN")}
+      {btn("fil", "FIL")}
     </div>
   );
 }

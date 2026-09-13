@@ -16,7 +16,9 @@ const D: Dict = {
   tabCheckout: { ko: "매장 결제", en: "Checkout" },
   tabStaff: { ko: "직원 관리", en: "Staff" },
   tabExchanges: { ko: "하자·교환", en: "Defects & exchanges" },
-  landing: { ko: "랜딩", en: "Landing" },
+  landing: { ko: "랜딩", en: "Landing", fil: "Landing" },
+  navBadgeDist: { ko: "총판", en: "DISTRIBUTOR", fil: "DISTRIBUTOR" },
+  navBadgeRetail: { ko: "소매점", en: "RETAIL", fil: "RETAIL" },
   orgFallback: { ko: "소속 기관", en: "Your organization" },
   queueTitle: { ko: "소유권 이전 대기 큐", en: "Transfer queue" },
   thRequest: { ko: "요청", en: "Request" },
@@ -110,7 +112,7 @@ export default function PartnerPage() {
               padding: "2px 8px",
             }}
           >
-            DISTRIBUTOR · 총판
+            {t("navBadgeDist")}
           </span>
           <div className="seg" style={{ marginLeft: 12 }}>
             <label className="seg-opt">
@@ -202,7 +204,7 @@ export default function PartnerPage() {
             padding: "2px 8px",
           }}
         >
-          RETAIL · 소매점
+          {t("navBadgeRetail")}
         </span>
         <div className="seg" style={{ marginLeft: 12 }}>
           <label className="seg-opt">

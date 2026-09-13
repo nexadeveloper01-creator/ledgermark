@@ -8,28 +8,29 @@ import { SessionBar, useSession } from "@/components/SessionBar";
 import { useT, LangToggle, type Dict } from "@/lib/i18n/web";
 
 const D: Dict = {
-  landing: { ko: "랜딩", en: "Landing" },
-  loading: { ko: "불러오는 중...", en: "Loading..." },
-  title: { ko: "현장 정품 확인", en: "Field authenticity check" },
-  desc: { ko: "제품에 인쇄된 UID를 스캔·입력하면 정품 여부만 즉시 확인합니다. 원장에 등록된 UID(코니아랩 생산분)면 정품, 없으면 위조입니다.", en: "Scan or enter the UID printed on a product to instantly check authenticity only. A UID registered in the ledger (produced by Conia Lab) is genuine; otherwise it is counterfeit." },
-  uidCode: { ko: "UID 코드", en: "UID code" },
-  scan: { ko: "정품 확인 / SCAN", en: "Check / SCAN" },
-  checking: { ko: "확인 중...", en: "Checking..." },
-  rescan: { ko: "재스캔", en: "Re-scan" },
-  genuine: { ko: "정품", en: "GENUINE" },
-  genuineNote: { ko: "코니아랩이 생산·발급한 정품 UID입니다. 원장에 등록되어 있습니다.", en: "A genuine UID produced and issued by Conia Lab. It is registered in the ledger." },
-  fake: { ko: "위조 의심", en: "COUNTERFEIT" },
-  fakeNote: { ko: "원장에 등록되지 않은 UID입니다. 정품이 아닙니다(위조·비정상 유통).", en: "This UID is not registered in the ledger. It is not genuine (counterfeit / illicit)." },
-  product: { ko: "제품", en: "Product" },
-  lot: { ko: "LOT", en: "LOT" },
-  status: { ko: "현재 상태", en: "Current status" },
-  prompt: { ko: "UID를 스캔하면 정품 여부가 표시됩니다.", en: "Scan a UID to see whether it is genuine." },
-  stMINTED: { ko: "생산 발급", en: "Minted" },
-  stEXPORTED: { ko: "수입 완료", en: "Imported" },
-  stWHOLESALE: { ko: "총판 배분", en: "Wholesale" },
-  stRETAIL_SOLD: { ko: "소비자 판매", en: "Retail sold" },
-  stEXCHANGED: { ko: "교환됨", en: "Exchanged" },
-  stRESOLD: { ko: "중고 거래됨", en: "Resold" },
+  landing: { ko: "랜딩", en: "Landing", fil: "Landing" },
+  navBadge: { ko: "현장 · 정품 확인", en: "FIELD · Authenticity", fil: "FIELD · Pagpapatunay" },
+  loading: { ko: "불러오는 중...", en: "Loading...", fil: "Naglo-load..." },
+  title: { ko: "현장 정품 확인", en: "Field authenticity check", fil: "Field authenticity check" },
+  desc: { ko: "제품에 인쇄된 UID를 스캔·입력하면 정품 여부만 즉시 확인합니다. 원장에 등록된 UID(코니아랩 생산분)면 정품, 없으면 위조입니다.", en: "Scan or enter the UID printed on a product to instantly check authenticity only. A UID registered in the ledger (produced by Conia Lab) is genuine; otherwise it is counterfeit.", fil: "I-scan o ilagay ang UID sa produkto para malaman agad kung genuine. Kung nakarehistro sa ledger (gawa ng Conia Lab), genuine ito; kung wala, peke." },
+  uidCode: { ko: "UID 코드", en: "UID code", fil: "UID code" },
+  scan: { ko: "정품 확인 / SCAN", en: "Check / SCAN", fil: "Tingnan / SCAN" },
+  checking: { ko: "확인 중...", en: "Checking...", fil: "Sinusuri..." },
+  rescan: { ko: "재스캔", en: "Re-scan", fil: "I-scan ulit" },
+  genuine: { ko: "정품", en: "GENUINE", fil: "GENUINE" },
+  genuineNote: { ko: "코니아랩이 생산·발급한 정품 UID입니다. 원장에 등록되어 있습니다.", en: "A genuine UID produced and issued by Conia Lab. It is registered in the ledger.", fil: "Genuine na UID na gawa at inilabas ng Conia Lab. Nakarehistro ito sa ledger." },
+  fake: { ko: "위조 의심", en: "COUNTERFEIT", fil: "PEKE" },
+  fakeNote: { ko: "원장에 등록되지 않은 UID입니다. 정품이 아닙니다(위조·비정상 유통).", en: "This UID is not registered in the ledger. It is not genuine (counterfeit / illicit).", fil: "Hindi nakarehistro sa ledger ang UID na ito. Hindi ito genuine (peke / iligal)." },
+  product: { ko: "제품", en: "Product", fil: "Produkto" },
+  lot: { ko: "LOT", en: "LOT", fil: "LOT" },
+  status: { ko: "현재 상태", en: "Current status", fil: "Kasalukuyang status" },
+  prompt: { ko: "UID를 스캔하면 정품 여부가 표시됩니다.", en: "Scan a UID to see whether it is genuine.", fil: "I-scan ang UID para makita kung genuine." },
+  stMINTED: { ko: "생산 발급", en: "Minted", fil: "Minted" },
+  stEXPORTED: { ko: "수입 완료", en: "Imported", fil: "Na-import" },
+  stWHOLESALE: { ko: "총판 배분", en: "Wholesale", fil: "Wholesale" },
+  stRETAIL_SOLD: { ko: "소비자 판매", en: "Retail sold", fil: "Naibenta sa retail" },
+  stEXCHANGED: { ko: "교환됨", en: "Exchanged", fil: "Napalitan" },
+  stRESOLD: { ko: "중고 거래됨", en: "Resold", fil: "Naibentang muli" },
 };
 
 interface Scanned {
@@ -97,7 +98,7 @@ export default function FieldPage() {
             padding: "2px 8px",
           }}
         >
-          FIELD · 정품 확인
+          {t("navBadge")}
         </span>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
           <LangToggle />
