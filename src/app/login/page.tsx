@@ -12,15 +12,15 @@ import { useT, LangToggle, type Dict } from "@/lib/i18n/web";
 const SAVED_LOGIN_KEY = "lm_saved_login";
 
 const D: Dict = {
-  "t": { ko: "로그인", en: "Sign in" },
-  "sub": { ko: "계정 권한에 따라 관제 콘솔·매장 웹·단속 단말·소비자 앱으로 이동합니다.", en: "You'll be routed to the console, store web, field terminal, or consumer app by your role." },
-  "email": { ko: "이메일", en: "Email" },
-  "pw": { ko: "비밀번호", en: "Password" },
-  "loading": { ko: "확인 중...", en: "Signing in..." },
-  "fail": { ko: "로그인에 실패했습니다.", en: "Sign-in failed." },
-  "forgot": { ko: "비밀번호를 잊으셨나요?", en: "Forgot your password?" },
-  "remember": { ko: "로그인 정보 저장 (다음에 자동 로그인)", en: "Save login (auto sign-in next time)" },
-  "autoLogin": { ko: "저장된 정보로 자동 로그인 중...", en: "Signing in with saved login..." },
+  "t": { ko: "로그인", en: "Sign in", fil: "Mag-sign in" },
+  "sub": { ko: "계정 권한에 따라 관제 콘솔·매장 웹·단속 단말·소비자 앱으로 이동합니다.", en: "You'll be routed to the console, store web, field terminal, or consumer app by your role.", fil: "Dadalhin ka sa console, store web, field terminal, o consumer app ayon sa iyong role." },
+  "email": { ko: "이메일", en: "Email", fil: "Email" },
+  "pw": { ko: "비밀번호", en: "Password", fil: "Password" },
+  "loading": { ko: "확인 중...", en: "Signing in...", fil: "Nagsi-sign in..." },
+  "fail": { ko: "로그인에 실패했습니다.", en: "Sign-in failed.", fil: "Nabigo ang pag-sign in." },
+  "forgot": { ko: "비밀번호를 잊으셨나요?", en: "Forgot your password?", fil: "Nakalimutan ang password?" },
+  "remember": { ko: "로그인 정보 저장 (다음에 자동 로그인)", en: "Save login (auto sign-in next time)", fil: "I-save ang login (auto sign-in sa susunod)" },
+  "autoLogin": { ko: "저장된 정보로 자동 로그인 중...", en: "Signing in with saved login...", fil: "Nagsa-sign in gamit ang naka-save na login..." },
 };
 
 const HOME_BY_ROLE: Record<string, string> = {

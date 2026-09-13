@@ -15,22 +15,22 @@ interface CustomsSummary {
 }
 
 const D: Dict = {
-  loading: { ko: "수입·세금 집계 중...", en: "Aggregating imports & tax..." },
-  title: { ko: "수입 통관 요약", en: "Import & customs summary" },
-  sub: { ko: "코니아랩 독점 생산·공급권 제품의 수입 물량과 납부 세금을 확인합니다.", en: "Imported volume and tax paid for products under Conia Lab's exclusive production/supply rights." },
-  imported: { ko: "수입 상품 수량", en: "Imported units" },
-  importedNote: { ko: "생산 후 필리핀으로 수입된 정품 수량", en: "Authentic units imported into the Philippines after production" },
-  taxPaid: { ko: "납부 세금 (누계)", en: "Tax paid (cumulative)" },
-  taxNote: { ko: "개당 ₱{n} 기준", en: "at ₱{n} per unit" },
-  assumptionBadge: { ko: "가정값 — 실제 세율 반영 전", en: "Assumed — pending real tax rate" },
-  distTitle: { ko: "수입 후 유통 단계별 수량", en: "Units by post-import stage" },
-  total: { ko: "전체 발급 UID", en: "Total issued UIDs" },
-  stMINTED: { ko: "생산 발급 (수입 전)", en: "Minted (pre-import)" },
-  stEXPORTED: { ko: "수입 완료", en: "Imported" },
-  stWHOLESALE: { ko: "총판 배분", en: "Wholesale" },
-  stRETAIL_SOLD: { ko: "소비자 판매", en: "Retail sold" },
-  stEXCHANGED: { ko: "교환됨", en: "Exchanged" },
-  stRESOLD: { ko: "중고 거래됨", en: "Resold" },
+  loading: { ko: "수입·세금 집계 중...", en: "Aggregating imports & tax...", fil: "Kinukuwenta ang imports at buwis..." },
+  title: { ko: "수입 통관 요약", en: "Import & customs summary", fil: "Buod ng import at customs" },
+  sub: { ko: "코니아랩 독점 생산·공급권 제품의 수입 물량과 납부 세금을 확인합니다.", en: "Imported volume and tax paid for products under Conia Lab's exclusive production/supply rights.", fil: "Dami ng na-import at buwis na binayaran para sa mga produktong nasa ilalim ng eksklusibong karapatan ng Conia Lab." },
+  imported: { ko: "수입 상품 수량", en: "Imported units", fil: "Na-import na yunit" },
+  importedNote: { ko: "생산 후 필리핀으로 수입된 정품 수량", en: "Authentic units imported into the Philippines after production", fil: "Bilang ng tunay na yunit na na-import sa Pilipinas pagkatapos ng produksyon" },
+  taxPaid: { ko: "납부 세금 (누계)", en: "Tax paid (cumulative)", fil: "Buwis na binayaran (kabuuan)" },
+  taxNote: { ko: "개당 ₱{n} 기준", en: "at ₱{n} per unit", fil: "sa ₱{n} kada yunit" },
+  assumptionBadge: { ko: "가정값 — 실제 세율 반영 전", en: "Assumed — pending real tax rate", fil: "Palagay — hindi pa aktwal na tax rate" },
+  distTitle: { ko: "수입 후 유통 단계별 수량", en: "Units by post-import stage", fil: "Yunit ayon sa yugto pagkatapos ng import" },
+  total: { ko: "전체 발급 UID", en: "Total issued UIDs", fil: "Kabuuang inilabas na UID" },
+  stMINTED: { ko: "생산 발급 (수입 전)", en: "Minted (pre-import)", fil: "Minted (bago mag-import)" },
+  stEXPORTED: { ko: "수입 완료", en: "Imported", fil: "Na-import" },
+  stWHOLESALE: { ko: "총판 배분", en: "Wholesale", fil: "Wholesale" },
+  stRETAIL_SOLD: { ko: "소비자 판매", en: "Retail sold", fil: "Naibenta sa retail" },
+  stEXCHANGED: { ko: "교환됨", en: "Exchanged", fil: "Napalitan" },
+  stRESOLD: { ko: "중고 거래됨", en: "Resold", fil: "Naibentang muli" },
 };
 
 const STATUS_ORDER = ["MINTED", "EXPORTED", "WHOLESALE", "RETAIL_SOLD", "EXCHANGED", "RESOLD"];
@@ -52,7 +52,7 @@ export function CustomsView() {
 
   if (loading || !data) return <p className="text-muted">{t("loading")}</p>;
 
-  const peso = (n: number) => `₱${n.toLocaleString(lang === "en" ? "en-US" : "ko-KR")}`;
+  const peso = (n: number) => `₱${n.toLocaleString(lang === "ko" ? "ko-KR" : "en-US")}`;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 26 }}>

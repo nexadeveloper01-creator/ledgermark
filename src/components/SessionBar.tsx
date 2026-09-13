@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useT, type Dict } from "@/lib/i18n/web";
 
-const SB: Dict = { "sb.logout": { ko: "로그아웃", en: "Sign out" } };
+const SB: Dict = { "sb.logout": { ko: "로그아웃", en: "Sign out", fil: "Mag-sign out" } };
 
 export interface SessionUser {
   id: string;

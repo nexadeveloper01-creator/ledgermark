@@ -32,9 +32,9 @@ interface Kpis {
 }
 
 const C: Dict = {
-  "console.badgeAdmin": { ko: "코니아랩 운영 콘솔", en: "Conia Lab Operations" },
-  "console.badgeCustoms": { ko: "관세청 · 수입 통관", en: "Customs · Imports" },
-  "console.landing": { ko: "랜딩 페이지", en: "Landing" },
+  "console.badgeAdmin": { ko: "코니아랩 운영 콘솔", en: "Conia Lab Operations", fil: "Conia Lab Operations" },
+  "console.badgeCustoms": { ko: "관세청 · 수입 통관", en: "Customs · Imports", fil: "Customs · Imports" },
+  "console.landing": { ko: "랜딩 페이지", en: "Landing", fil: "Landing" },
   "common.loading": { ko: "불러오는 중...", en: "Loading..." },
 
   "mod.dashboard": { ko: "대시보드", en: "Dashboard" },
