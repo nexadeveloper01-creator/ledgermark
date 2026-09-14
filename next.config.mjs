@@ -7,7 +7,9 @@ const APK_BASE =
   process.env.APK_RELEASE_BASE ||
   "https://github.com/nexadeveloper01-creator/ledgermark/releases/latest/download";
 
-const APKS = ["ledgermark-consumer.apk", "ledgermark-kiosk.apk", "ledgermark-field.apk"];
+// 소비자 앱만 APK로 배포한다. 매장 자판기·경찰 현장·관세청·운영자는 모두 브라우저로
+// 시연하므로 터미널 APK(웹뷰 셸, 모바일 미최적화)는 배포에서 제외한다.
+const APKS = ["ledgermark-consumer.apk"];
 
 const nextConfig = {
   reactStrictMode: true,

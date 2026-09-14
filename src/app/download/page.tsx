@@ -2,7 +2,8 @@ import QRCode from "qrcode";
 import { DownloadClient } from "./DownloadClient";
 
 // 역할별 빌드 허브(퍼블리싱) — 공개 페이지.
-//  APK: 소비자 / 매장 자판기 / 경찰 현장   |   웹 콘솔: 관세청 / 운영자
+//  APK: 소비자 앱만   |   웹: 매장 자판기 / 경찰 현장 / 관세청 / 운영자
+//  (소비자만 앱 설치로 시연하고 나머지는 전부 브라우저로 시연한다.)
 // QR은 서버에서 생성하고, UI/다국어는 클라이언트 컴포넌트가 담당한다.
 export const metadata = {
   title: "LEDGERMARK · 역할별 빌드 / Builds",
@@ -26,10 +27,10 @@ async function qr(path: string) {
 
 export default async function DownloadPage() {
   const [qConsumer, qKiosk, qField, qConsole, qAccounts] = await Promise.all([
-    qr("/download/ledgermark-consumer.apk"),
-    qr("/download/ledgermark-kiosk.apk"),
-    qr("/download/ledgermark-field.apk"),
-    qr("/console"),
+    qr("/download/ledgermark-consumer.apk"), // 소비자 앱만 APK
+    qr("/kiosk"), // 매장 자판기 — 웹
+    qr("/field"), // 경찰 현장 — 웹
+    qr("/console"), // 관세청·운영자 — 웹
     qr("/download/login-accounts.html"),
   ]);
 

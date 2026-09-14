@@ -8,11 +8,13 @@ const D: Dict = {
   landing: { ko: "랜딩", en: "Home" },
   title: { ko: "역할별 빌드", en: "Builds by role" },
   intro: {
-    ko: "현장·기기에서 쓰는 소비자·자판기·경찰 단말은 APK로 설치하고, 데스크톱에서 쓰는 관세청·운영자 콘솔은 브라우저로 접속합니다. QR을 폰으로 스캔하면 바로 설치/접속됩니다.",
-    en: "Install the consumer, vending, and police field terminals used in the field as APKs; access the customs and operator consoles used on desktop via a browser. Scan a QR with your phone to install or open directly.",
+    ko: "소비자 앱만 Android APK로 설치하고, 나머지(매장 자판기·경찰 현장·관세청·운영자)는 모두 브라우저로 접속해 시연합니다. QR을 폰으로 스캔하면 바로 설치/접속됩니다.",
+    en: "Only the consumer app installs as an Android APK; everything else (store vending, police field, customs, operator) runs in a browser for the demo. Scan a QR with your phone to install or open directly.",
+    fil: "Ang consumer app lang ang naka-APK; ang lahat ng iba (vending, field, customs, operator) ay sa browser para sa demo. I-scan ang QR gamit ang telepono.",
   },
-  apkSection: { ko: "앱 설치 (Android APK)", en: "App install (Android APK)" },
-  webSection: { ko: "웹 콘솔 (설치 불필요)", en: "Web console (no install)" },
+  apkSection: { ko: "앱 설치 (Android APK) — 소비자 앱", en: "App install (Android APK) — consumer app" },
+  webSection: { ko: "웹 접속 (설치 불필요)", en: "Web access (no install)" },
+  webKioskLogin: { ko: "무인 화면 · 로그인 불필요 (직원 POS: store@ledgermark.com / ledgermark2026!)", en: "Unmanned screen · no login (staff POS: store@ledgermark.com / ledgermark2026!)" },
   demoSection: { ko: "시연 자료", en: "Demo materials" },
   appConsumerT: { ko: "ConiaMark · 소비자 앱", en: "ConiaMark · Consumer app" },
   appConsumerD: { ko: "QR 정품 인증 · 등록 · 포인트/쿠폰 · 무상 교환", en: "QR authentication · registration · points/coupons · free exchange" },
@@ -41,12 +43,12 @@ const D: Dict = {
   scanInstall: { ko: "폰으로 QR 스캔 설치", en: "Scan QR with phone to install" },
   openConsole: { ko: "콘솔 열기", en: "Open console" },
   browserAccess: { ko: "브라우저 접속", en: "Browser access" },
-  howTitle: { ko: "APK 설치 방법 (Android)", en: "How to install the APK (Android)" },
-  how1: { ko: "역할 카드의 QR을 폰으로 스캔하거나 ‘APK 다운로드’를 누릅니다.", en: "Scan the QR on a role card with your phone, or tap ‘Download APK’." },
+  howTitle: { ko: "소비자 앱 설치 방법 (Android)", en: "How to install the consumer app (Android)" },
+  how1: { ko: "소비자 앱 카드의 QR을 폰으로 스캔하거나 ‘APK 다운로드’를 누릅니다.", en: "Scan the QR on the consumer-app card with your phone, or tap ‘Download APK’." },
   how2: { ko: "다운로드한 APK를 실행합니다.", en: "Open the downloaded APK." },
   how3: { ko: "‘출처를 알 수 없는 앱 설치’를 요청하면 허용합니다.", en: "Allow ‘install from unknown sources’ if prompted." },
-  how4: { ko: "설치 후 실행하고 위 계정으로 로그인합니다(자판기 무인 화면은 로그인 불필요).", en: "After installing, launch and sign in with the accounts above (the vending unmanned screen needs no login)." },
-  footNote: { ko: "모든 빌드는 이 서버(클라우드)에 연결되어 동일한 실데이터로 동작합니다. 데모/파일럿 빌드입니다.", en: "All builds connect to this server (cloud) and run on the same live data. These are demo/pilot builds." },
+  how4: { ko: "설치 후 실행하고 consumer@ 계정으로 로그인합니다. 나머지 화면(자판기·현장·관세청·운영자)은 설치 없이 브라우저로 접속합니다.", en: "After installing, launch and sign in with consumer@. All other screens (vending, field, customs, operator) open in a browser with no install." },
+  footNote: { ko: "소비자 앱만 네이티브 설치이며 나머지는 브라우저로 동작합니다. 모든 빌드는 이 서버(클라우드)의 동일한 실데이터에 연결됩니다. 데모/파일럿 빌드입니다.", en: "Only the consumer app is a native install; everything else runs in a browser. All connect to the same live data on this server (cloud). Demo/pilot builds." },
 };
 
 export function DownloadClient({
@@ -97,26 +99,26 @@ export function DownloadClient({
             login="consumer@ledgermark.com / ledgermark2026!"
             t={t}
           />
-          <AppCard
-            title={t("appKioskT")}
-            desc={t("appKioskD")}
-            apk="/download/ledgermark-kiosk.apk"
-            qrSvg={qKiosk}
-            login={t("appKioskLogin")}
-            t={t}
-          />
-          <AppCard
-            title={t("appFieldT")}
-            desc={t("appFieldD")}
-            apk="/download/ledgermark-field.apk"
-            qrSvg={qField}
-            login="officer@ledgermark.com / ledgermark2026!"
-            t={t}
-          />
         </div>
 
         <h2 style={{ fontSize: 17, margin: "36px 0 14px" }}>{t("webSection")}</h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 18 }}>
+          <WebCard
+            title={t("appKioskT")}
+            desc={t("appKioskD")}
+            href="/kiosk"
+            qrSvg={qKiosk}
+            login={t("webKioskLogin")}
+            t={t}
+          />
+          <WebCard
+            title={t("appFieldT")}
+            desc={t("appFieldD")}
+            href="/field"
+            qrSvg={qField}
+            login="officer@ledgermark.com / ledgermark2026!"
+            t={t}
+          />
           <WebCard
             title={t("webBocT")}
             desc={t("webBocD")}
