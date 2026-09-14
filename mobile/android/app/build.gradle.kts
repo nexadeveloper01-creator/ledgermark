@@ -15,8 +15,9 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.conialabs.ledgermark_app"
+        // 소비자 앱 전용 고유 Application ID. 다른 어떤 앱과도 충돌/업데이트되지 않도록
+        // ConiaMark 소비자 앱만의 id를 사용한다(터미널 역할은 웹으로 시연).
+        applicationId = "com.conialabs.coniamark"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
