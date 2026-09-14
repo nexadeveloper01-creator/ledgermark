@@ -204,7 +204,10 @@ export function DownloadClient({
             {t("acctD")}
           </p>
           <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
-            <div style={{ width: 96, height: 96, flexShrink: 0 }} dangerouslySetInnerHTML={{ __html: qAccounts }} />
+            <div
+              style={{ width: 112, height: 112, flexShrink: 0, background: "#fff", borderRadius: 8, padding: 8 }}
+              dangerouslySetInnerHTML={{ __html: qAccounts }}
+            />
             <div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 <a href="/download/login-accounts.html" target="_blank" className="btn btn-secondary" style={{ height: 38, display: "inline-flex", alignItems: "center", padding: "0 14px", fontSize: 13 }}>
@@ -246,18 +249,19 @@ function AppCard({ title, desc, apk, qrSvg, login, t }: { title: string; desc: s
       <p className="text-muted" style={{ fontSize: 12.5, lineHeight: 1.55, minHeight: 54, margin: 0 }}>
         {desc}
       </p>
-      <div style={{ display: "flex", gap: 14, alignItems: "center", marginTop: 12 }}>
-        <div style={{ width: 96, height: 96, flexShrink: 0 }} dangerouslySetInnerHTML={{ __html: qrSvg }} />
-        <div>
-          <a href={apk} className="btn btn-primary" style={{ height: 40, display: "inline-flex", alignItems: "center", padding: "0 16px", fontSize: 13 }}>
-            {t("apkDownload")}
-          </a>
-          <p className="text-muted" style={{ fontSize: 11, marginTop: 8, lineHeight: 1.5 }}>
-            {t("scanInstall")}
-            <br />
-            {login}
-          </p>
-        </div>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 12, marginTop: 12 }}>
+        <div
+          style={{ width: 132, height: 132, flexShrink: 0, background: "#fff", borderRadius: 8, padding: 8 }}
+          dangerouslySetInnerHTML={{ __html: qrSvg }}
+        />
+        <a href={apk} className="btn btn-primary" style={{ height: 40, display: "inline-flex", alignItems: "center", padding: "0 16px", fontSize: 13 }}>
+          {t("apkDownload")}
+        </a>
+        <p className="text-muted" style={{ fontSize: 11, margin: 0, lineHeight: 1.5, overflowWrap: "anywhere" }}>
+          {t("scanInstall")}
+          <br />
+          {login}
+        </p>
       </div>
     </div>
   );
@@ -271,18 +275,19 @@ function WebCard({ title, desc, href, qrSvg, login, t }: { title: string; desc: 
       <p className="text-muted" style={{ fontSize: 12.5, lineHeight: 1.55, minHeight: 54, margin: 0 }}>
         {desc}
       </p>
-      <div style={{ display: "flex", gap: 14, alignItems: "center", marginTop: 12 }}>
-        <div style={{ width: 96, height: 96, flexShrink: 0 }} dangerouslySetInnerHTML={{ __html: qrSvg }} />
-        <div>
-          <Link href={href} className="btn btn-secondary" style={{ height: 40, display: "inline-flex", alignItems: "center", padding: "0 16px", fontSize: 13 }}>
-            {t("openConsole")}
-          </Link>
-          <p className="text-muted" style={{ fontSize: 11, marginTop: 8, lineHeight: 1.5 }}>
-            {t("browserAccess")}
-            <br />
-            {login}
-          </p>
-        </div>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 12, marginTop: 12 }}>
+        <div
+          style={{ width: 132, height: 132, flexShrink: 0, background: "#fff", borderRadius: 8, padding: 8 }}
+          dangerouslySetInnerHTML={{ __html: qrSvg }}
+        />
+        <Link href={href} className="btn btn-secondary" style={{ height: 40, display: "inline-flex", alignItems: "center", padding: "0 16px", fontSize: 13 }}>
+          {t("openConsole")}
+        </Link>
+        <p className="text-muted" style={{ fontSize: 11, margin: 0, lineHeight: 1.5, overflowWrap: "anywhere" }}>
+          {t("browserAccess")}
+          <br />
+          {login}
+        </p>
       </div>
     </div>
   );

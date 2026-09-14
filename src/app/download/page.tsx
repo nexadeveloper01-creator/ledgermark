@@ -12,12 +12,16 @@ export const metadata = {
 const SITE = process.env.APP_BASE_URL || "https://app-production-daca.up.railway.app";
 
 async function qr(path: string) {
-  return QRCode.toString(`${SITE}${path}`, {
+  const svg = await QRCode.toString(`${SITE}${path}`, {
     type: "svg",
-    margin: 1,
-    width: 132,
-    color: { dark: "#0E1116", light: "#00000000" },
+    margin: 2, // 스캔 안정용 quiet zone
+    width: 128,
+    color: { dark: "#0E1116", light: "#ffffff" }, // 흰 배경 고정(투명 배경은 스캔 실패 원인)
   });
+  // 고정 width/height 속성을 100%로 바꿔 컨테이너 크기에 맞춰 스케일되게 한다.
+  // (기존엔 132px SVG가 96px 박스를 넘쳐 버튼·계정 텍스트와 겹쳤다.)
+  // QRCode svg는 루트 <svg>에만 width/height를 두므로 각각 독립 치환해도 안전하다.
+  return svg.replace(/\swidth="\d+"/, ' width="100%"').replace(/\sheight="\d+"/, ' height="100%"');
 }
 
 export default async function DownloadPage() {
