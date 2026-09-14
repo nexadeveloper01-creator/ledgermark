@@ -4,6 +4,7 @@ import { seedSurveysAndRewards } from "./seed-points";
 import { ensureTestAccounts } from "./ensure-test-accounts";
 import { ensureDemoStock } from "./ensure-demo-stock";
 import { ensureDemoRequests } from "./ensure-demo-requests";
+import { ensureDemoExtra } from "./ensure-demo-extra";
 import { ensureDemoAnchor } from "./ensure-demo-anchor";
 
 // 배포 컨테이너 기동 시 호출된다. 계정이 하나도 없을 때(빈 DB)만 전체 시드하며,
@@ -23,6 +24,8 @@ async function main() {
       await ensureDemoStock();
       // 소매점 판매 큐 시연 데이터(소매 재고 + 대기 판매요청).
       await ensureDemoRequests();
+      // 실제 시연 대비 여유 재고 100개(정품·소매 WHOLESALE).
+      await ensureDemoExtra();
       // 블록체인 앵커 1건 보장(콘솔 앵커링 모듈·KPI 시연).
       await ensureDemoAnchor();
       return;
@@ -32,6 +35,7 @@ async function main() {
     await ensureTestAccounts();
     await ensureDemoStock();
     await ensureDemoRequests();
+    await ensureDemoExtra();
     await ensureDemoAnchor();
   } catch (err) {
     // 기동을 막지 않는다. 로그만 남기고 넘어간다.
