@@ -35,6 +35,10 @@ const C: Dict = {
   "console.badgeAdmin": { ko: "코니아랩 운영 콘솔", en: "Conia Lab Operations", fil: "Conia Lab Operations" },
   "console.badgeCustoms": { ko: "관세청 · 수입 통관", en: "Customs · Imports", fil: "Customs · Imports" },
   "console.landing": { ko: "랜딩 페이지", en: "Landing", fil: "Landing" },
+  "gov.republic": { ko: "REPUBLIC OF THE PHILIPPINES", en: "REPUBLIC OF THE PHILIPPINES", fil: "REPUBLIKA NG PILIPINAS" },
+  "gov.agency": { ko: "관세청 · DTI", en: "Bureau of Customs · DTI", fil: "Kawanihan ng Adwana · DTI" },
+  "gov.portal": { ko: "수입·세금 관제 포털", en: "Import & Tax Oversight Portal", fil: "Portal ng Pangangasiwa sa Import at Buwis" },
+  "gov.poweredBy": { ko: "플랫폼 제공: LEDGERMARK", en: "Platform by LEDGERMARK", fil: "Platform ng LEDGERMARK" },
   "common.loading": { ko: "불러오는 중...", en: "Loading..." },
 
   "mod.dashboard": { ko: "대시보드", en: "Dashboard" },
@@ -165,12 +169,62 @@ export default function ConsolePage() {
 
   return (
     <div style={{ minHeight: "100vh" }}>
+      {/* 관세청은 코니아랩 운영 콘솔과 확실히 구분되도록 정부 포털 정체성 밴드를 얹는다. */}
+      {isCustoms && (
+        <div
+          style={{
+            background: "#0b2545",
+            color: "#fff",
+            borderBottom: "3px solid #f4c542",
+            padding: "10px 32px",
+            display: "flex",
+            alignItems: "center",
+            gap: 14,
+            flexWrap: "wrap",
+            rowGap: 4,
+          }}
+        >
+          <span aria-hidden style={{ fontSize: 22, lineHeight: 1 }}>
+            🇵🇭
+          </span>
+          <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.25 }}>
+            <span style={{ fontSize: 10, letterSpacing: "0.18em", color: "rgba(255,255,255,0.72)" }}>
+              {t("gov.republic")}
+            </span>
+            <span style={{ fontSize: 16, fontWeight: 700, letterSpacing: "0.02em" }}>{t("gov.agency")}</span>
+          </div>
+          <span
+            style={{
+              marginLeft: 10,
+              paddingLeft: 12,
+              borderLeft: "1px solid rgba(255,255,255,0.25)",
+              fontSize: 12,
+              color: "rgba(255,255,255,0.8)",
+            }}
+          >
+            {t("gov.portal")}
+          </span>
+          <span
+            style={{
+              marginLeft: "auto",
+              fontSize: 10,
+              letterSpacing: "0.1em",
+              color: "rgba(255,255,255,0.55)",
+            }}
+          >
+            {t("gov.poweredBy")}
+          </span>
+        </div>
+      )}
       <div
         className="nav"
         style={{ borderBottom: "1px solid var(--color-divider)", padding: "0 32px", height: 64, gap: 20 }}
       >
-        <span className="nav-brand" style={{ fontSize: 17, letterSpacing: "0.12em" }}>
-          LEDGERMARK
+        <span
+          className="nav-brand"
+          style={{ fontSize: 17, letterSpacing: "0.12em", color: isCustoms ? "var(--color-accent-800)" : undefined }}
+        >
+          {isCustoms ? t("gov.agency") : "LEDGERMARK"}
         </span>
         <span
           style={{
