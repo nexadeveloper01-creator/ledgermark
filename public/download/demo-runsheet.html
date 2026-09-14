@@ -226,11 +226,11 @@
       <div class="card">
         <h4><span class="dot"></span>상태 점검</h4>
         <ul>
-          <li>데모 재고 300개 정상 <span class="mono">PH-2026-DEMO-000001~300</span></li>
-          <li>정품 UID <span class="mono">PH-2026-DEMO-000001</span></li>
+          <li>정품 스캔용 <b>여유 재고 100개</b> <span class="mono">PH-2026-LIVE-000001~100</span> (소매점 소유 — 등록→커밋까지 연결됨)</li>
+          <li>데모 재고 300개 <span class="mono">PH-2026-DEMO-000001~300</span> (총판 재고 — 관세청 수량 반영)</li>
           <li>소매 판매 큐 <b>대기 3건 미리 준비</b> <span class="mono">PH-2026-STORE-000001~3</span> (store@ 로그인 시 바로 보임)</li>
-          <li>블록체인 앵커 1건 게시됨(콘솔 원장 상태 → 앵커링 이력)</li>
-          <li>위조 시연용 미등록 코드(임의)</li>
+          <li>블록체인 앵커 게시됨(콘솔 원장 상태 → 앵커링 이력) · 밀수 의심 알림 1건</li>
+          <li>위조 시연용 미등록 코드 <span class="mono">FAKE-777</span></li>
           <li>네트워크·화면 밝기</li>
         </ul>
       </div>
@@ -271,8 +271,8 @@
           <div class="surface"><span><span class="k">화면</span> <span class="v">ConiaMark /app</span></span><span><span class="k">폰</span> <span class="v">consumer@</span></span></div>
           <p class="say">"소비자가 손에 쥐는 건 <b>ConiaMark</b> 앱 하나입니다. 제품의 UID를 스캔하면 정품인지 즉시 확인하고 그 자리에서 등록합니다. 원장에 있는 코니아랩 생산분이면 정품이고, 등록하는 순간 소유권이 소비자에게 넘어오면서 포인트가 쌓입니다."</p>
           <ol class="steps">
-            <li>앱: <span class="kbd">UID 스캔</span> <span class="mono">PH-2026-DEMO-000001</span> → "원장 일치 · 정품 확인"</li>
-            <li>등록 진행 → 제품 탭에 신규 기기 등장 · 포인트 적립</li>
+            <li>앱: <span class="kbd">UID 스캔</span> <span class="mono">PH-2026-LIVE-000001</span> → "원장 일치 · 정품 확인" <span style="color:var(--faint)">(미사용 코드; 리허설로 썼으면 000002~000100 중 아무거나 — 전부 정품)</span></li>
+            <li>연령인증 → <b>정품 등록 신청</b> → "매장 승인 대기"(이 요청이 바로 04단계 소매점 큐에 뜹니다)</li>
             <li>표시되는 UID는 <b>앞2·뒤2만, 가운데 XXXX</b>로 마스킹(예: <span class="mono">PHXXXX01</span>) — 전체 코드 비노출</li>
           </ol>
           <div class="point"><span class="lab">강조</span><span>매장 단말 없이 앱만으로 정품 확인·등록이 끝난다. (무인 자판기는 별도 협업 사업 — 이번 시연 범위 밖)</span></div>
@@ -301,7 +301,7 @@
           <div class="surface"><span><span class="k">화면</span> <span class="v">/partner · 소매점(RETAILER)</span></span><span><span class="k">계정</span> <span class="v">store@</span></span></div>
           <p class="say">"소매점이 판매를 인증하면 두 가지가 동시에 일어납니다. 소비자에게 <b>소유권이 이전되고</b>, 3개월짜리 <b>무상 교환권 1회</b>가 발급됩니다. 그리고 방금 앱에서 보신 할인 쿠폰이 실제 결제에서 QR로 차감됩니다 — 포인트가 매장 매출로 돌아오는 지점입니다."</p>
           <ol class="steps">
-            <li>소매점: 소유권 이전 큐에 <b>대기 요청 3건</b>(Maria/Juan/Andrea · <span class="mono">PH-2026-STORE-000001~3</span>)이 미리 있음 → 하나를 <b>판매 인증(RETAIL_SALE) 커밋</b> → 소비자 소유권 이전 + <b>교환권 1회(3개월 유효)</b> 발급</li>
+            <li>소매점 큐: <b>방금 02단계에서 소비자가 신청한 요청</b>이 맨 위에 뜸(+ 미리 준비된 3건 Maria/Juan/Andrea) → 하나를 <b>판매 인증(RETAIL_SALE) 커밋</b> → 소비자 소유권 이전 + <b>교환권 1회(3개월 유효)</b> 발급</li>
             <li>매장 결제: 정가 입력 → 앱 쿠폰 <span class="kbd">QR 스캔</span> → 할인 미리보기 → <span class="kbd">결제 확정</span></li>
             <li>영수증: 정가 → 할인 → 결제액, 쿠폰은 <b>사용 완료</b>로 차감(재사용 불가)</li>
           </ol>
@@ -316,9 +316,9 @@
           <div class="surface"><span><span class="k">화면</span> <span class="v">/field · /console</span></span><span><span class="k">계정</span> <span class="v">officer@ · admin@</span></span></div>
           <p class="say">"경찰 현장 단말은 UID를 스캔해 <b>정품인지 아닌지만</b> 즉시 보여줍니다. 현장에서 필요한 건 그 한 가지뿐이니까요. 원장에 있는 코니아랩 생산분이면 정품, 없으면 위조입니다. 그리고 이 원장은 해시체인이라 — <b>저희조차 뒤에서 고칠 수 없습니다.</b>"</p>
           <ol class="steps">
-            <li>경찰 <span class="kbd">/field</span>: 정품 코드 스캔 → <b>✓ 정품(GENUINE)</b></li>
-            <li>임의 미등록 코드 스캔 → <b>✕ 위조(COUNTERFEIT)</b> 즉시 판정</li>
-            <li>콘솔 <span class="kbd">원장 상태</span>: "조작 흔적 없음" 무결성 검증 + 앵커링</li>
+            <li>경찰 <span class="kbd">/field</span>(officer@): 정품 코드 <span class="mono">PH-2026-LIVE-000002</span> 스캔 → <b>✓ 정품(GENUINE)</b></li>
+            <li>위조 코드 <span class="mono">FAKE-777</span>(원장에 없음) 스캔 → <b>✕ 위조(COUNTERFEIT)</b> 즉시 판정</li>
+            <li>콘솔 <span class="kbd">원장 상태</span>(admin@): "조작 흔적 없음" 무결성 검증 + 앵커링 이력. 밀수 의심 알림 1건도 확인 가능</li>
           </ol>
           <div class="point danger"><span class="lab">핵심</span><span>단속은 복잡한 판정·조서 없이 <b>정품/위조 단 두 결과</b>. "블록체인 신뢰"를 조작 불가 원장으로 증명.</span></div>
         </div>
@@ -377,7 +377,8 @@
       <div class="links">
         <a href="https://app-production-daca.up.railway.app/download"><span>역할별 설치 · 다운로드 허브</span><span class="path">/download</span></a>
         <a href="https://app-production-daca.up.railway.app/download/coniamark-setup.html"><span>기기 세팅 시트 · 설치 QR·준비 절차</span><span class="path">/download/coniamark-setup.html</span></a>
-        <a href="https://app-production-daca.up.railway.app/app"><span>ConiaMark 소비자 앱 · 정품 확인·등록</span><span class="path">/app</span></a>
+        <a href="https://app-production-daca.up.railway.app/download/ledgermark-consumer.apk"><span>ConiaMark 소비자 앱 · APK 직접 다운로드</span><span class="path">/download/ledgermark-consumer.apk</span></a>
+        <a href="https://app-production-daca.up.railway.app/app"><span>ConiaMark 소비자 앱(웹 미리보기) · 정품 확인·등록</span><span class="path">/app</span></a>
         <a href="https://app-production-daca.up.railway.app/console"><span>운영 콘솔 · 관세청(수입·세금)</span><span class="path">/console</span></a>
         <a href="https://app-production-daca.up.railway.app/partner"><span>소매점 결제 · 총판 하자·교환</span><span class="path">/partner</span></a>
         <a href="https://app-production-daca.up.railway.app/field"><span>경찰 현장 정품 확인</span><span class="path">/field</span></a>
@@ -385,7 +386,7 @@
     </div>
     <div class="note">
       <span class="lab">컨틴전시</span>
-      <b>네트워크가 불안하면</b> 각 화면을 미리 열어 두고, 앱 UID 스캔은 코드 직접 입력으로 대체하세요(정품 <span class="mono">PH-2026-DEMO-000001</span>). 위조 시연은 <b>원장에 없는 임의 코드</b>를 준비해 두면 확실합니다. (무인 자판기 <span class="mono">/kiosk</span>는 이번 시연 범위 밖 — 협업 사업)
+      <b>네트워크가 불안하면</b> 각 화면을 미리 열어 두고, 앱 UID 스캔은 코드 직접 입력으로 대체하세요(정품 <span class="mono">PH-2026-LIVE-000001~100</span> 중 아무거나). 위조 시연은 <b>원장에 없는 임의 코드</b>(예 <span class="mono">FAKE-777</span>)면 확실합니다. 자판기·현장·콘솔은 노트북 브라우저로, 소비자 앱만 폰에 APK로 설치합니다.
     </div>
   </section>
 
